@@ -390,13 +390,135 @@ def sync_discord(bg, surface, current_line, fg, accent, sub_accent, is_dark):
         except Exception:
             pass
 
-def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
+def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, variant_name="Pro"):
     import json
-    comment_color = "#7970a9" if is_dark else "#8c8c8c"
-    string_color = "#8aff80" if is_dark else "#22863a"
-    number_color = "#ffca80" if is_dark else "#b08800"
-    type_color = "#80ffea" if is_dark else "#008080"
-    operator_color = sub_accent
+    v_lower = variant_name.lower()
+
+    if "everforest" in v_lower:
+        if is_dark:
+            comment_color = "#859289"
+            keyword_color = "#e67e80"  # Everforest Red for keywords
+            function_color = "#83c092" # Everforest Aqua for functions
+            type_color = "#dbbc7f"     # Everforest Yellow for types
+            string_color = "#a7c080"   # Everforest Green for strings
+            number_color = "#e69875"   # Everforest Orange for numbers
+            operator_color = "#7fbbb3" # Everforest Blue for operators
+        else:
+            comment_color = "#939f91"
+            keyword_color = "#f85552"  # Everforest Light Red
+            function_color = "#35a77c" # Everforest Light Aqua
+            type_color = "#dfa000"     # Everforest Light Yellow
+            string_color = "#8da101"   # Everforest Light Green
+            number_color = "#f57d26"   # Everforest Light Orange
+            operator_color = "#3a94c5" # Everforest Light Blue
+
+    elif "gruvbox" in v_lower:
+        if is_dark:
+            comment_color = "#928374"
+            keyword_color = "#fb4934"
+            function_color = "#b8bb26"
+            type_color = "#fabd2f"
+            string_color = "#b8bb26"
+            number_color = "#d3869b"
+            operator_color = "#fe8019"
+        else:
+            comment_color = "#928374"
+            keyword_color = "#9d0006"
+            function_color = "#79740e"
+            type_color = "#b57614"
+            string_color = "#79740e"
+            number_color = "#8f3f71"
+            operator_color = "#af3a03"
+
+    elif "catppuccin" in v_lower:
+        if "latte" in v_lower:
+            comment_color = "#9ca0b0"
+            keyword_color = "#8839ef"
+            function_color = "#1e66f5"
+            type_color = "#df8e1d"
+            string_color = "#40a02b"
+            number_color = "#fe640b"
+            operator_color = "#179299"
+        else:
+            comment_color = "#6c7086"
+            keyword_color = "#cba6f7"
+            function_color = "#89b4fa"
+            type_color = "#f9e2af"
+            string_color = "#a6e3a1"
+            number_color = "#fab387"
+            operator_color = "#94e2d5"
+
+    elif "tokyo" in v_lower:
+        if "day" in v_lower:
+            comment_color = "#848cb5"
+            keyword_color = "#9854f6"
+            function_color = "#2e7de9"
+            type_color = "#007197"
+            string_color = "#587539"
+            number_color = "#b15c00"
+            operator_color = "#7847bd"
+        else:
+            comment_color = "#565f89"
+            keyword_color = "#bb9af7"
+            function_color = "#7aa2f7"
+            type_color = "#2ac3de"
+            string_color = "#9ece6a"
+            number_color = "#ff9e64"
+            operator_color = "#89ddff"
+
+    elif "nord" in v_lower:
+        comment_color = "#4c566a" if is_dark else "#616e88"
+        keyword_color = "#81a1c1"
+        function_color = "#88c0d0"
+        type_color = "#8fbcbb"
+        string_color = "#a3be8c"
+        number_color = "#b48ead"
+        operator_color = "#81a1c1"
+
+    elif "rosé" in v_lower or "rose" in v_lower:
+        if "dawn" in v_lower:
+            comment_color = "#9893a5"
+            keyword_color = "#286983"
+            function_color = "#56949f"
+            type_color = "#ea9d34"
+            string_color = "#cebe8d"
+            number_color = "#d7827e"
+            operator_color = "#907aa9"
+        else:
+            comment_color = "#6e6a86"
+            keyword_color = "#31748f"
+            function_color = "#9ccfd8"
+            type_color = "#f6c177"
+            string_color = "#ebbcba"
+            number_color = "#eb6f92"
+            operator_color = "#c4a7e7"
+
+    elif "dracula" in v_lower or "pro" in v_lower or "blade" in v_lower or "buff" in v_lower or "cyan" in v_lower or "lincoln" in v_lower or "morpheus" in v_lower or "alucard" in v_lower:
+        if "alucard" in v_lower:
+            comment_color = "#635d97"
+            keyword_color = "#644ac9"
+            function_color = "#a3144d"
+            type_color = "#036a96"
+            string_color = "#14710a"
+            number_color = "#a34d14"
+            operator_color = "#644ac9"
+        else:
+            comment_color = "#7970a9"
+            keyword_color = accent
+            function_color = sub_accent
+            type_color = "#80ffea"
+            string_color = "#8aff80"
+            number_color = "#ffca80"
+            operator_color = sub_accent
+
+    else:
+        comment_color = "#7970a9" if is_dark else "#8c8c8c"
+        keyword_color = accent
+        function_color = sub_accent
+        type_color = "#80ffea" if is_dark else "#008080"
+        string_color = "#8aff80" if is_dark else "#22863a"
+        number_color = "#ffca80" if is_dark else "#b08800"
+        operator_color = sub_accent
 
     colors_dict = {
         "editor.background": bg,
@@ -434,8 +556,8 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
     token_colors = {
         "comments": comment_color,
         "strings": string_color,
-        "keywords": accent,
-        "functions": sub_accent,
+        "keywords": keyword_color,
+        "functions": function_color,
         "variables": fg,
         "numbers": number_color,
         "types": type_color,
@@ -451,7 +573,7 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
                     "storage.type",
                     "storage.modifier"
                 ],
-                "settings": {"foreground": accent}
+                "settings": {"foreground": keyword_color}
             },
             {
                 "scope": [
@@ -460,7 +582,7 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
                     "entity.name.method",
                     "meta.function-call"
                 ],
-                "settings": {"foreground": sub_accent}
+                "settings": {"foreground": function_color}
             },
             {
                 "scope": [
@@ -515,13 +637,13 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
                     "entity.name.tag",
                     "meta.tag"
                 ],
-                "settings": {"foreground": accent}
+                "settings": {"foreground": keyword_color}
             },
             {
                 "scope": [
                     "entity.other.attribute-name"
                 ],
-                "settings": {"foreground": sub_accent}
+                "settings": {"foreground": function_color}
             },
             {
                 "scope": [
@@ -534,13 +656,13 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
                 "scope": [
                     "markup.heading"
                 ],
-                "settings": {"foreground": accent, "fontStyle": "bold"}
+                "settings": {"foreground": keyword_color, "fontStyle": "bold"}
             },
             {
                 "scope": [
                     "markup.bold"
                 ],
-                "settings": {"foreground": sub_accent, "fontStyle": "bold"}
+                "settings": {"foreground": function_color, "fontStyle": "bold"}
             },
             {
                 "scope": [
@@ -1744,7 +1866,7 @@ def main():
     sync_gtk(args.bg, args.surface, args.currentLine, args.fg, args.accent, is_dark)
     sync_alacritty(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_discord(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
-    sync_vscode(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
+    sync_vscode(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark, args.variantName)
     sync_zen(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
     sync_feishin(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark, args.variantName)
     sync_obsidian(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
