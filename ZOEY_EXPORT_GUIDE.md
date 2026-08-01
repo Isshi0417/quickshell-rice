@@ -93,16 +93,16 @@ cmake --build build
 sudo cmake --install build
 ```
 
-### Step 3: Deploy QuickShell & Fastfetch Configurations to `~/.config/`
+### Step 3: Symlink QuickShell & Fastfetch Configurations to `~/.config/`
 
-Copy the QuickShell ecosystem and Fastfetch Hampter configuration into Zoey's `.config` directory:
+Symlink the QuickShell ecosystem and Fastfetch Hampter configuration directly from the cloned repository so running `git pull` in the repo automatically updates `~/.config`:
 
 ```bash
-mkdir -p ~/.config/quickshell ~/.config/fastfetch
-cp -r quickshell/* ~/.config/quickshell/
-cp -r fastfetch/* ~/.config/fastfetch/
-chmod +x ~/.config/quickshell/toggle_launcher.sh
-chmod +x ~/.config/quickshell/services/python/*.py
+mkdir -p ~/.config
+ln -snf "$(pwd)/quickshell" ~/.config/quickshell
+ln -snf "$(pwd)/fastfetch" ~/.config/fastfetch
+chmod +x quickshell/toggle_launcher.sh
+chmod +x quickshell/services/python/*.py
 ```
 
 ### Step 4: Configure `~/.bashrc` to Auto-run Fastfetch

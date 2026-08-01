@@ -237,23 +237,23 @@ deploy_configs() {
     info "Deploying QuickShell configuration to ${TARGET_CONFIG_DIR}..."
     mkdir -p "${TARGET_CONFIG_DIR}"
 
-    # Quickshell Desktop Shell Config
+    # Quickshell Desktop Shell Config (Symlinked to repo so git pull auto-updates ~/.config/quickshell)
     if [ -d "${SCRIPT_DIR}/quickshell" ]; then
-        info "Deploying QuickShell QML ecosystem..."
+        info "Linking QuickShell QML ecosystem..."
         rm -rf "${TARGET_CONFIG_DIR}/quickshell"
-        cp -r "${SCRIPT_DIR}/quickshell" "${TARGET_CONFIG_DIR}/quickshell"
-        chmod +x "${TARGET_CONFIG_DIR}/quickshell/toggle_launcher.sh"
-        chmod +x "${TARGET_CONFIG_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
+        ln -snf "${SCRIPT_DIR}/quickshell" "${TARGET_CONFIG_DIR}/quickshell" || cp -r "${SCRIPT_DIR}/quickshell" "${TARGET_CONFIG_DIR}/quickshell"
+        chmod +x "${SCRIPT_DIR}/quickshell/toggle_launcher.sh"
+        chmod +x "${SCRIPT_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
     fi
 
-    # Fastfetch Hampter Config
+    # Fastfetch Hampter Config (Symlinked to repo so git pull auto-updates ~/.config/fastfetch)
     if [ -d "${SCRIPT_DIR}/fastfetch" ]; then
-        info "Deploying Fastfetch Hampter configuration to ${TARGET_CONFIG_DIR}/fastfetch..."
-        mkdir -p "${TARGET_CONFIG_DIR}/fastfetch"
-        cp -r "${SCRIPT_DIR}/fastfetch/"* "${TARGET_CONFIG_DIR}/fastfetch/"
+        info "Linking Fastfetch Hampter configuration..."
+        rm -rf "${TARGET_CONFIG_DIR}/fastfetch"
+        ln -snf "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch" || cp -r "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch"
     fi
 
-    success "QuickShell configuration deployed successfully!"
+    success "QuickShell configuration linked successfully to ${TARGET_CONFIG_DIR}!"
 }
 
 # 6. Deploy KDE Color Schemes & Konsole Profiles
