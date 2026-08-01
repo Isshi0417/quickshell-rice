@@ -145,20 +145,45 @@ Item {
         if (cleanCmd === "") return;
 
         let execCmd = cleanCmd.replace(/%[a-zA-Z]/g, "").trim()
-        if (execCmd === "zen" || execCmd === "zen.desktop" || execCmd === "zen-alpha") {
-            execCmd = "zen-browser"
-        }
         root.activeAppId = execCmd.toLowerCase()
 
-        // Handle flatpak / desktop ID vs raw command execution safely using shell wrapper
         if (execCmd.startsWith("flatpak run ") || execCmd.includes("flatpak ")) {
             Quickshell.execDetached(["sh", "-c", execCmd + " &"])
-        } else if ((execCmd.startsWith("org.") || execCmd.startsWith("io.") || execCmd.startsWith("com.") || execCmd.startsWith("app.")) && !execCmd.includes(" ")) {
-            let desktopName = execCmd.replace(/\.desktop$/, "")
-            Quickshell.execDetached(["sh", "-c", "flatpak run " + desktopName + " 2>/dev/null || gtk-launch " + desktopName + " 2>/dev/null || gtk-launch " + desktopName + ".desktop 2>/dev/null || " + execCmd + " &"])
-        } else {
-            Quickshell.execDetached(["sh", "-c", execCmd + " &"])
+            return;
         }
+
+        let baseName = execCmd.replace(/\.desktop$/, "").trim()
+
+        // Build universal Flatpak + desktop launcher + native binary fallback chain
+        let shellCmd = ""
+        if (baseName.startsWith("org.") || baseName.startsWith("io.") || baseName.startsWith("com.") || baseName.startsWith("app.")) {
+            let shortName = baseName.split(".").pop()
+            shellCmd = "flatpak run " + baseName + " 2>/dev/null || flatpak run " + shortName + " 2>/dev/null || gtk-launch " + baseName + " 2>/dev/null || gtk-launch " + shortName + " 2>/dev/null || " + shortName + " 2>/dev/null || " + execCmd + " &"
+        } else {
+            // Known reverse domain mappings for common Flatpak apps like spotify, feishin, zen, vesktop, discord, etc.
+            let flatpakMapping = {
+                "spotify": "com.spotify.Client",
+                "feishin": "io.github.jeffvli.feishin",
+                "zen": "io.github.zen_browser.zen",
+                "zen-browser": "io.github.zen_browser.zen",
+                "vesktop": "dev.vencord.Vesktop",
+                "discord": "com.discordapp.Discord",
+                "code": "com.visualstudio.code",
+                "vscodium": "com.vscodium.codium",
+                "obs": "com.obsproject.Studio",
+                "steam": "com.valvesoftware.Steam",
+                "heroic": "com.heroicgameslauncher.hgl"
+            }
+
+            let mappedFlatpak = flatpakMapping[baseName.toLowerCase()] || ""
+            if (mappedFlatpak !== "") {
+                shellCmd = "flatpak run " + mappedFlatpak + " 2>/dev/null || flatpak run " + baseName + " 2>/dev/null || gtk-launch " + mappedFlatpak + " 2>/dev/null || gtk-launch " + baseName + " 2>/dev/null || " + execCmd + " &"
+            } else {
+                shellCmd = "flatpak run " + baseName + " 2>/dev/null || gtk-launch " + baseName + " 2>/dev/null || " + execCmd + " &"
+            }
+        }
+
+        Quickshell.execDetached(["sh", "-c", shellCmd])
     }
 
     function closeApp(appId) {
