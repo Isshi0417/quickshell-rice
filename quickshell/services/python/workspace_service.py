@@ -66,14 +66,31 @@ def get_status():
 
 def switch_to(index):
     try:
+        idx_target = int(index)
+        desktops_raw = subprocess.check_output(
+            ["qdbus6", "--literal", "org.kde.KWin", "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager.desktops"],
+            text=True, stderr=subprocess.DEVNULL
+        )
+        matches = re.findall(r'\(uss\)\s*(\d+),\s*"([^"]+)"(?:,\s*"([^"]*)")?', desktops_raw)
+        if matches and 1 <= idx_target <= len(matches):
+            target_uuid = matches[idx_target - 1][1]
+            res = subprocess.run(
+                ["qdbus6", "org.kde.KWin", "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager.setCurrent", target_uuid],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            if res.returncode == 0:
+                return
+    except Exception:
+        pass
+
+    try:
         shortcut_name = f"Switch to Desktop {index}"
         res = subprocess.run(
             ["qdbus6", "org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component.invokeShortcut", shortcut_name],
-            capture_output=True, text=True
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         if res.returncode != 0:
-            # Hyprland fallback
-            subprocess.run(["hyprctl", "dispatch", "workspace", str(index)], capture_output=True)
+            subprocess.run(["hyprctl", "dispatch", "workspace", str(index)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:
         pass
 
