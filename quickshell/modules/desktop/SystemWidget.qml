@@ -22,6 +22,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 
+    mask: Region {}
+
     implicitWidth: mainCol.implicitWidth
     implicitHeight: mainCol.implicitHeight
 

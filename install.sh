@@ -200,10 +200,33 @@ deploy_configs() {
         chmod +x "${TARGET_CONFIG_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
     fi
 
+    # Fastfetch Config
+    if [ -d "${SCRIPT_DIR}/fastfetch" ]; then
+        info "Deploying Fastfetch Hampter configuration..."
+        mkdir -p "${TARGET_CONFIG_DIR}/fastfetch"
+        cp -r "${SCRIPT_DIR}/fastfetch/"* "${TARGET_CONFIG_DIR}/fastfetch/"
+    fi
+
     success "QuickShell configuration deployed successfully!"
 }
 
-# 5. Systemd User Service Setup
+# 5. Bashrc Fastfetch Setup
+setup_bashrc() {
+    info "Setting up fastfetch in ~/.bashrc..."
+    BASHRC_FILE="${HOME}/.bashrc"
+    if [ -f "$BASHRC_FILE" ]; then
+        if ! grep -q "fastfetch" "$BASHRC_FILE"; then
+            echo "" >> "$BASHRC_FILE"
+            echo "# Run fastfetch on terminal startup" >> "$BASHRC_FILE"
+            echo "fastfetch" >> "$BASHRC_FILE"
+            success "Fastfetch added to ~/.bashrc"
+        else
+            info "Fastfetch already present in ~/.bashrc"
+        fi
+    fi
+}
+
+# 6. Systemd User Service Setup
 setup_systemd_service() {
     info "Setting up Systemd User Service for QuickShell..."
     SERVICE_DIR="${TARGET_CONFIG_DIR}/systemd/user"
@@ -232,7 +255,7 @@ EOF
     success "Systemd user service configured!"
 }
 
-# 6. Run Theme Sync Engine
+# 7. Run Theme Sync Engine
 run_initial_sync() {
     info "Triggering initial multi-app dynamic theme synchronization..."
     THEME_SYNC_SCRIPT="${TARGET_CONFIG_DIR}/quickshell/services/python/theme_sync.py"
@@ -256,6 +279,7 @@ run_initial_sync() {
 install_dependencies
 install_quickshell
 deploy_configs
+setup_bashrc
 setup_systemd_service
 run_initial_sync
 

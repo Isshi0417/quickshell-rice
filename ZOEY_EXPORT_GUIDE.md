@@ -93,18 +93,27 @@ cmake --build build
 sudo cmake --install build
 ```
 
-### Step 3: Deploy QuickShell Configuration to `~/.config/quickshell/`
+### Step 3: Deploy QuickShell & Fastfetch Configurations to `~/.config/`
 
-Copy the QuickShell ecosystem into Zoey's `.config` directory:
+Copy the QuickShell ecosystem and Fastfetch Hampter configuration into Zoey's `.config` directory:
 
 ```bash
-mkdir -p ~/.config/quickshell
+mkdir -p ~/.config/quickshell ~/.config/fastfetch
 cp -r quickshell/* ~/.config/quickshell/
+cp -r fastfetch/* ~/.config/fastfetch/
 chmod +x ~/.config/quickshell/toggle_launcher.sh
 chmod +x ~/.config/quickshell/services/python/*.py
 ```
 
-### Step 4: Configure Systemd User Service
+### Step 4: Configure `~/.bashrc` to Auto-run Fastfetch
+
+Ensure `fastfetch` runs on interactive terminal startup in `~/.bashrc`:
+
+```bash
+grep -q "fastfetch" ~/.bashrc || echo -e "\n# Run fastfetch on terminal startup\nfastfetch" >> ~/.bashrc
+```
+
+### Step 5: Configure Systemd User Service
 
 Create `~/.config/systemd/user/quickshell.service`:
 

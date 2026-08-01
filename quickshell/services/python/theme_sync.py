@@ -1059,6 +1059,12 @@ def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent):
 
     fastfetch_jsonc = f"""{{
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {{
+    "source": "~/.config/fastfetch/hamster_cookie.txt",
+    "padding": {{
+      "right": 4
+    }}
+  }},
   "display": {{
     "color": {{
       "keys": "{accent}",
