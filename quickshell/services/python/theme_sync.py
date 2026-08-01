@@ -392,84 +392,195 @@ def sync_discord(bg, surface, current_line, fg, accent, sub_accent, is_dark):
 
 def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
     import json
+    comment_color = "#7970a9" if is_dark else "#8c8c8c"
+    string_color = "#8aff80" if is_dark else "#22863a"
+    number_color = "#ffca80" if is_dark else "#b08800"
+    type_color = "#80ffea" if is_dark else "#008080"
+    operator_color = sub_accent
+
     colors_dict = {
         "editor.background": bg,
         "editor.foreground": fg,
+        "editor.selectionBackground": current_line,
+        "editor.lineHighlightBackground": surface,
+        "editorLineNumber.foreground": current_line,
+        "editorLineNumber.activeForeground": accent,
+        "editorCursor.foreground": accent,
         "sideBar.background": surface,
         "sideBar.foreground": fg,
+        "sideBarTitle.foreground": accent,
+        "sideBarSectionHeader.background": bg,
+        "sideBarSectionHeader.foreground": fg,
         "activityBar.background": bg,
         "activityBar.foreground": accent,
+        "activityBarBadge.background": accent,
+        "activityBarBadge.foreground": bg,
         "statusBar.background": bg,
         "statusBar.foreground": fg,
+        "statusBarItem.remoteBackground": accent,
         "titleBar.activeBackground": bg,
         "titleBar.activeForeground": fg,
         "tab.activeBackground": surface,
         "tab.activeForeground": fg,
         "tab.inactiveBackground": bg,
         "tab.inactiveForeground": current_line,
+        "tab.activeBorder": accent,
         "panel.background": surface,
+        "panelTitle.activeBorder": accent,
         "terminal.background": bg,
         "terminal.foreground": fg
     }
 
     token_colors = {
-        "comments": "#7970a9" if is_dark else "#8c8c8c",
-        "strings": "#8aff80" if is_dark else "#22863a",
+        "comments": comment_color,
+        "strings": string_color,
         "keywords": accent,
         "functions": sub_accent,
         "variables": fg,
-        "numbers": "#ffca80" if is_dark else "#b08800",
-        "types": sub_accent,
+        "numbers": number_color,
+        "types": type_color,
         "textMateRules": [
             {
-                "scope": ["keyword", "storage.type", "storage.modifier"],
+                "scope": [
+                    "keyword",
+                    "keyword.control",
+                    "keyword.operator.new",
+                    "keyword.operator.expression",
+                    "keyword.operator.logical",
+                    "storage",
+                    "storage.type",
+                    "storage.modifier"
+                ],
                 "settings": {"foreground": accent}
             },
             {
-                "scope": ["entity.name.function", "support.function"],
+                "scope": [
+                    "entity.name.function",
+                    "support.function",
+                    "entity.name.method",
+                    "meta.function-call"
+                ],
                 "settings": {"foreground": sub_accent}
             },
             {
-                "scope": ["string", "string.quoted"],
-                "settings": {"foreground": "#8aff80" if is_dark else "#22863a"}
+                "scope": [
+                    "entity.name.type",
+                    "entity.name.class",
+                    "entity.name.namespace",
+                    "entity.other.inherited-class",
+                    "support.type",
+                    "support.class"
+                ],
+                "settings": {"foreground": type_color}
             },
             {
-                "scope": ["comment"],
-                "settings": {"foreground": "#7970a9" if is_dark else "#8c8c8c", "fontStyle": "italic"}
+                "scope": [
+                    "string",
+                    "string.quoted",
+                    "string.template",
+                    "punctuation.definition.string"
+                ],
+                "settings": {"foreground": string_color}
             },
             {
-                "scope": ["constant.numeric", "constant.language"],
-                "settings": {"foreground": "#ffca80" if is_dark else "#b08800"}
+                "scope": [
+                    "comment",
+                    "comment.line",
+                    "comment.block",
+                    "punctuation.definition.comment"
+                ],
+                "settings": {"foreground": comment_color, "fontStyle": "italic"}
             },
             {
-                "scope": ["variable", "variable.other"],
+                "scope": [
+                    "constant.numeric",
+                    "constant.language",
+                    "constant.other",
+                    "boolean"
+                ],
+                "settings": {"foreground": number_color}
+            },
+            {
+                "scope": [
+                    "variable",
+                    "variable.other",
+                    "variable.parameter",
+                    "variable.language",
+                    "variable.name"
+                ],
                 "settings": {"foreground": fg}
+            },
+            {
+                "scope": [
+                    "entity.name.tag",
+                    "meta.tag"
+                ],
+                "settings": {"foreground": accent}
+            },
+            {
+                "scope": [
+                    "entity.other.attribute-name"
+                ],
+                "settings": {"foreground": sub_accent}
+            },
+            {
+                "scope": [
+                    "keyword.operator",
+                    "punctuation.accessor"
+                ],
+                "settings": {"foreground": operator_color}
+            },
+            {
+                "scope": [
+                    "markup.heading"
+                ],
+                "settings": {"foreground": accent, "fontStyle": "bold"}
+            },
+            {
+                "scope": [
+                    "markup.bold"
+                ],
+                "settings": {"foreground": sub_accent, "fontStyle": "bold"}
+            },
+            {
+                "scope": [
+                    "markup.italic"
+                ],
+                "settings": {"foreground": type_color, "fontStyle": "italic"}
             }
         ]
     }
-    
-    for base_dir in [os.path.expanduser('~/.config/Code/User'), os.path.expanduser('~/.config/Code - OSS/User'), os.path.expanduser('~/.config/VSCodium/User')]:
-        if os.path.exists(os.path.dirname(base_dir)):
+
+    target_dirs = [
+        os.path.expanduser('~/.config/Code/User'),
+        os.path.expanduser('~/.config/Code - OSS/User'),
+        os.path.expanduser('~/.config/VSCodium/User'),
+        os.path.expanduser('~/.var/app/com.visualstudio.code/config/Code/User'),
+        os.path.expanduser('~/.var/app/com.vscodium.codium/config/VSCodium/User')
+    ]
+
+    for base_dir in target_dirs:
+        try:
             os.makedirs(base_dir, exist_ok=True)
             settings_path = os.path.join(base_dir, 'settings.json')
             data = {}
             if os.path.exists(settings_path):
                 try:
-                    with open(settings_path, 'r') as f:
+                    with open(settings_path, 'r', encoding='utf-8') as f:
                         raw = f.read()
                         cleaned = re.sub(r'//.*', '', raw)
                         data = json.loads(cleaned) if cleaned.strip() else {}
                 except Exception:
                     data = {}
-            
+
             data["workbench.colorCustomizations"] = colors_dict
             data["editor.tokenColorCustomizations"] = token_colors
             data["workbench.colorTheme"] = "Default Dark Modern" if is_dark else "Default Light Modern"
-            try:
-                with open(settings_path, 'w') as f:
-                    json.dump(data, f, indent=4)
-            except Exception:
-                pass
+
+            with open(settings_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
+        except Exception:
+            pass
 
 def sync_zen(bg, surface, current_line, fg, accent, sub_accent, is_dark):
     import subprocess
