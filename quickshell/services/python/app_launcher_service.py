@@ -55,11 +55,16 @@ def parse_desktop_apps():
         if fallback_theme not in themes_to_search:
             themes_to_search.append(fallback_theme)
 
-    search_dirs = []
-    bases = [os.path.expanduser('~/.local/share/icons'), '/usr/share/icons']
+    bases = [
+        os.path.expanduser('~/.local/share/icons'),
+        os.path.expanduser('~/.local/share/flatpak/exports/share/icons'),
+        '/var/lib/flatpak/exports/share/icons',
+        '/usr/local/share/icons',
+        '/usr/share/icons'
+    ]
     subdirs = [
         '64x64/apps', '48x48/apps', 'scalable/apps', '128x128/apps', '256x256/apps', '32x32/apps',
-        '64x64@2x/apps', '48x48@2x/apps', 'apps/64', 'apps/48', 'apps/scalable', 'apps'
+        '64x64@2x/apps', '48x48@2x/apps', 'apps/64', 'apps/48', 'apps/scalable', 'apps', ''
     ]
 
     for t in themes_to_search:
@@ -69,7 +74,19 @@ def parse_desktop_apps():
                 if os.path.exists(d) and d not in search_dirs:
                     search_dirs.append(d)
 
-    search_dirs.append('/usr/share/pixmaps')
+    # Also add direct Flatpak export directories without subdirs
+    for fp_dir in [
+        os.path.expanduser('~/.local/share/flatpak/exports/share/icons/hicolor/scalable/apps'),
+        os.path.expanduser('~/.local/share/flatpak/exports/share/icons/hicolor/128x128/apps'),
+        os.path.expanduser('~/.local/share/flatpak/exports/share/icons/hicolor/64x64/apps'),
+        '/var/lib/flatpak/exports/share/icons/hicolor/scalable/apps',
+        '/var/lib/flatpak/exports/share/icons/hicolor/128x128/apps',
+        '/var/lib/flatpak/exports/share/icons/hicolor/64x64/apps',
+        '/usr/share/pixmaps'
+    ]:
+        if os.path.exists(fp_dir) and fp_dir not in search_dirs:
+            search_dirs.append(fp_dir)
+
     EXTS = ['.svg', '.png', '.xpm']
 
     def resolve_fallback():
@@ -88,6 +105,7 @@ def parse_desktop_apps():
             return fallback_path
         if os.path.isabs(name) and os.path.exists(name):
             return name
+
         for d in search_dirs:
             for ext in EXTS:
                 p = os.path.join(d, name + ext)
@@ -97,6 +115,23 @@ def parse_desktop_apps():
                     p2 = os.path.join(d, name)
                     if os.path.exists(p2):
                         return p2
+
+        # Substring / Desktop ID matching fallback (essential for Flatpak icons like io.github.zen_browser.zen)
+        clean_name = name.lower()
+        if clean_name.endswith('.png') or clean_name.endswith('.svg') or clean_name.endswith('.xpm'):
+            clean_name = os.path.splitext(clean_name)[0]
+
+        for d in search_dirs:
+            if not os.path.exists(d):
+                continue
+            try:
+                for f in os.scandir(d):
+                    fn_lower = f.name.lower()
+                    if clean_name in fn_lower or fn_lower.startswith(clean_name):
+                        return f.path
+            except Exception:
+                pass
+
         return fallback_path
 
     def parse_desktop(f):

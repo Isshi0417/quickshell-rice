@@ -97,6 +97,7 @@ Item {
 
     // Fallback icon path from active system icon theme
     property string fallbackIconPath: ""
+    property var iconMap: ({})
 
     Process { id: launchProc }
 
@@ -111,7 +112,23 @@ Item {
                     let parsed = JSON.parse(data.trim())
                     if (parsed && typeof parsed === "object") {
                         if (parsed.fallback) root.fallbackIconPath = parsed.fallback
-                        if (parsed.apps && Array.isArray(parsed.apps)) root.allApps = parsed.apps
+                        if (parsed.apps && Array.isArray(parsed.apps)) {
+                            root.allApps = parsed.apps
+                            let newMap = {}
+                            for (let i = 0; i < parsed.apps.length; i++) {
+                                let a = parsed.apps[i]
+                                if (a.icon) {
+                                    if (a.id) newMap[a.id.toLowerCase()] = a.icon
+                                    if (a.id) newMap[a.id.replace(/\.desktop$/, "").toLowerCase()] = a.icon
+                                    if (a.name) newMap[a.name.toLowerCase()] = a.icon
+                                    if (a.exec) {
+                                        let cleanExec = a.exec.replace(/%[a-zA-Z]/g, "").trim().split(/\s+/)[0]
+                                        newMap[cleanExec.toLowerCase()] = a.icon
+                                    }
+                                }
+                            }
+                            root.iconMap = newMap
+                        }
                     }
                 } catch (e) {}
             }

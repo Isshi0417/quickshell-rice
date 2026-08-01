@@ -368,7 +368,15 @@ Item {
         if (name.startsWith("file://")) return name
         if (name.startsWith("/")) return "file://" + name
 
-        let clean = name.toLowerCase()
+        let clean = name.toLowerCase().replace(/\.desktop$/, "")
+        
+        // 1. Dynamic lookup in AppLauncherService iconMap (resolves Flatpak & native app icons dynamically!)
+        if (AppLauncherService.iconMap && AppLauncherService.iconMap[clean]) {
+            let mapped = AppLauncherService.iconMap[clean]
+            return mapped.startsWith("file://") ? mapped : "file://" + mapped
+        }
+
+        // 2. Hardcoded fallback overrides for common system apps
         let themeDir = Theme.iconTheme
         if (clean.includes("alacritty")) return "file:///usr/share/icons/" + themeDir + "/32x32/apps/Alacritty.svg"
         if (clean.includes("dolphin")) return "file:///usr/share/icons/" + themeDir + "/32x32/apps/org.kde.dolphin.svg"
