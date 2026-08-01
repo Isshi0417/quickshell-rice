@@ -388,33 +388,48 @@ EOF
     success "Systemd user service configured at ${SERVICE_DIR}/quickshell.service!"
 }
 
-# Helper to repair Flatpak Feishin sandbox config corruption
+# Helper to set Feishin theme to default and repair sandbox configurations
 repair_feishin_flatpak() {
-    info "Scanning and repairing Flatpak Feishin sandbox configurations..."
-    local VAR_APP="${HOME}/.var/app"
-    if [ -d "$VAR_APP" ]; then
-        for app_dir in "$VAR_APP"/*feishin* "$VAR_APP"/*Feishin*; do
-            if [ -d "$app_dir" ]; then
-                for sub in "config/feishin" "config/Feishin" "data/feishin" "data/Feishin" "config" "data"; do
-                    local target="${app_dir}/${sub}"
-                    if [ -d "$target" ]; then
-                        python3 -c "
+    info "Setting Feishin theme to default & repairing sandbox configurations..."
+    python3 -c "
 import os, json
-for bad in ['config.json', 'settings.json']:
-    p = os.path.join('$target', bad)
-    if os.path.exists(p):
+home = os.path.expanduser('~')
+target_dirs = [
+    os.path.join(home, '.config', 'feishin'),
+    os.path.join(home, '.local', 'share', 'feishin')
+]
+
+var_app = os.path.join(home, '.var', 'app')
+if os.path.exists(var_app):
+    for d in os.listdir(var_app):
+        if 'feishin' in d.lower():
+            for sub in ['config/feishin', 'data/feishin', 'config', 'data']:
+                target_dirs.append(os.path.join(var_app, d, sub))
+
+for td in target_dirs:
+    if os.path.exists(td):
+        # 1. Set preferences.json theme to defaultDark
+        pref_file = os.path.join(td, 'preferences.json')
         try:
-            with open(p, 'r', encoding='utf-8') as f: d = json.load(f)
-            if isinstance(d, dict) and list(d.keys()) == ['theme']:
-                os.remove(p)
-                print(f'[Repaired Flatpak Feishin] Removed bad {bad} at {p}')
+            pdata = {}
+            if os.path.exists(pref_file):
+                with open(pref_file, 'r', encoding='utf-8') as f:
+                    pdata = json.load(f)
+            pdata['theme'] = 'defaultDark'
+            with open(pref_file, 'w', encoding='utf-8') as f:
+                json.dump(pdata, f, indent=2)
         except Exception: pass
+
+        # 2. Clean up corrupted config.json / settings.json
+        for bad in ['config.json', 'settings.json']:
+            bp = os.path.join(td, bad)
+            if os.path.exists(bp):
+                try:
+                    with open(bp, 'r', encoding='utf-8') as f: bd = json.load(f)
+                    if isinstance(bd, dict) and list(bd.keys()) == ['theme']:
+                        os.remove(bp)
+                except Exception: pass
 " 2>/dev/null || true
-                    fi
-                done
-            fi
-        done
-    fi
 }
 
 # 7. Run Theme Sync Engine

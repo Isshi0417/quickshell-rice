@@ -915,20 +915,6 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                 with open(os.path.join(themes_dir, "quickshell.json"), 'w', encoding='utf-8') as f:
                     json.dump(qs_json, f, indent=2)
 
-            # Update ONLY preferences.json safely
-            pref_file = os.path.join(base_dir, 'preferences.json')
-            pref_data = {}
-            if os.path.exists(pref_file):
-                try:
-                    with open(pref_file, 'r', encoding='utf-8') as f:
-                        pref_data = json.load(f)
-                except Exception:
-                    pref_data = {}
-
-            pref_data["theme"] = active_slug
-            with open(pref_file, 'w', encoding='utf-8') as f:
-                json.dump(pref_data, f, indent=2)
-
             # Repair/remove any corrupted config.json or settings.json files created by previous bad writes
             for bad_file_name in ['config.json', 'settings.json']:
                 bad_path = os.path.join(base_dir, bad_file_name)
