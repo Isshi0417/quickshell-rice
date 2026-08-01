@@ -890,18 +890,16 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                 themes_dir = os.path.join(base_dir, t_dir_name)
                 os.makedirs(themes_dir, exist_ok=True)
 
-                # 1. Clean up any previous .backup files and restore as .json
-                for backup_file in glob.glob(os.path.join(themes_dir, '*.backup')):
-                    try:
-                        clean_json = backup_file[:-7]
-                        if not os.path.exists(clean_json):
-                            os.rename(backup_file, clean_json)
-                        else:
-                            os.remove(backup_file)
-                    except Exception:
-                        pass
+                # Clean up backup files or zero-byte corrupted files
+                for f_name in os.listdir(themes_dir):
+                    f_path = os.path.join(themes_dir, f_name)
+                    if f_name.endswith('.backup') or (os.path.isfile(f_path) and os.path.getsize(f_path) == 0):
+                        try:
+                            os.remove(f_path)
+                        except Exception:
+                            pass
 
-                # 2. Pre-generate JSON files for all predefined variants so all themes are available
+                # Pre-generate JSON files for all predefined variants so all themes are available
                 for v in PREDEFINED_VARIANTS:
                     v_slug = slugify(v["name"])
                     v_json = make_feishin_json(v["bg"], v["surface"], v["currentLine"], v["fg"], v["accent"], v["isDark"], v["name"], v_slug)
@@ -909,7 +907,7 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                     with open(v_path, 'w', encoding='utf-8') as f:
                         json.dump(v_json, f, indent=2)
 
-                # 3. Write active variant JSON with runtime parameters + quickshell.json
+                # Write active variant JSON with runtime parameters + quickshell.json
                 active_path = os.path.join(themes_dir, f"{active_slug}.json")
                 with open(active_path, 'w', encoding='utf-8') as f:
                     json.dump(active_json, f, indent=2)
@@ -917,33 +915,33 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                 with open(os.path.join(themes_dir, "quickshell.json"), 'w', encoding='utf-8') as f:
                     json.dump(qs_json, f, indent=2)
 
-            # 4. Auto-update preferences.json / config.json / settings.json in Feishin config directory
-            for pref_name in ['preferences.json', 'config.json', 'settings.json']:
-                pref_file = os.path.join(base_dir, pref_name)
+            # Update ONLY preferences.json safely
+            pref_file = os.path.join(base_dir, 'preferences.json')
+            pref_data = {}
+            if os.path.exists(pref_file):
                 try:
-                    pref_data = {}
-                    if os.path.exists(pref_file):
-                        with open(pref_file, 'r', encoding='utf-8') as f:
-                            pref_data = json.load(f)
-                    pref_data["theme"] = active_slug
-                    with open(pref_file, 'w', encoding='utf-8') as f:
-                        json.dump(pref_data, f, indent=2)
+                    with open(pref_file, 'r', encoding='utf-8') as f:
+                        pref_data = json.load(f)
                 except Exception:
-                    pass
+                    pref_data = {}
+
+            pref_data["theme"] = active_slug
+            with open(pref_file, 'w', encoding='utf-8') as f:
+                json.dump(pref_data, f, indent=2)
+
+            # Repair/remove any corrupted config.json or settings.json files created by previous bad writes
+            for bad_file_name in ['config.json', 'settings.json']:
+                bad_path = os.path.join(base_dir, bad_file_name)
+                if os.path.exists(bad_path):
+                    try:
+                        with open(bad_path, 'r', encoding='utf-8') as f:
+                            bad_data = json.load(f)
+                        if isinstance(bad_data, dict) and list(bad_data.keys()) == ['theme']:
+                            os.remove(bad_path)
+                    except Exception:
+                        pass
         except Exception:
             pass
-
-    restart_app_if_running(
-        "feishin",
-        ["feishin", "io.github.jeffvli.feishin", "org.jeffvli.feishin"],
-        [
-            "flatpak run io.github.jeffvli.feishin",
-            "flatpak run org.jeffvli.feishin",
-            "gtk-launch io.github.jeffvli.feishin",
-            "gtk-launch feishin",
-            "feishin"
-        ]
-    )
 
 def sync_starship(bg, surface, current_line, fg, accent, sub_accent, is_dark):
     starship_dir = os.path.expanduser('~/.config')
