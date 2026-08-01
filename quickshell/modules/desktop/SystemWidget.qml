@@ -32,62 +32,15 @@ PanelWindow {
         spacing: 12
         implicitWidth: 640
 
-        // TOP ROW: 3 Plasmoid Blocks
+        // TOP ROW: 2 Wide Plasmoid Blocks (CPU & GPU)
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
 
-            // Top Card 1: Transparent Running Hamster Engine
+            // Top Card 1: CPU Plasmoid Block
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredWidth: 200
-                implicitHeight: 165
-                radius: 16
-                color: Theme.surface
-                border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
-                border.width: 1
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-
-                    Item {
-                        Layout.alignment: Qt.AlignHCenter
-                        width: 84
-                        height: 84
-
-                        AnimatedImage {
-                            id: hamsterGif
-                            anchors.fill: parent
-                            source: "file://" + Quickshell.env("HOME") + "/.config/quickshell/assets/hampter_transparent.gif"
-                            fillMode: Image.PreserveAspectFit
-                            smooth: false
-                            playing: !TaskService.isFullscreen
-                            speed: Math.max(0.6, Math.min(3.5, 0.8 + (SystemMonitorService.cpuPct * 0.035)))
-                        }
-                    }
-
-                    Text {
-                        text: "Hamster Engine"
-                        color: Theme.accent
-                        font.pixelSize: 12
-                        font.weight: Font.Bold
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-
-                    Text {
-                        text: (60 + SystemMonitorService.cpuPct * 3) + " RPM • " + (SystemMonitorService.cpuPct > 70 ? "🔥 Sprinting" : (SystemMonitorService.cpuPct > 20 ? "⚡ Running" : "💤 Trotting"))
-                        color: Theme.comment
-                        font.pixelSize: 10
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                }
-            }
-
-            // Top Card 2: CPU Plasmoid Block
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredWidth: 210
+                Layout.preferredWidth: 314
                 implicitHeight: 165
                 radius: 16
                 color: Theme.surface
@@ -157,10 +110,10 @@ PanelWindow {
                 }
             }
 
-            // Top Card 3: GPU Plasmoid Block
+            // Top Card 2: GPU Plasmoid Block
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredWidth: 210
+                Layout.preferredWidth: 314
                 implicitHeight: 165
                 radius: 16
                 color: Theme.surface
@@ -230,7 +183,7 @@ PanelWindow {
             }
         }
 
-        // BOTTOM ROW: 2 Larger Plasmoid Blocks
+        // BOTTOM ROW: 2 Wide Plasmoid Blocks (RAM & Sensors/Network)
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
@@ -253,7 +206,7 @@ PanelWindow {
                     RowLayout {
                         Layout.fillWidth: true
                         Text {
-                            text: "🧠 RAM & Memory"
+                            text: "🧠 RAM"
                             color: Theme.fg
                             font.pixelSize: 12
                             font.weight: Font.Bold
@@ -287,14 +240,7 @@ PanelWindow {
                         Layout.fillWidth: true
                         Text { text: "Used: " + SystemMonitorService.ramUsed + " / " + SystemMonitorService.ramTotal + " GB"; color: Theme.comment; font.pixelSize: 10 }
                         Item { Layout.fillWidth: true }
-                        Text { text: "Free: " + (Math.max(0, SystemMonitorService.ramTotal - SystemMonitorService.ramUsed)).toFixed(1) + " GB"; color: Theme.green; font.pixelSize: 10 }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
                         Text { text: "Swap: " + SystemMonitorService.swapUsed + " / " + SystemMonitorService.swapTotal + " GB"; color: Theme.yellow; font.pixelSize: 10 }
-                        Item { Layout.fillWidth: true }
-                        Text { text: "Uptime: " + SystemMonitorService.uptime; color: Theme.cyan; font.pixelSize: 10 }
                     }
 
                     Item { Layout.fillHeight: true }
@@ -324,7 +270,7 @@ PanelWindow {
                     spacing: 4
 
                     Text {
-                        text: "🌡️ Sensors, Network & Storage"
+                        text: "🌡️ Sensors & Net"
                         color: Theme.fg
                         font.pixelSize: 12
                         font.weight: Font.Bold
@@ -339,22 +285,12 @@ PanelWindow {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: "⬇ RX: " + SystemMonitorService.netRx; color: Theme.green; font.pixelSize: 10; font.weight: Font.Bold }
+                        Text { text: "⬇ " + SystemMonitorService.netRx; color: Theme.green; font.pixelSize: 10; font.weight: Font.Bold }
                         Item { Layout.fillWidth: true }
-                        Text { text: "⬆ TX: " + SystemMonitorService.netTx; color: Theme.subAccent; font.pixelSize: 10; font.weight: Font.Bold }
+                        Text { text: "⬆ " + SystemMonitorService.netTx; color: Theme.subAccent; font.pixelSize: 10; font.weight: Font.Bold }
                     }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "🔥 Top Task: " + SystemMonitorService.topProc; color: Theme.pink; font.pixelSize: 10 }
-                        Item { Layout.fillWidth: true }
-                        Text { text: SystemMonitorService.procCount + " Processes"; color: Theme.comment; font.pixelSize: 10 }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "💾 Disk: " + SystemMonitorService.diskUsed + " / " + SystemMonitorService.diskTotal + " GB (" + SystemMonitorService.diskPct + "%)"; color: Theme.comment; font.pixelSize: 10 }
-                    }
+                    Text { text: "🔥 " + SystemMonitorService.topProc + " (" + SystemMonitorService.procCount + " procs)"; color: Theme.pink; font.pixelSize: 10 }
 
                     // Disk Usage Gauge Bar
                     Rectangle {

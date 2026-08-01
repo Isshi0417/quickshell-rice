@@ -15,6 +15,9 @@ Scope {
 
     // Desktop Plasmoid System Monitor (Layer: Bottom, Non-restricting)
     SystemWidget {}
+
+    // Standalone Running Hamster Engine Widget (Layer: Bottom, Bottom-Left)
+    HamsterWidget {}
     // Full-screen transparent dismiss overlay (Layer: Top)
     PanelWindow {
         id: dismissOverlay
