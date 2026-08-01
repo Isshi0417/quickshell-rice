@@ -1,0 +1,17 @@
+@import 'colors.css';
+
+window {
+    background-color: #212C2A;
+    color: #F8F8F2;
+}
+
+headerbar {
+    background-color: #1A2322;
+    color: #F8F8F2;
+    border-bottom: 1px solid #4C6762;
+}
+
+.selected {
+    background-color: #415854;
+    color: #F8F8F2;
+}

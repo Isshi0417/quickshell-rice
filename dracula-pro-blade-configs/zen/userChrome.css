@@ -1,0 +1,11 @@
+/* Dracula Pro Blade Theme for Zen Browser */
+:root {
+    --zen-colors-bg: #212C2A !important;
+    --zen-colors-bg-alt: #1A2322 !important;
+    --zen-colors-fg: #F8F8F2 !important;
+    --zen-colors-border: #4C6762 !important;
+    --zen-primary-color: #80FFEA !important;
+    --toolbar-bgcolor: #212C2A !important;
+    --toolbar-color: #F8F8F2 !important;
+    --tab-selected-bgcolor: #415854 !important;
+}
