@@ -1,0 +1,19 @@
+# Subagents workspace logs
+.agents/
+
+# Python byte-code / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS / Editor temporary files
+.DS_Store
+*.swp
+*~
+
+# QuickShell build / temporary runtime files
+*.qmlc
+quickshell/tmp/
+
+# Exclude paid proprietary assets
+dracula-pro/
