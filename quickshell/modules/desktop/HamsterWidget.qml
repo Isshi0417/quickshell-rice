@@ -70,7 +70,7 @@ PanelWindow {
             Text {
                 text: (60 + SystemMonitorService.cpuPct * 3) + " RPM • " + (SystemMonitorService.cpuPct > 70 ? "🔥 Sprinting" : (SystemMonitorService.cpuPct > 20 ? "⚡ Running" : "💤 Trotting"))
                 color: Theme.comment
-                font.pixelSize: 9.5
+                font.pixelSize: 10
                 Layout.alignment: Qt.AlignHCenter
             }
         }
