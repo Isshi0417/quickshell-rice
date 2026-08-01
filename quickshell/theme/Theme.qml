@@ -20,14 +20,14 @@ Item {
         { category: "Zoey Pink",   name: "Zoey Night",  isDark: true,  accent: "#f472b6", subAccent: "#c084fc", bg: "#251c2e", surface: "#33263e", currentLine: "#483659", fg: "#f5e6f8" },
         { category: "Zoey Pink",   name: "Emo Zoey",    isDark: true,  accent: "#ff2a85", subAccent: "#9333ea", bg: "#120914", surface: "#1c0d20", currentLine: "#32143a", fg: "#f4d7f7" },
 
-        // Dracula Pro
-        { category: "Dracula Pro", name: "Pro",      isDark: true,  accent: "#9580ff", subAccent: "#ff80bf", bg: "#22212c", surface: "#2b2938", currentLine: "#454158", fg: "#f8f8f2" },
-        { category: "Dracula Pro", name: "Blade",    isDark: true,  accent: "#80ffea", subAccent: "#8aff80", bg: "#212c2a", surface: "#293835", currentLine: "#415854", fg: "#f8f8f2" },
-        { category: "Dracula Pro", name: "Buff",     isDark: true,  accent: "#ffca80", subAccent: "#ff9580", bg: "#2a212c", surface: "#352938", currentLine: "#544158", fg: "#f8f8f2" },
-        { category: "Dracula Pro", name: "Cyan",     isDark: true,  accent: "#80ffea", subAccent: "#9580ff", bg: "#0b0d0f", surface: "#181b1f", currentLine: "#414d58", fg: "#f8f8f2" },
-        { category: "Dracula Pro", name: "Lincoln",  isDark: true,  accent: "#ffff80", subAccent: "#8aff80", bg: "#2c2a21", surface: "#38352a", currentLine: "#585441", fg: "#f8f8f2" },
-        { category: "Dracula Pro", name: "Morpheus", isDark: true,  accent: "#ff9580", subAccent: "#ffca80", bg: "#2c2122", surface: "#382a2b", currentLine: "#584145", fg: "#f8f8f2" },
-        { category: "Dracula Pro", name: "Alucard",  isDark: false, accent: "#6272a4", subAccent: "#ff79c6", bg: "#f8f8f2", surface: "#e6e6e6", currentLine: "#d0d0d0", fg: "#282a36" },
+        // Dracula Pro (Official Palette from dracula-pro/design/palette.md)
+        { category: "Dracula Pro", name: "Pro",      isDark: true,  accent: "#9580ff", subAccent: "#ff80bf", bg: "#22212c", surface: "#2b2938", currentLine: "#454158", fg: "#f8f8f2", comment: "#7970a9" },
+        { category: "Dracula Pro", name: "Blade",    isDark: true,  accent: "#80ffea", subAccent: "#8aff80", bg: "#212c2a", surface: "#293835", currentLine: "#415854", fg: "#f8f8f2", comment: "#70a99f" },
+        { category: "Dracula Pro", name: "Buff",     isDark: true,  accent: "#ff80bf", subAccent: "#ff9580", bg: "#2a212c", surface: "#352938", currentLine: "#544158", fg: "#f8f8f2", comment: "#9f70a9" },
+        { category: "Dracula Pro", name: "Cyan",     isDark: true,  accent: "#80ffea", subAccent: "#9580ff", bg: "#0b0d0f", surface: "#181b1f", currentLine: "#414d58", fg: "#f8f8f2", comment: "#708ca9" },
+        { category: "Dracula Pro", name: "Lincoln",  isDark: true,  accent: "#ffff80", subAccent: "#8aff80", bg: "#2c2a21", surface: "#38352a", currentLine: "#585441", fg: "#f8f8f2", comment: "#a99f70" },
+        { category: "Dracula Pro", name: "Morpheus", isDark: true,  accent: "#ff9580", subAccent: "#ffca80", bg: "#2c2122", surface: "#382a2b", currentLine: "#584145", fg: "#f8f8f2", comment: "#a97079" },
+        { category: "Dracula Pro", name: "Alucard",  isDark: false, accent: "#644ac9", subAccent: "#a3144d", bg: "#f5f5f5", surface: "#cfcfde", currentLine: "#cfcfde", fg: "#1f1f1f", comment: "#635d97" },
 
         // Gruvbox
         { category: "Gruvbox",     name: "Gruvbox Dark",     isDark: true,  accent: "#fe8019", subAccent: "#fabd2f", bg: "#282828", surface: "#3c3836", currentLine: "#504945", fg: "#ebdbb2" },
@@ -124,16 +124,29 @@ Item {
                 if (v.fg) fg = v.fg
                 else fg = isDark ? "#f8f8f2" : "#282a36"
 
-                if (isDark) {
-                    comment = "#7970a9"
+                if (v.comment) {
+                    comment = v.comment
+                } else {
+                    comment = isDark ? "#7970a9" : Qt.rgba(fg.r, fg.g, fg.b, 0.65)
+                }
+
+                if (v.name === "Alucard") {
+                    cyan = "#036a96"
+                    green = "#14710a"
+                    orange = "#a34d14"
+                    pink = "#a3144d"
+                    purple = "#644ac9"
+                    red = "#cb3a2a"
+                    yellow = "#846e15"
+                } else if (isDark) {
                     cyan = "#80ffea"
                     green = "#8aff80"
                     orange = "#ffca80"
                     pink = "#ff80bf"
+                    purple = "#9580ff"
                     red = "#ff9580"
                     yellow = "#ffff80"
                 } else {
-                    comment = Qt.rgba(fg.r, fg.g, fg.b, 0.65)
                     cyan = "#0891b2"
                     green = "#16a34a"
                     orange = "#ea580c"
