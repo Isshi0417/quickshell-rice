@@ -30,22 +30,26 @@ PanelWindow {
         id: openAnim
         running: false
         to: 1.0
-        duration: 140
-        easing.type: Easing.OutCubic
+        duration: 220
+        easing.type: Easing.OutBack
+        easing.overshoot: 1.2
     }
+
     NumberAnimation on openProgress {
         id: closeAnim
         running: false
         to: 0.0
-        duration: 100
-        easing.type: Easing.OutCubic
+        duration: 160
+        easing.type: Easing.InBack
+        easing.overshoot: 1.2
         onFinished: PopupService.appLauncherOpen = false
     }
 
     onVisibleChanged: {
         if (visible) {
+            closeAnim.running = false
             openProgress = 0.0
-            openAnim.running = true
+            openAnim.restart()
             AppLauncherService.reset()
             searchField.text = ""
             root.selectedIndex = 0
@@ -58,7 +62,7 @@ PanelWindow {
 
     function closeWithAnimation() {
         openAnim.running = false
-        closeAnim.running = true
+        closeAnim.restart()
     }
 
     // ── Dim background ────────────────────────────────────────────────────
@@ -82,8 +86,8 @@ PanelWindow {
         focus: root.visible
         Keys.onEscapePressed: root.closeWithAnimation()
 
-        opacity: root.openProgress
-        scale: 0.94 + 0.06 * root.openProgress
+        opacity: Math.max(0.0, Math.min(1.0, root.openProgress))
+        scale: 0.85 + 0.15 * root.openProgress
 
         // Panel glass card
         Rectangle {
