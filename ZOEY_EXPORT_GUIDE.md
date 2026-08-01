@@ -1,21 +1,20 @@
-# QuickShell & Dracula Pro Ecosystem: Zoey's Deployment Guide
+# QuickShell Ecosystem: Zoey's Deployment & Setup Guide
 
-Welcome to the **QuickShell Desktop Shell & Riced Theme Ecosystem**! This guide contains everything necessary to set up, deploy, and run this complete desktop experience on **Zoey's computer (Nobara Linux / Fedora / Arch / Ubuntu)**.
+Welcome to the **QuickShell Desktop Shell & Riced Theme Ecosystem**! This guide details how to install and run the complete self-contained desktop experience on **Zoey's computer (Nobara Linux / Fedora / Arch / Ubuntu)** directly out of her `~/.config` directory.
 
 ---
 
-## 🌟 Overview of Riced Components
+## 🌟 Architecture Overview
 
-- **QuickShell Desktop Shell (QML Engine)**:
-  - **Top Status Bar**: Dynamic workspace switcher, active window title tracker, CPU/RAM/Temp metrics, digital clock with calendar dropdown, system tray, audio volume, brightness, battery, and MPRIS music player controller.
-  - **Bottom Dock**: Floating application launcher, pinned apps, window task bar, mouse-over micro-animations, and wallpaper selector.
-  - **Overlay Panels & Popups**: Glassmorphic Quick Settings, App Launcher modal, MPRIS player card, volume & brightness OSDs.
-- **Multi-App Dynamic Theme Engine (`theme_sync.py`)**:
-  - Automatically synchronizes color palettes across **GTK 3/4**, **Alacritty**, **Discord**, **VSCode / VSCodium**, **Zen Browser**, **Feishin Music Player**, and **Starship Shell Prompt**.
-  - Includes 30+ curated dark & light color themes (Dracula Pro: Blade, Buff, Lincoln, Morpheus, Alucard; Catppuccin; Tokyo Night; Rosé Pine; Gruvbox; Everforest; Nord; Solarized; One Dark; Cyberpunk Neon).
-- **Custom Assets & Wallpapers**:
-  - Theme-matching wallpapers in `quickshell/wallpapers/`.
-  - Icon sets and riced terminal/editor configuration files.
+QuickShell is deployed as a 100% self-contained configuration located inside `~/.config/quickshell`:
+
+- **Execution Directory**: `~/.config/quickshell/`
+- **Systemd User Daemon**: `~/.config/systemd/user/quickshell.service` (executes `quickshell -p %h/.config/quickshell`)
+- **Top Status Bar**: Dynamic workspace switcher, window title tracker, CPU/RAM/Temp metrics, digital clock with calendar dropdown, system tray, audio volume, brightness, battery, and MPRIS music player controls.
+- **Bottom Dock**: Floating application launcher, pinned apps, window task bar, mouse-over micro-animations, and wallpaper selector.
+- **Dynamic Multi-App Theme Engine (`~/.config/quickshell/services/python/theme_sync.py`)**:
+  - Automatically generates and applies live color themes for **GTK 3/4**, **Alacritty**, **Discord**, **VSCode / VSCodium**, **Zen Browser**, **Feishin Music Player**, **Starship Prompt**, **btop**, **fastfetch**, **ghostty**, **micro editor**, **Konsole**, and **Xresources**.
+  - Includes 30+ dark & light color palettes (Dracula Pro: Blade, Buff, Lincoln, Morpheus, Alucard; Catppuccin; Tokyo Night; Rosé Pine; Gruvbox; Everforest; Nord; Solarized; One Dark; Cyberpunk Neon).
 
 ---
 
@@ -28,13 +27,17 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The script will automatically detect Nobara (`dnf`), install all necessary system packages, deploy QuickShell and riced application configs to `~/.config/`, enable the `quickshell.service` systemd user daemon, and trigger the initial multi-app theme synchronization.
+The installer will:
+1. Detect Nobara (`dnf`) and install all required system packages.
+2. Deploy QuickShell directly to `~/.config/quickshell/`.
+3. Configure and enable `~/.config/systemd/user/quickshell.service`.
+4. Trigger the initial dynamic theme sync across all supported apps.
 
 ---
 
 ## 🛠️ Step-by-Step Manual Setup for Nobara Linux
 
-If you prefer installing manually or want to understand each step:
+If installing manually:
 
 ### Step 1: Install Package Dependencies on Nobara (DNF)
 
@@ -70,10 +73,11 @@ cmake --build build
 sudo cmake --install build
 ```
 
-### Step 3: Deploy QuickShell Configuration to `~/.config/`
+### Step 3: Deploy QuickShell Configuration to `~/.config/quickshell/`
+
+Copy the QuickShell ecosystem into Zoey's `.config` directory:
 
 ```bash
-# QuickShell configuration & dynamic theme engine
 mkdir -p ~/.config/quickshell
 cp -r quickshell/* ~/.config/quickshell/
 chmod +x ~/.config/quickshell/toggle_launcher.sh
@@ -109,7 +113,7 @@ systemctl --user enable --now quickshell.service
 
 ### Step 5: Initialize Dynamic Multi-App Theme Engine
 
-Run the python theme synchronizer to dynamically generate live color schemes across all supported applications (GTK 3/4, Alacritty, VSCode, Discord, Zen Browser, Feishin, Starship, btop, fastfetch, ghostty, micro, Konsole, Xresources):
+Run the theme sync engine directly out of `~/.config/quickshell/services/python/theme_sync.py`:
 
 ```bash
 python3 ~/.config/quickshell/services/python/theme_sync.py \
@@ -138,7 +142,7 @@ To bind the QuickShell App Launcher to the `Super` (Windows) key or a keyboard s
 - **Check Shell Status**: `systemctl --user status quickshell.service`
 - **Restart Desktop Shell**: `systemctl --user restart quickshell.service`
 - **View Runtime Logs**: `journalctl --user -u quickshell.service -f`
-- **Manual Theme Switch**: `python3 ~/.config/quickshell/services/python/theme_sync.py --variant "Catppuccin Mocha"`
+- **Manual Theme Switch**: `python3 ~/.config/quickshell/services/python/theme_sync.py --bg "#1e1e2e" --surface "#313244" --currentLine "#45475a" --fg "#cdd6f4" --accent "#cba6f7" --subAccent "#89b4fa" --isDark true --variantName "Catppuccin Mocha"`
 
 ---
 
