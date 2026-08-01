@@ -849,12 +849,17 @@ def make_feishin_json(bg, surface, current_line, fg, accent, is_dark, name="Quic
         "extends": extends_theme,
         "colors": {
             "primary": accent,
+            "primary-foreground": "#ffffff" if is_dark else "#000000",
             "background": bg,
             "background-alternate": surface,
             "surface": surface,
             "surface-foreground": fg,
             "foreground": fg,
-            "foreground-muted": current_line
+            "foreground-muted": current_line,
+            "accent": accent,
+            "border": current_line,
+            "sidebar-background": bg,
+            "sidebar-foreground": fg
         }
     }
 
@@ -862,55 +867,64 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
     import json, glob
     active_slug = slugify(variant_name)
 
-    feishin_dirs = get_app_config_dirs(['feishin', 'Feishin'])
+    feishin_dirs = get_app_config_dirs(['feishin', 'Feishin', 'io.github.jeffvli.feishin'])
     for fb in [
         os.path.expanduser('~/.config/feishin'),
+        os.path.expanduser('~/.local/share/feishin'),
         os.path.expanduser('~/.var/app/io.github.jeffvli.feishin/config/feishin'),
+        os.path.expanduser('~/.var/app/io.github.jeffvli.feishin/data/feishin'),
         os.path.expanduser('~/.var/app/org.jeffvli.feishin/config/feishin'),
-        os.path.expanduser('~/.var/app/feishin/config/feishin')
+        os.path.expanduser('~/.var/app/org.jeffvli.feishin/data/feishin'),
+        os.path.expanduser('~/.var/app/feishin/config/feishin'),
+        os.path.expanduser('~/.var/app/feishin/data/feishin')
     ]:
         if fb not in feishin_dirs:
             feishin_dirs.append(fb)
 
+    active_json = make_feishin_json(bg, surface, current_line, fg, accent, is_dark, variant_name, active_slug)
+    qs_json = make_feishin_json(bg, surface, current_line, fg, accent, is_dark, "Quickshell", "quickshell")
+
     for base_dir in feishin_dirs:
         try:
-            themes_dir = os.path.join(base_dir, 'Themes')
-            os.makedirs(themes_dir, exist_ok=True)
+            for t_dir_name in ['Themes', 'themes']:
+                themes_dir = os.path.join(base_dir, t_dir_name)
+                os.makedirs(themes_dir, exist_ok=True)
 
-            # 1. Clean up any previous .backup files and restore as .json
-            for backup_file in glob.glob(os.path.join(themes_dir, '*.backup')):
+                # 1. Clean up any previous .backup files and restore as .json
+                for backup_file in glob.glob(os.path.join(themes_dir, '*.backup')):
+                    try:
+                        clean_json = backup_file[:-7]
+                        if not os.path.exists(clean_json):
+                            os.rename(backup_file, clean_json)
+                        else:
+                            os.remove(backup_file)
+                    except Exception:
+                        pass
+
+                # 2. Pre-generate JSON files for all predefined variants so all themes are available
+                for v in PREDEFINED_VARIANTS:
+                    v_slug = slugify(v["name"])
+                    v_json = make_feishin_json(v["bg"], v["surface"], v["currentLine"], v["fg"], v["accent"], v["isDark"], v["name"], v_slug)
+                    v_path = os.path.join(themes_dir, f"{v_slug}.json")
+                    with open(v_path, 'w', encoding='utf-8') as f:
+                        json.dump(v_json, f, indent=2)
+
+                # 3. Write active variant JSON with runtime parameters + quickshell.json
+                active_path = os.path.join(themes_dir, f"{active_slug}.json")
+                with open(active_path, 'w', encoding='utf-8') as f:
+                    json.dump(active_json, f, indent=2)
+
+                with open(os.path.join(themes_dir, "quickshell.json"), 'w', encoding='utf-8') as f:
+                    json.dump(qs_json, f, indent=2)
+
+            # 4. Auto-update preferences.json / config.json / settings.json in Feishin config directory
+            for pref_name in ['preferences.json', 'config.json', 'settings.json']:
+                pref_file = os.path.join(base_dir, pref_name)
                 try:
-                    clean_json = backup_file[:-7]
-                    if not os.path.exists(clean_json):
-                        os.rename(backup_file, clean_json)
-                    else:
-                        os.remove(backup_file)
-                except Exception:
-                    pass
-
-            # 2. Pre-generate JSON files for all predefined variants so all themes are available
-            for v in PREDEFINED_VARIANTS:
-                v_slug = slugify(v["name"])
-                v_json = make_feishin_json(v["bg"], v["surface"], v["currentLine"], v["fg"], v["accent"], v["isDark"], v["name"], v_slug)
-                v_path = os.path.join(themes_dir, f"{v_slug}.json")
-                with open(v_path, 'w', encoding='utf-8') as f:
-                    json.dump(v_json, f, indent=2)
-
-            # 3. Write active variant JSON with runtime parameters + quickshell.json
-            active_json = make_feishin_json(bg, surface, current_line, fg, accent, is_dark, variant_name, active_slug)
-            active_path = os.path.join(themes_dir, f"{active_slug}.json")
-            with open(active_path, 'w', encoding='utf-8') as f:
-                json.dump(active_json, f, indent=2)
-
-            with open(os.path.join(themes_dir, "quickshell.json"), 'w', encoding='utf-8') as f:
-                json.dump(active_json, f, indent=2)
-
-            # 4. Auto-update preferences.json in Feishin config directory if present
-            pref_file = os.path.join(base_dir, 'preferences.json')
-            if os.path.exists(pref_file):
-                try:
-                    with open(pref_file, 'r', encoding='utf-8') as f:
-                        pref_data = json.load(f)
+                    pref_data = {}
+                    if os.path.exists(pref_file):
+                        with open(pref_file, 'r', encoding='utf-8') as f:
+                            pref_data = json.load(f)
                     pref_data["theme"] = active_slug
                     with open(pref_file, 'w', encoding='utf-8') as f:
                         json.dump(pref_data, f, indent=2)
