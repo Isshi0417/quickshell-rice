@@ -253,6 +253,20 @@ deploy_configs() {
         cp -r "${SCRIPT_DIR}/fastfetch/"* "${TARGET_CONFIG_DIR}/fastfetch/"
     fi
 
+    # KDE Color Schemes & Konsole Profiles
+    if [ -d "${SCRIPT_DIR}/kde" ]; then
+        info "Deploying KDE Plasma color schemes and Konsole profiles..."
+        mkdir -p "${HOME}/.local/share/color-schemes" "${HOME}/.local/share/konsole"
+        [ -d "${SCRIPT_DIR}/kde/color-schemes" ] && cp -r "${SCRIPT_DIR}/kde/color-schemes/"* "${HOME}/.local/share/color-schemes/" 2>/dev/null || true
+        [ -d "${SCRIPT_DIR}/kde/konsole" ] && cp -r "${SCRIPT_DIR}/kde/konsole/"* "${HOME}/.local/share/konsole/" 2>/dev/null || true
+    fi
+
+    # Run KDE generator script for complete coverage
+    KDE_GEN_SCRIPT="${TARGET_CONFIG_DIR}/quickshell/services/python/generate_kde_colorschemes.py"
+    if [ -f "$KDE_GEN_SCRIPT" ]; then
+        python3 "$KDE_GEN_SCRIPT" 2>/dev/null || true
+    fi
+
     success "QuickShell configuration deployed successfully!"
 }
 
