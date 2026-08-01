@@ -4,17 +4,37 @@ Welcome to the **QuickShell Desktop Shell & Riced Theme Ecosystem**! This guide 
 
 ---
 
-## 🌟 Architecture Overview
+## 🌟 Architecture & Application Sync Overview
 
 QuickShell is deployed as a 100% self-contained configuration located inside `~/.config/quickshell`:
 
 - **Execution Directory**: `~/.config/quickshell/`
-- **Systemd User Daemon**: `~/.config/systemd/user/quickshell.service` (executes `quickshell -p %h/.config/quickshell`)
+- **Systemd User Daemon**: `~/.config/systemd/user/quickshell.service` (executes `/usr/bin/quickshell -p %h/.config/quickshell`)
 - **Top Status Bar**: Dynamic workspace switcher, window title tracker, CPU/RAM/Temp metrics, digital clock with calendar dropdown, system tray, audio volume, brightness, battery, and MPRIS music player controls.
 - **Bottom Dock**: Floating application launcher, pinned apps, window task bar, mouse-over micro-animations, and wallpaper selector.
-- **Dynamic Multi-App Theme Engine (`~/.config/quickshell/services/python/theme_sync.py`)**:
-  - Automatically generates and applies live color themes for **GTK 3/4**, **Alacritty**, **Discord**, **VSCode / VSCodium**, **Zen Browser**, **Feishin Music Player**, **Starship Prompt**, **btop**, **fastfetch**, **ghostty**, **micro editor**, **Konsole**, and **Xresources**.
-  - Includes 30+ dark & light color palettes (Dracula Pro: Blade, Buff, Lincoln, Morpheus, Alucard; Catppuccin; Tokyo Night; Rosé Pine; Gruvbox; Everforest; Nord; Solarized; One Dark; Cyberpunk Neon).
+
+### 🎨 Dynamic Multi-App Theme Engine (`~/.config/quickshell/services/python/theme_sync.py`)
+
+When picking a theme in QuickShell, `theme_sync.py` broadcasts live color schemes to all installed applications while preserving user preferences:
+
+- **Alacritty Terminal**:
+  - Main config: `~/.config/alacritty/alacritty.toml` configured with `opacity = 1.0` (fully opaque/solid background).
+  - Dynamic colors: Written to `~/.config/alacritty/colors.toml` and linked via `import = ["colors.toml"]`.
+  - Overriding inline `[colors]` blocks are automatically stripped so themes reload live without resetting fonts or window settings.
+- **Fastfetch**:
+  - `~/.config/fastfetch/config.jsonc` undergoes non-destructive regex updates for `"keys"` and `"title"` accent colors. Custom modules, logos, and ASCII layouts are fully preserved.
+- **GTK 3 & GTK 4**: Live CSS rules written to `~/.config/gtk-3.0/gtk.css` and `~/.config/gtk-4.0/gtk.css`.
+- **VSCode / VSCodium**: Injected into `workbench.colorCustomizations` and `editor.tokenColorCustomizations` in `settings.json`.
+- **Discord** (Vesktop, Vencord, Equicord, Equibop): Live CSS themes generated in app theme directories.
+- **Zen Browser**: `userChrome.css` and `userContent.css` generated per profile.
+- **Feishin Music Player**: Theme JSON files written to `~/.config/feishin/Themes/` and activated in `config.json`.
+- **Starship Prompt**: Palette rules written to `~/.config/starship.toml`.
+- **btop**: Theme generated in `~/.config/btop/themes/quickshell.theme` and activated in `btop.conf`.
+- **ghostty**: `~/.config/ghostty/config` palette updated live.
+- **micro editor**: Colorscheme written to `~/.config/micro/colorschemes/quickshell.micro`.
+- **vim / neovim**: `~/.vim/colors/quickshell_theme.vim` generated and loaded.
+- **Konsole & KDE**: Color schemes written to `~/.local/share/konsole/Quickshell.colorscheme`.
+- **Xresources**: `~/.Xresources` updated and merged via `xrdb`.
 
 ---
 
