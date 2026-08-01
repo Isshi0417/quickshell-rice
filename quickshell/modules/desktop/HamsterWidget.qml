@@ -29,29 +29,28 @@ PanelWindow {
     // Standalone Bigger Running Hamster Engine Card (Bottom Left)
     Rectangle {
         id: card
-        implicitWidth: 190
-        implicitHeight: 205
-        radius: 18
+        implicitWidth: 162
+        implicitHeight: 184
+        radius: 16
         color: Theme.surface
         border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
         border.width: 1.5
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 6
-            spacing: 2
+            anchors.margins: 3
+            spacing: 0
 
-            // Hamster GIF Image (Tight fit with minimal border space & bigger size)
+            // Hamster GIF Image (Maximizes GIF bounds with minimal border gap)
             Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
-                implicitHeight: 155
+                implicitHeight: 145
 
                 AnimatedImage {
                     id: hamsterGif
-                    anchors.centerIn: parent
-                    width: 150
-                    height: 150
+                    anchors.fill: parent
+                    anchors.margins: 0
                     source: "file://" + Quickshell.env("HOME") + "/.config/quickshell/assets/hampter_transparent.gif"
                     fillMode: Image.PreserveAspectFit
                     smooth: true
@@ -63,7 +62,7 @@ PanelWindow {
             Text {
                 text: "🐹 Hamster Engine"
                 color: Theme.accent
-                font.pixelSize: 12
+                font.pixelSize: 11
                 font.weight: Font.Bold
                 Layout.alignment: Qt.AlignHCenter
             }
@@ -71,7 +70,7 @@ PanelWindow {
             Text {
                 text: (60 + SystemMonitorService.cpuPct * 3) + " RPM • " + (SystemMonitorService.cpuPct > 70 ? "🔥 Sprinting" : (SystemMonitorService.cpuPct > 20 ? "⚡ Running" : "💤 Trotting"))
                 color: Theme.comment
-                font.pixelSize: 10
+                font.pixelSize: 9.5
                 Layout.alignment: Qt.AlignHCenter
             }
         }
