@@ -103,7 +103,7 @@ Item {
     // Parse desktop files on startup and monitor real-time directory changes
     Process {
         id: parseProc
-        command: ["python3", "-u", "/home/sho/Documents/themes/quickshell/services/python/app_launcher_service.py"]
+        command: ["python3", "-u", Quickshell.env("HOME") + "/.config/quickshell/services/python/app_launcher_service.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {

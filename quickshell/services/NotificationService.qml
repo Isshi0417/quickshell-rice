@@ -53,9 +53,12 @@ Item {
 
     // Persistent DBus Notification Inhibitor Process (Suppresses Plasmashell default top-left popups)
     Process {
-        id: dndHoldProc
-        command: ["python3", "-u", "/home/sho/Documents/themes/quickshell/services/python/dnd_inhibitor.py"]
+        id: dndProc
+        command: ["python3", "-u", Quickshell.env("HOME") + "/.config/quickshell/services/python/dnd_inhibitor.py"]
         running: true
+        stdout: SplitParser {
+            onRead: data => root.dndActive = (data.trim() === "true")
+        }
     }
 
     signal notificationReceived(var notification)
@@ -63,7 +66,7 @@ Item {
     // Real-Time DBus Notification Monitor Process
     Process {
         id: notifProc
-        command: ["python3", "-u", "/home/sho/Documents/themes/quickshell/services/python/notification_service.py"]
+        command: ["python3", "-u", Quickshell.env("HOME") + "/.config/quickshell/services/python/notification_service.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {

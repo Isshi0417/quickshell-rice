@@ -188,7 +188,7 @@ class ActiveAppService(dbus.service.Object):
         return True
 
 def setup_kwin_listener():
-    js_template = "/home/sho/Documents/themes/quickshell/services/js/kwin_state_listener.js"
+    js_template = os.path.expanduser("~/.config/quickshell/services/js/kwin_state_listener.js")
     js_path = "/tmp/kwin_state_listener.js"
     try:
         if os.path.exists(js_template):

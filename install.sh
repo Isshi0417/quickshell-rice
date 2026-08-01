@@ -188,7 +188,7 @@ install_quickshell() {
 
 # 4. Copying and Linking Configurations
 deploy_configs() {
-    info "Deploying configurations to ${TARGET_CONFIG_DIR}..."
+    info "Deploying QuickShell configuration to ${TARGET_CONFIG_DIR}..."
     mkdir -p "${TARGET_CONFIG_DIR}"
 
     # Quickshell Desktop Shell Config
@@ -200,33 +200,7 @@ deploy_configs() {
         chmod +x "${TARGET_CONFIG_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
     fi
 
-    # Application Riced Configs from dracula-pro-blade-configs
-    CONFIGS_SRC="${SCRIPT_DIR}/dracula-pro-blade-configs"
-    if [ -d "$CONFIGS_SRC" ]; then
-        info "Deploying application configs (Alacritty, Fastfetch, GTK, micro, btop)..."
-        
-        [ -d "${CONFIGS_SRC}/alacritty" ] && cp -r "${CONFIGS_SRC}/alacritty" "${TARGET_CONFIG_DIR}/"
-        [ -d "${CONFIGS_SRC}/fastfetch" ] && cp -r "${CONFIGS_SRC}/fastfetch" "${TARGET_CONFIG_DIR}/"
-        [ -d "${CONFIGS_SRC}/btop" ] && cp -r "${CONFIGS_SRC}/btop" "${TARGET_CONFIG_DIR}/"
-        [ -d "${CONFIGS_SRC}/micro" ] && cp -r "${CONFIGS_SRC}/micro" "${TARGET_CONFIG_DIR}/"
-        [ -d "${CONFIGS_SRC}/ghostty" ] && cp -r "${CONFIGS_SRC}/ghostty" "${TARGET_CONFIG_DIR}/"
-
-        # GTK 3 & GTK 4
-        if [ -d "${CONFIGS_SRC}/gtk" ]; then
-            mkdir -p "${TARGET_CONFIG_DIR}/gtk-3.0" "${TARGET_CONFIG_DIR}/gtk-4.0"
-            cp -r "${CONFIGS_SRC}/gtk/"* "${TARGET_CONFIG_DIR}/gtk-3.0/" 2>/dev/null || true
-            cp -r "${CONFIGS_SRC}/gtk/"* "${TARGET_CONFIG_DIR}/gtk-4.0/" 2>/dev/null || true
-        fi
-
-        # VSCode settings
-        VSCODE_DIR="${TARGET_CONFIG_DIR}/Code/User"
-        if [ -d "${CONFIGS_SRC}/vscode" ]; then
-            mkdir -p "$VSCODE_DIR"
-            cp -r "${CONFIGS_SRC}/vscode/"* "$VSCODE_DIR/" 2>/dev/null || true
-        fi
-    fi
-
-    success "Configurations deployed successfully!"
+    success "QuickShell configuration deployed successfully!"
 }
 
 # 5. Systemd User Service Setup
@@ -260,11 +234,19 @@ EOF
 
 # 6. Run Theme Sync Engine
 run_initial_sync() {
-    info "Triggering initial multi-app theme synchronization..."
+    info "Triggering initial multi-app dynamic theme synchronization..."
     THEME_SYNC_SCRIPT="${TARGET_CONFIG_DIR}/quickshell/services/python/theme_sync.py"
     if [ -f "$THEME_SYNC_SCRIPT" ]; then
-        python3 "$THEME_SYNC_SCRIPT" || warn "Theme sync script executed with warnings."
-        success "Multi-app themes synced across GTK, Alacritty, VSCode, Zen, Feishin, and Starship!"
+        python3 "$THEME_SYNC_SCRIPT" \
+            --bg "#22212c" \
+            --surface "#2b2938" \
+            --currentLine "#454158" \
+            --fg "#f8f8f2" \
+            --accent "#9580ff" \
+            --subAccent "#ff80bf" \
+            --isDark true \
+            --variantName Pro || warn "Theme sync script executed with warnings."
+        success "Multi-app themes dynamically generated across GTK, Alacritty, VSCode, Zen, Feishin, Starship, btop, fastfetch, ghostty, micro, konsole, and Xresources!"
     else
         warn "theme_sync.py not found at ${THEME_SYNC_SCRIPT}"
     fi

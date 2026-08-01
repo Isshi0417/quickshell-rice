@@ -59,7 +59,7 @@ Item {
 
     Process {
         id: scanProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/network_service.py"]
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/network_service.py"]
         stdout: SplitParser {
             onRead: data => {
                 try {

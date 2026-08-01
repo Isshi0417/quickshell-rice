@@ -46,7 +46,7 @@ Item {
 
     Process {
         id: scanProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/mount_service.py"]
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/mount_service.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {

@@ -3,7 +3,7 @@ import sys
 import os
 import subprocess
 
-JS_TEMPLATE_PATH = '/home/sho/Documents/themes/quickshell/services/js/kwin_focus.js'
+JS_TEMPLATE_PATH = os.path.expanduser('~/.config/quickshell/services/js/kwin_focus.js')
 
 def focus_window(app_name, ix=0, iy=0):
     try:

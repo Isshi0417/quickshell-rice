@@ -57,7 +57,7 @@ PanelWindow {
                         AnimatedImage {
                             id: hamsterGif
                             anchors.fill: parent
-                            source: "file:///home/sho/Documents/themes/quickshell/assets/hampter_transparent.gif"
+                            source: "file://" + Quickshell.env("HOME") + "/.config/quickshell/assets/hampter_transparent.gif"
                             fillMode: Image.PreserveAspectFit
                             smooth: false
                             playing: !TaskService.isFullscreen

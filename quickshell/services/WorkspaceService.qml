@@ -12,8 +12,7 @@ Item {
     property var workspaceNames: []
 
     function switchTo(index) {
-        activeWorkspace = index
-        switchProc.command = ["python3", "/home/sho/Documents/themes/quickshell/services/python/workspace_service.py", "switch", index.toString()]
+        switchProc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/workspace_service.py", "switch", index.toString()]
         switchProc.running = true
     }
 
@@ -23,7 +22,7 @@ Item {
 
     Process {
         id: queryProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/workspace_service.py"]
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/workspace_service.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {

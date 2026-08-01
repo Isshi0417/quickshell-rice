@@ -45,7 +45,7 @@ Item {
 
     Process {
         id: monitorProc
-        command: ["python3", "-u", "/home/sho/Documents/themes/quickshell/services/python/system_monitor_service.py"]
+        command: ["python3", "-u", Quickshell.env("HOME") + "/.config/quickshell/services/python/system_monitor_service.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {

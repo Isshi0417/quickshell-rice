@@ -132,7 +132,7 @@ Item {
             }
 
             proc.running = false
-            proc.command = ["python3", "/home/sho/Documents/themes/quickshell/services/python/kwin_focus.py", lower, ix.toString(), iy.toString()]
+            proc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/kwin_focus.py", lower, ix.toString(), iy.toString()]
             proc.running = true
         } else if (cmd || appId) {
             launchApp(cmd || appId)
@@ -210,14 +210,14 @@ Item {
 
     function savePinnedApps() {
         let jsonStr = JSON.stringify(pinnedApps)
-        saveProc.command = ["python3", "/home/sho/Documents/themes/quickshell/services/python/save_pinned_apps.py", jsonStr]
+        saveProc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/save_pinned_apps.py", jsonStr]
         saveProc.running = true
     }
 
     function updateIconGeometries(map) {
         if (!map || typeof map !== "object") return;
         let jsonStr = JSON.stringify(map)
-        updateGeomProc.command = ["python3", "/home/sho/Documents/themes/quickshell/services/python/update_icon_geometries.py", jsonStr]
+        updateGeomProc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/update_icon_geometries.py", jsonStr]
         updateGeomProc.running = true
     }
 
@@ -228,7 +228,7 @@ Item {
     // Read saved pinned apps from JSON as a SINGLE LINE stream on startup
     Process {
         id: readPinnedProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/read_pinned_apps.py"]
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/read_pinned_apps.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {
@@ -247,7 +247,7 @@ Item {
     // Event-driven Active Window & Open Windows DBus Daemon
     Process {
         id: activeDaemon
-        command: ["python3", "-u", "/home/sho/Documents/themes/quickshell/services/python/active_window_service.py"]
+        command: ["python3", "-u", Quickshell.env("HOME") + "/.config/quickshell/services/python/active_window_service.py"]
         running: true
         stdout: SplitParser {
             onRead: data => {
@@ -262,7 +262,7 @@ Item {
     // Single-line JSON State Reader Process (100ms)
     Process {
         id: readStateProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/read_window_state.py"]
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/read_window_state.py"]
         stdout: SplitParser {
             onRead: data => {
                 try {

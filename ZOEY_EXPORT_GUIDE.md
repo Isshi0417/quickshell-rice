@@ -70,28 +70,14 @@ cmake --build build
 sudo cmake --install build
 ```
 
-### Step 3: Deploy Config Files to `~/.config/`
+### Step 3: Deploy QuickShell Configuration to `~/.config/`
 
 ```bash
-# 1. QuickShell configuration
+# QuickShell configuration & dynamic theme engine
 mkdir -p ~/.config/quickshell
 cp -r quickshell/* ~/.config/quickshell/
 chmod +x ~/.config/quickshell/toggle_launcher.sh
-
-# 2. Application riced configurations
-cp -r dracula-pro-blade-configs/alacritty ~/.config/
-cp -r dracula-pro-blade-configs/fastfetch ~/.config/
-cp -r dracula-pro-blade-configs/btop ~/.config/
-cp -r dracula-pro-blade-configs/micro ~/.config/
-
-# 3. GTK 3 & GTK 4 themes
-mkdir -p ~/.config/gtk-3.0 ~/.config/gtk-4.0
-cp -r dracula-pro-blade-configs/gtk/* ~/.config/gtk-3.0/
-cp -r dracula-pro-blade-configs/gtk/* ~/.config/gtk-4.0/
-
-# 4. VSCode settings
-mkdir -p ~/.config/Code/User
-cp -r dracula-pro-blade-configs/vscode/* ~/.config/Code/User/
+chmod +x ~/.config/quickshell/services/python/*.py
 ```
 
 ### Step 4: Configure Systemd User Service
@@ -121,12 +107,15 @@ systemctl --user daemon-reload
 systemctl --user enable --now quickshell.service
 ```
 
-### Step 5: Initialize Multi-App Theme Sync Engine
+### Step 5: Initialize Dynamic Multi-App Theme Engine
 
-Run the python theme synchronizer to broadcast themes to GTK, Alacritty, VSCode, Discord, Zen Browser, Feishin, and Starship:
+Run the python theme synchronizer to dynamically generate live color schemes across all supported applications (GTK 3/4, Alacritty, VSCode, Discord, Zen Browser, Feishin, Starship, btop, fastfetch, ghostty, micro, Konsole, Xresources):
 
 ```bash
-python3 ~/.config/quickshell/services/python/theme_sync.py --variant Pro
+python3 ~/.config/quickshell/services/python/theme_sync.py \
+    --bg "#22212c" --surface "#2b2938" --currentLine "#454158" \
+    --fg "#f8f8f2" --accent "#9580ff" --subAccent "#ff80bf" \
+    --isDark true --variantName Pro
 ```
 
 ---

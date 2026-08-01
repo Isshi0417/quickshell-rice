@@ -4,7 +4,7 @@ import os
 import json
 import subprocess
 
-JS_TEMPLATE_PATH = '/home/sho/Documents/themes/quickshell/services/js/update_icon_geometries.js'
+JS_TEMPLATE_PATH = os.path.expanduser('~/.config/quickshell/services/js/update_icon_geometries.js')
 
 def update_geometries(geom_json_str):
     try:

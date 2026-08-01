@@ -12,15 +12,15 @@ Item {
 
     // Automatic recolor watcher background daemon
     Process {
-        id: watcherProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/recolor_watcher.py"]
+        id: recolorProc
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/recolor_watcher.py"]
         running: true
     }
 
-    // High-speed Python scanner process for ~/Pictures/Wallpapers per-theme variant subfolders
+    // Auto-scan wallpapers in ~/Pictures/Wallpapers and ~/.config/quickshell/wallpapers
     Process {
         id: scanProc
-        command: ["python3", "/home/sho/Documents/themes/quickshell/services/python/wallpaper_scanner.py"]
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/wallpaper_scanner.py"]
         stdout: SplitParser {
             onRead: data => {
                 try {
