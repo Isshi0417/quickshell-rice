@@ -511,6 +511,78 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
             number_color = "#ffca80"
             operator_color = sub_accent
 
+    elif "solarized" in v_lower:
+        if is_dark:
+            comment_color = "#586e75"
+            keyword_color = "#859900"  # Solarized Green
+            function_color = "#268bd2" # Solarized Blue
+            type_color = "#b58900"     # Solarized Yellow
+            string_color = "#2aa198"   # Solarized Cyan
+            number_color = "#d33682"   # Solarized Magenta
+            operator_color = "#cb4b16" # Solarized Orange
+        else:
+            comment_color = "#93a1a1"
+            keyword_color = "#859900"
+            function_color = "#268bd2"
+            type_color = "#b58900"
+            string_color = "#2aa198"
+            number_color = "#d33682"
+            operator_color = "#cb4b16"
+
+    elif "one" in v_lower:
+        if is_dark:
+            comment_color = "#5c6370"
+            keyword_color = "#c678dd"  # One Dark Purple
+            function_color = "#61afef" # One Dark Blue
+            type_color = "#e5c07b"     # One Dark Yellow
+            string_color = "#98c379"   # One Dark Green
+            number_color = "#d19a66"   # One Dark Orange
+            operator_color = "#56b6c2" # One Dark Cyan
+        else:
+            comment_color = "#a0a1a7"
+            keyword_color = "#a626a4"
+            function_color = "#4078f2"
+            type_color = "#c18401"
+            string_color = "#50a14f"
+            number_color = "#986801"
+            operator_color = "#0184bc"
+
+    elif "monokai" in v_lower:
+        comment_color = "#727072"
+        keyword_color = "#ff6188"   # Monokai Pink/Red
+        function_color = "#a9dc76"  # Monokai Green
+        type_color = "#78dce8"      # Monokai Cyan
+        string_color = "#ffd866"    # Monokai Yellow
+        number_color = "#ab9df2"    # Monokai Purple
+        operator_color = "#fc9867"  # Monokai Orange
+
+    elif "cyberpunk" in v_lower or "emo" in v_lower:
+        comment_color = "#7b52ab"
+        keyword_color = "#ff007f"   # Neon Pink
+        function_color = "#00f0ff"  # Neon Cyan
+        type_color = "#ffff00"      # Neon Yellow
+        string_color = "#00ff9f"    # Neon Green
+        number_color = "#ff9900"    # Neon Orange
+        operator_color = "#9d4edd"  # Purple
+
+    elif "zoey" in v_lower:
+        if is_dark:
+            comment_color = "#94a3b8"
+            keyword_color = "#f472b6"   # Pink
+            function_color = "#c084fc"  # Purple
+            type_color = "#38bdf8"      # Cyan
+            string_color = "#4ade80"    # Green
+            number_color = "#fbbf24"    # Yellow
+            operator_color = "#f43f5e"  # Rose
+        else:
+            comment_color = "#9d4edd"
+            keyword_color = "#ec4899"
+            function_color = "#a855f7"
+            type_color = "#0284c7"
+            string_color = "#16a34a"
+            number_color = "#ea580c"
+            operator_color = "#e11d48"
+
     else:
         comment_color = "#7970a9" if is_dark else "#8c8c8c"
         keyword_color = accent
