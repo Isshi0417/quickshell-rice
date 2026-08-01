@@ -30,15 +30,15 @@ PanelWindow {
         id: openAnim
         running: false
         to: 1.0
-        duration: 90
-        easing.type: Easing.OutQuad
+        duration: 140
+        easing.type: Easing.OutCubic
     }
     NumberAnimation on openProgress {
         id: closeAnim
         running: false
         to: 0.0
-        duration: 70
-        easing.type: Easing.InQuad
+        duration: 100
+        easing.type: Easing.OutCubic
         onFinished: PopupService.appLauncherOpen = false
     }
 
@@ -83,7 +83,7 @@ PanelWindow {
         Keys.onEscapePressed: root.closeWithAnimation()
 
         opacity: root.openProgress
-        scale: 0.97 + 0.03 * root.openProgress
+        scale: 0.94 + 0.06 * root.openProgress
 
         // Panel glass card
         Rectangle {
@@ -444,6 +444,13 @@ PanelWindow {
             return AppLauncherService.fallbackIconPath ? "file://" + AppLauncherService.fallbackIconPath : ""
         }
         if (iconName.startsWith("/")) return "file://" + iconName
+
+        let lower = iconName.toLowerCase().trim()
+        if (AppLauncherService.iconMap && AppLauncherService.iconMap[lower]) {
+            let mapped = AppLauncherService.iconMap[lower]
+            return mapped.startsWith("/") ? "file://" + mapped : mapped
+        }
+
         return AppLauncherService.fallbackIconPath ? "file://" + AppLauncherService.fallbackIconPath : ""
     }
 }
