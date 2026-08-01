@@ -55,6 +55,7 @@ def parse_desktop_apps():
         if fallback_theme not in themes_to_search:
             themes_to_search.append(fallback_theme)
 
+    search_dirs = []
     bases = [
         os.path.expanduser('~/.local/share/icons'),
         os.path.expanduser('~/.local/share/flatpak/exports/share/icons'),
@@ -196,10 +197,7 @@ def parse_desktop_apps():
                     continue
 
                 only_in = [x.strip().lower() for x in s.get('OnlyShowIn', '').split(';') if x.strip()]
-                not_in = [x.strip().lower() for x in s.get('NotShowIn', '').split(';') if x.strip()]
-                if only_in and 'kde' not in only_in:
-                    continue
-                if not_in and 'kde' in not_in:
+                if only_in and not any(env in only_in for env in ['kde', 'gnome', 'nobara', 'fedora', 'ubuntu', 'wayland', 'x-cinnamon', 'pantheon', 'unity', 'xfce']):
                     continue
 
                 name = s.get('Name', '')
