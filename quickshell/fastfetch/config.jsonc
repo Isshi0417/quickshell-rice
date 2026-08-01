@@ -15,8 +15,8 @@
     "display": {
         "separator": "  ",
         "color": {
-            "keys": "magenta",
-            "title": "bright_magenta"
+            "keys": "#a7c080",
+            "title": "#7fbbb3"
         }
     },
     "modules": [
@@ -77,7 +77,7 @@
         },
         {
             "type": "colors",
-            "key": "│ 🎨 colors     │",
+            "key": "│ 🎨 colors    │",
             "keyColor": "yellow",
             "symbol": "circle"
         },

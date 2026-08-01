@@ -1112,74 +1112,8 @@ theme[upload_end]="#ff80bf"
             pass
 
 def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent):
-    import re
-    fastfetch_dir = os.path.expanduser('~/.config/fastfetch')
-    os.makedirs(fastfetch_dir, exist_ok=True)
-    conf_path = os.path.join(fastfetch_dir, 'config.jsonc')
-    
-    if os.path.exists(conf_path):
-        try:
-            with open(conf_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            modified = False
-            if '"keys"' in content:
-                content, count1 = re.subn(r'"keys"\s*:\s*"[^"]*"', f'"keys": "{accent}"', content)
-                if count1 > 0: modified = True
-            if '"title"' in content:
-                content, count2 = re.subn(r'"title"\s*:\s*"[^"]*"', f'"title": "{sub_accent}"', content)
-                if count2 > 0: modified = True
-
-            if not modified and '"display"' in content:
-                content = re.sub(r'"display"\s*:\s*\{', f'"display": {{\n    "color": {{\n      "keys": "{accent}",\n      "title": "{sub_accent}"\n    }},', content, count=1)
-                modified = True
-
-            if modified:
-                with open(conf_path, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                return
-        except Exception:
-            pass
-
-    fastfetch_jsonc = f"""{{
-  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": {{
-    "source": "~/.config/fastfetch/hamster_cookie.txt",
-    "padding": {{
-      "right": 4
-    }}
-  }},
-  "display": {{
-    "color": {{
-      "keys": "{accent}",
-      "title": "{sub_accent}"
-    }}
-  }},
-  "modules": [
-    "title",
-    "separator",
-    "os",
-    "host",
-    "kernel",
-    "uptime",
-    "packages",
-    "shell",
-    "display",
-    "wm",
-    "terminal",
-    "cpu",
-    "gpu",
-    "memory",
-    "break",
-    "colors"
-  ]
-}}
-"""
-    try:
-        with open(conf_path, 'w', encoding='utf-8') as f:
-            f.write(fastfetch_jsonc)
-    except Exception:
-        pass
+    # Preserves user's exact master fastfetch configuration from ~/.config/fastfetch/
+    pass
 
 def sync_ghostty(bg, surface, current_line, fg, accent, sub_accent):
     ghostty_dir = os.path.expanduser('~/.config/ghostty')
