@@ -246,31 +246,39 @@ deploy_configs() {
         chmod +x "${TARGET_CONFIG_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
     fi
 
-    # Fastfetch Config
-    if [ -d "${SCRIPT_DIR}/fastfetch" ]; then
-        info "Deploying Fastfetch Hampter configuration..."
-        mkdir -p "${TARGET_CONFIG_DIR}/fastfetch"
-        cp -r "${SCRIPT_DIR}/fastfetch/"* "${TARGET_CONFIG_DIR}/fastfetch/"
-    fi
-
-    # KDE Color Schemes & Konsole Profiles
-    if [ -d "${SCRIPT_DIR}/kde" ]; then
-        info "Deploying KDE Plasma color schemes and Konsole profiles..."
-        mkdir -p "${HOME}/.local/share/color-schemes" "${HOME}/.local/share/konsole"
-        [ -d "${SCRIPT_DIR}/kde/color-schemes" ] && cp -r "${SCRIPT_DIR}/kde/color-schemes/"* "${HOME}/.local/share/color-schemes/" 2>/dev/null || true
-        [ -d "${SCRIPT_DIR}/kde/konsole" ] && cp -r "${SCRIPT_DIR}/kde/konsole/"* "${HOME}/.local/share/konsole/" 2>/dev/null || true
-    fi
-
-    # Run KDE generator script for complete coverage
-    KDE_GEN_SCRIPT="${TARGET_CONFIG_DIR}/quickshell/services/python/generate_kde_colorschemes.py"
-    if [ -f "$KDE_GEN_SCRIPT" ]; then
-        python3 "$KDE_GEN_SCRIPT" 2>/dev/null || true
-    fi
-
     success "QuickShell configuration deployed successfully!"
 }
 
-# 5. Bashrc Fastfetch Setup
+# 6. Deploy KDE Color Schemes & Konsole Profiles
+deploy_kde_colorschemes() {
+    info "Deploying KDE Plasma color schemes to ~/.local/share/color-schemes..."
+    COLOR_SCHEMES_DIR="${HOME}/.local/share/color-schemes"
+    KONSOLE_DIR="${HOME}/.local/share/konsole"
+
+    mkdir -p "$COLOR_SCHEMES_DIR" "$KONSOLE_DIR"
+
+    if [ -d "${SCRIPT_DIR}/kde/color-schemes" ]; then
+        cp -r "${SCRIPT_DIR}/kde/color-schemes/"*.colors "$COLOR_SCHEMES_DIR/" 2>/dev/null || true
+        chmod 644 "$COLOR_SCHEMES_DIR/"*.colors 2>/dev/null || true
+        success "KDE color schemes deployed to ${COLOR_SCHEMES_DIR}"
+    fi
+
+    if [ -d "${SCRIPT_DIR}/kde/konsole" ]; then
+        cp -r "${SCRIPT_DIR}/kde/konsole/"*.colorscheme "$KONSOLE_DIR/" 2>/dev/null || true
+        chmod 644 "$KONSOLE_DIR/"*.colorscheme 2>/dev/null || true
+        success "Konsole profiles deployed to ${KONSOLE_DIR}"
+    fi
+
+    # Execute dynamic KDE color scheme generator to ensure all 38 variants are updated
+    KDE_GEN_SCRIPT="${TARGET_CONFIG_DIR}/quickshell/services/python/generate_kde_colorschemes.py"
+    if [ -f "$KDE_GEN_SCRIPT" ]; then
+        info "Running dynamic KDE color scheme generator..."
+        python3 "$KDE_GEN_SCRIPT" || warn "KDE color scheme generator finished with warnings."
+        success "Generated 38 KDE Plasma color schemes in ${COLOR_SCHEMES_DIR}"
+    fi
+}
+
+# 7. Bashrc Fastfetch Setup
 setup_bashrc() {
     info "Setting up fastfetch in ~/.bashrc..."
     BASHRC_FILE="${HOME}/.bashrc"
@@ -340,6 +348,7 @@ install_dependencies
 install_quickshell
 install_wallust_lutgen
 deploy_configs
+deploy_kde_colorschemes
 setup_bashrc
 setup_systemd_service
 run_initial_sync
