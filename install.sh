@@ -388,6 +388,35 @@ EOF
     success "Systemd user service configured at ${SERVICE_DIR}/quickshell.service!"
 }
 
+# Helper to repair Flatpak Feishin sandbox config corruption
+repair_feishin_flatpak() {
+    info "Scanning and repairing Flatpak Feishin sandbox configurations..."
+    local VAR_APP="${HOME}/.var/app"
+    if [ -d "$VAR_APP" ]; then
+        for app_dir in "$VAR_APP"/*feishin* "$VAR_APP"/*Feishin*; do
+            if [ -d "$app_dir" ]; then
+                for sub in "config/feishin" "config/Feishin" "data/feishin" "data/Feishin" "config" "data"; do
+                    local target="${app_dir}/${sub}"
+                    if [ -d "$target" ]; then
+                        python3 -c "
+import os, json
+for bad in ['config.json', 'settings.json']:
+    p = os.path.join('$target', bad)
+    if os.path.exists(p):
+        try:
+            with open(p, 'r', encoding='utf-8') as f: d = json.load(f)
+            if isinstance(d, dict) and list(d.keys()) == ['theme']:
+                os.remove(p)
+                print(f'[Repaired Flatpak Feishin] Removed bad {bad} at {p}')
+        except Exception: pass
+" 2>/dev/null || true
+                    fi
+                done
+            fi
+        done
+    fi
+}
+
 # 7. Run Theme Sync Engine
 run_initial_sync() {
     info "Triggering initial multi-app dynamic theme synchronization..."
@@ -414,6 +443,7 @@ install_quickshell
 install_wallust_lutgen
 deploy_configs
 deploy_kde_colorschemes
+repair_feishin_flatpak
 setup_bashrc
 setup_systemd_service
 run_initial_sync
