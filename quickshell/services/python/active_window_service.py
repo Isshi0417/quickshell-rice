@@ -87,6 +87,79 @@ def parse_desktop(f):
     except Exception: pass
     return entry
 
+def resolve_game_info(app_lower):
+    # Handle Steam Apps (e.g. steam_app_1245620 or steam_app_570)
+    if 'steam_app_' in app_lower:
+        parts = app_lower.split('steam_app_')
+        if len(parts) > 1:
+            steam_id = parts[1].split('.')[0]
+            game_name = None
+            game_icon = None
+
+            # 1. Search for steam_app_<id>.desktop
+            desktop_paths = glob.glob(os.path.expanduser(f'~/.local/share/applications/*{steam_id}*.desktop')) + \
+                            glob.glob(f'/usr/share/applications/*{steam_id}*.desktop')
+            for dp in desktop_paths:
+                entry = parse_desktop(dp)
+                if entry:
+                    game_name = entry.get('Name')
+                    game_icon = entry.get('Icon')
+                    if game_name: break
+
+            # 2. Search Steam App Manifest VDF files
+            if not game_name:
+                vdf_paths = glob.glob(os.path.expanduser(f'~/.steam/root/steamapps/appmanifest_{steam_id}.vdf')) + \
+                            glob.glob(os.path.expanduser(f'~/.local/share/Steam/steamapps/appmanifest_{steam_id}.vdf')) + \
+                            glob.glob(os.path.expanduser(f'~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/appmanifest_{steam_id}.vdf'))
+                for vp in vdf_paths:
+                    try:
+                        with open(vp, 'r', encoding='utf-8', errors='ignore') as f:
+                            for line in f:
+                                if '"name"' in line:
+                                    game_name = line.split('"name"')[1].replace('"', '').strip()
+                                    break
+                    except Exception: pass
+
+            if not game_icon:
+                icon_candidates = glob.glob(os.path.expanduser(f'~/.steam/root/steam/games/*{steam_id}*.png')) + \
+                                  glob.glob(os.path.expanduser(f'~/.local/share/Steam/steam/games/*{steam_id}*.png')) + \
+                                  glob.glob(os.path.expanduser(f'~/.var/app/com.valvesoftware.Steam/data/Steam/steam/games/*{steam_id}*.png'))
+                if icon_candidates:
+                    game_icon = icon_candidates[0]
+                else:
+                    game_icon = "com.valvesoftware.Steam"
+
+            if not game_name:
+                game_name = f"Steam Game ({steam_id})"
+
+            return {
+                "appId": app_lower,
+                "name": game_name,
+                "icon": game_icon
+            }
+
+    # Handle Lutris games
+    if 'lutris' in app_lower:
+        lutris_desktops = glob.glob(os.path.expanduser('~/.local/share/applications/lutris-*.desktop'))
+        for ld in lutris_desktops:
+            entry = parse_desktop(ld)
+            if entry and entry.get('Name'):
+                return {
+                    "appId": app_lower,
+                    "name": entry.get('Name'),
+                    "icon": entry.get('Icon') or "net.lutris.Lutris"
+                }
+
+    # Handle Wine / Proton / Gamescope generic titles
+    if app_lower in ['wine', 'wine64', 'proton', 'gamescope']:
+        return {
+            "appId": app_lower,
+            "name": app_lower.capitalize() + " Game",
+            "icon": "com.valvesoftware.Steam"
+        }
+
+    return None
+
 def resolve_app_info(app_id):
     if not app_id:
         return {"appId": "", "name": "Application", "icon": ""}
@@ -94,6 +167,11 @@ def resolve_app_info(app_id):
     app_lower = app_id.lower().strip()
     if app_lower in _icon_cache:
         return _icon_cache[app_lower]
+
+    game_info = resolve_game_info(app_lower)
+    if game_info:
+        _icon_cache[app_lower] = game_info
+        return game_info
 
     desktop_files = (
         glob.glob('/usr/share/applications/*.desktop') +

@@ -18,9 +18,10 @@ function updateWindows() {
         if (w.fullScreen && (w.active || w === activeWin)) {
             isFullscreen = true;
         }
-        if (w.normalWindow && !w.skipTaskbar) {
+        if ((w.normalWindow || w.fullScreen || w.managed) && !w.skipTaskbar) {
             var cls = (w.resourceClass || w.desktopFileName || "").toLowerCase();
-            if (cls && cls !== "quickshell" && cls !== "plasmashell" && cls.indexOf("status_icon") === -1 && cls.indexOf("tray") === -1) {
+            if (!cls && w.caption) cls = w.caption.toLowerCase();
+            if (cls && cls !== "quickshell" && cls !== "plasmashell" && cls.indexOf("status_icon") === -1 && cls.indexOf("tray") === -1 && cls.indexOf("desktop") === -1) {
                 if (openApps.indexOf(cls) === -1) {
                     openApps.push(cls);
                 }
