@@ -322,8 +322,11 @@ setup_bashrc() {
 # 6. Systemd User Service Setup
 setup_systemd_service() {
     info "Setting up Systemd User Service for QuickShell..."
-    SERVICE_DIR="${TARGET_CONFIG_DIR}/systemd/user"
+    SERVICE_DIR="${HOME}/.config/systemd/user"
     mkdir -p "$SERVICE_DIR"
+
+    # Dynamically detect quickshell binary on target machine or fallback to /usr/bin/env
+    QUICKSHELL_BIN="$(command -v quickshell 2>/dev/null || echo '/usr/bin/env quickshell')"
 
     cat << EOF > "${SERVICE_DIR}/quickshell.service"
 [Unit]
@@ -332,20 +335,22 @@ After=graphical-session.target
 PartOf=graphical-session.target
 
 [Service]
-ExecStart=/usr/bin/quickshell -p %h/.config/quickshell
+Type=simple
+ExecStart=${QUICKSHELL_BIN} -p %h/.config/quickshell
 Restart=always
-RestartSec=2
+RestartSec=3
 Environment=QT_QPA_PLATFORM=wayland
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:%h/.local/bin:%h/.cargo/bin
 
 [Install]
 WantedBy=graphical-session.target
 EOF
 
     systemctl --user daemon-reload
-    systemctl --user enable quickshell.service || warn "Could not enable quickshell service automatically"
+    systemctl --user enable quickshell.service 2>/dev/null || warn "Could not enable quickshell service automatically"
     info "Starting QuickShell systemd service..."
-    systemctl --user restart quickshell.service || warn "Could not start quickshell service automatically (is a Wayland session running?)"
-    success "Systemd user service configured!"
+    systemctl --user restart quickshell.service 2>/dev/null || warn "Could not start quickshell service automatically (is a Wayland session running?)"
+    success "Systemd user service configured at ${SERVICE_DIR}/quickshell.service!"
 }
 
 # 7. Run Theme Sync Engine

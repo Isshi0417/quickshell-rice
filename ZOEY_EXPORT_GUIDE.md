@@ -124,10 +124,12 @@ After=graphical-session.target
 PartOf=graphical-session.target
 
 [Service]
-ExecStart=/usr/bin/quickshell -p %h/.config/quickshell
+Type=simple
+ExecStart=/usr/bin/env quickshell -p %h/.config/quickshell
 Restart=always
-RestartSec=2
+RestartSec=3
 Environment=QT_QPA_PLATFORM=wayland
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:%h/.local/bin:%h/.cargo/bin
 
 [Install]
 WantedBy=graphical-session.target
