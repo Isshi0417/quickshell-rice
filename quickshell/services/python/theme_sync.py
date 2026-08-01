@@ -557,34 +557,43 @@ tab[selected="true"] {{
         'user_pref("toolkit.startup.max_resumed_crashes", -1);\n'
     ]
 
-    zen_base = os.path.expanduser('~/.config/zen')
-    if os.path.exists(zen_base):
-        for profile in os.listdir(zen_base):
-            profile_dir = os.path.join(zen_base, profile)
-            if os.path.isdir(profile_dir) and ('.' in profile or 'default' in profile.lower()):
-                # Ensure user.js enables stylesheets and disables crash dialogs
-                user_js = os.path.join(profile_dir, 'user.js')
-                js_content = ""
-                if os.path.exists(user_js):
-                    with open(user_js, 'r') as f:
-                        js_content = f.read()
-                for line in pref_lines:
-                    pref_key = line.split('"')[1]
-                    if pref_key not in js_content:
-                        with open(user_js, 'a') as f:
-                            f.write("\n" + line)
+    zen_bases = [
+        os.path.expanduser('~/.config/zen'),
+        os.path.expanduser('~/.zen'),
+        os.path.expanduser('~/.var/app/app.zen_browser.zen/.zen'),
+        os.path.expanduser('~/.var/app/io.github.zen_browser.zen/.zen'),
+        os.path.expanduser('~/.var/app/org.zen_browser.zen/.zen'),
+        os.path.expanduser('~/.var/app/app.zen_browser.zen/config/zen'),
+        os.path.expanduser('~/.var/app/io.github.zen_browser.zen/config/zen')
+    ]
+    for zen_base in zen_bases:
+        if os.path.exists(zen_base):
+            for profile in os.listdir(zen_base):
+                profile_dir = os.path.join(zen_base, profile)
+                if os.path.isdir(profile_dir) and ('.' in profile or 'default' in profile.lower()):
+                    # Ensure user.js enables stylesheets and disables crash dialogs
+                    user_js = os.path.join(profile_dir, 'user.js')
+                    js_content = ""
+                    if os.path.exists(user_js):
+                        with open(user_js, 'r') as f:
+                            js_content = f.read()
+                    for line in pref_lines:
+                        pref_key = line.split('"')[1]
+                        if pref_key not in js_content:
+                            with open(user_js, 'a') as f:
+                                f.write("\n" + line)
 
-                # Write userChrome.css and userContent.css
-                chrome_dir = os.path.join(profile_dir, 'chrome')
-                os.makedirs(chrome_dir, exist_ok=True)
-                
-                try:
-                    with open(os.path.join(chrome_dir, 'userChrome.css'), 'w') as f:
-                        f.write(chrome_css)
-                    with open(os.path.join(chrome_dir, 'userContent.css'), 'w') as f:
-                        f.write(content_css)
-                except Exception:
-                    pass
+                    # Write userChrome.css and userContent.css
+                    chrome_dir = os.path.join(profile_dir, 'chrome')
+                    os.makedirs(chrome_dir, exist_ok=True)
+                    
+                    try:
+                        with open(os.path.join(chrome_dir, 'userChrome.css'), 'w') as f:
+                            f.write(chrome_css)
+                        with open(os.path.join(chrome_dir, 'userContent.css'), 'w') as f:
+                            f.write(content_css)
+                    except Exception:
+                        pass
 
     # Graceful SIGTERM restart with profile lock release buffer
     res = subprocess.run(["pgrep", "-f", "zen-browser"], capture_output=True, text=True)
@@ -691,7 +700,9 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
 
     feishin_dirs = [
         os.path.expanduser('~/.config/feishin'),
-        os.path.expanduser('~/.var/app/org.jeffvli.feishin/config/feishin')
+        os.path.expanduser('~/.var/app/io.github.jeffvli.feishin/config/feishin'),
+        os.path.expanduser('~/.var/app/org.jeffvli.feishin/config/feishin'),
+        os.path.expanduser('~/.var/app/feishin/config/feishin')
     ]
 
     for base_dir in feishin_dirs:

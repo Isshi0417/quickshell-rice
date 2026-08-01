@@ -49,23 +49,23 @@ Item {
                     Behavior on color { ColorAnimation { duration: 120 } }
                 }
 
-                // Distro Icon Image Container
+                // Distro / Cute Emoji Icon Container
                 Item {
                     anchors.centerIn: parent
                     width: 26
                     height: 26
-                    scale: launcherBtn.isHovered ? 1.12 : 1.0
+                    scale: launcherBtn.isHovered ? 1.15 : 1.0
 
                     Behavior on scale {
                         NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
                     }
 
-                    Image {
-                        anchors.fill: parent
-                        sourceSize.width: 26
-                        sourceSize.height: 26
-                        fillMode: Image.PreserveAspectFit
-                        source: "file:///usr/share/icons/cachyos.svg"
+                    Text {
+                        anchors.centerIn: parent
+                        text: "🐹"
+                        font.pixelSize: 20
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                 }
 
