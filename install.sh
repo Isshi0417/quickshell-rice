@@ -271,14 +271,42 @@ deploy_configs() {
         ln -snf "${SCRIPT_DIR}/alacritty" "${TARGET_CONFIG_DIR}/alacritty" || cp -r "${SCRIPT_DIR}/alacritty" "${TARGET_CONFIG_DIR}/alacritty"
     fi
 
-    # Wallpapers Deployment
-    if [ -d "${SCRIPT_DIR}/quickshell/wallpapers" ]; then
-        info "Deploying default wallpapers to ~/Pictures/Wallpapers..."
-        mkdir -p "${HOME}/Pictures/Wallpapers"
-        cp -rn "${SCRIPT_DIR}/quickshell/wallpapers/"* "${HOME}/Pictures/Wallpapers/" 2>/dev/null || true
-    fi
+    # Wallpapers Deployment & Lutgen Folder Setup
+    deploy_wallpaper_folders
 
     success "QuickShell configuration linked successfully to ${TARGET_CONFIG_DIR}!"
+}
+
+# Helper to create all theme wallpaper directories for lutgen recolor engine
+deploy_wallpaper_folders() {
+    info "Setting up Lutgen theme wallpaper folders in ~/Pictures/Wallpapers..."
+    WP_BASE="${HOME}/Pictures/Wallpapers"
+    mkdir -p "$WP_BASE"
+
+    local VARIANTS=(
+        "Zoey Pink" "Zoey Night" "Emo Zoey"
+        "Pro" "Blade" "Buff" "Cyan" "Lincoln" "Morpheus" "Alucard"
+        "Gruvbox Dark" "Gruvbox Material" "Gruvbox Light"
+        "Rosé Pine" "Rosé Pine Moon" "Rosé Pine Dawn"
+        "Catppuccin Mocha" "Catppuccin Macchiato" "Catppuccin Latte"
+        "Everforest Dark" "Everforest Light"
+        "Tokyo Night" "Tokyo Night Storm" "Tokyo Night Day"
+        "Nord Dark" "Nord Light"
+        "Solarized Dark" "Solarized Light"
+        "One Dark Pro" "One Light"
+        "Monokai Pro" "Cyberpunk Neon" "Custom"
+    )
+
+    for v in "${VARIANTS[@]}"; do
+        mkdir -p "${WP_BASE}/${v}"
+    done
+
+    if [ -d "${SCRIPT_DIR}/quickshell/wallpapers" ]; then
+        info "Deploying wallpapers and recolored variants to ~/Pictures/Wallpapers..."
+        cp -rn "${SCRIPT_DIR}/quickshell/wallpapers/"* "${WP_BASE}/" 2>/dev/null || true
+    fi
+
+    success "Lutgen wallpaper folders and images deployed to ${WP_BASE}!"
 }
 
 # 6. Deploy KDE Color Schemes & Konsole Profiles
