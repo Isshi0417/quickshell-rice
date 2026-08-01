@@ -232,6 +232,17 @@ install_wallust_lutgen() {
     fi
 }
 
+# Helper to safely unlink or remove existing config target before relinking
+safe_unlink() {
+    local target="$1"
+    if [ -L "$target" ]; then
+        info "Unlinking existing symbolic link at ${target}..."
+        unlink "$target" 2>/dev/null || rm -f "$target"
+    elif [ -d "$target" ]; then
+        rm -rf "$target"
+    fi
+}
+
 # 5. Copying and Linking Configurations
 deploy_configs() {
     info "Deploying QuickShell configuration to ${TARGET_CONFIG_DIR}..."
@@ -239,8 +250,8 @@ deploy_configs() {
 
     # Quickshell Desktop Shell Config (Symlinked to repo so git pull auto-updates ~/.config/quickshell)
     if [ -d "${SCRIPT_DIR}/quickshell" ]; then
-        info "Linking QuickShell QML ecosystem..."
-        rm -rf "${TARGET_CONFIG_DIR}/quickshell"
+        info "Unlinking existing & linking QuickShell QML ecosystem..."
+        safe_unlink "${TARGET_CONFIG_DIR}/quickshell"
         ln -snf "${SCRIPT_DIR}/quickshell" "${TARGET_CONFIG_DIR}/quickshell" || cp -r "${SCRIPT_DIR}/quickshell" "${TARGET_CONFIG_DIR}/quickshell"
         chmod +x "${SCRIPT_DIR}/quickshell/toggle_launcher.sh"
         chmod +x "${SCRIPT_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
@@ -248,8 +259,8 @@ deploy_configs() {
 
     # Fastfetch Hampter Config (Symlinked to repo so git pull auto-updates ~/.config/fastfetch)
     if [ -d "${SCRIPT_DIR}/fastfetch" ]; then
-        info "Linking Fastfetch Hampter configuration..."
-        rm -rf "${TARGET_CONFIG_DIR}/fastfetch"
+        info "Unlinking existing & linking Fastfetch Hampter configuration..."
+        safe_unlink "${TARGET_CONFIG_DIR}/fastfetch"
         ln -snf "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch" || cp -r "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch"
     fi
 
