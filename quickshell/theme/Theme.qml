@@ -166,12 +166,13 @@ Item {
 
                 let imgPath = getVariantWallpaper(v.name)
                 if (WallpaperService) {
-                    WallpaperService.applyWallpaper(imgPath)
+                    WallpaperService.applyWallpaper(imgPath, v.name)
                 } else {
                     wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
                     let rawPath = imgPath.replace("file://", "")
                     Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
                 }
+                let rawPath = imgPath.replace("file://", "")
                 Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
 
                 // Persist selected theme variant to disk
@@ -197,8 +198,17 @@ Item {
     }
 
     function getVariantWallpaper(varName) {
+        if (!varName || varName === "") return ""
+        let cur = varName.toLowerCase().trim()
+
+        // 1. Check if user set/cached a custom wallpaper for this specific theme variant
+        if (WallpaperService && WallpaperService.cachedThemeWallpapers && WallpaperService.cachedThemeWallpapers[varName]) {
+            let cached = WallpaperService.cachedThemeWallpapers[varName]
+            if (cached && cached !== "") return cached
+        }
+
+        // 2. Check scanned wallpapers folder for matching variant folder
         if (WallpaperService && WallpaperService.wallpapers) {
-            let cur = varName.toLowerCase().trim()
             for (let i = 0; i < WallpaperService.wallpapers.length; i++) {
                 let wp = WallpaperService.wallpapers[i]
                 if ((wp.variant || "").toLowerCase().trim() === cur) {
