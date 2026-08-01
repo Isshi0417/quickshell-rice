@@ -17,6 +17,27 @@ Item {
         running: true
     }
 
+    // Read saved user wallpaper on startup
+    Process {
+        id: readWallpaperProc
+        command: ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/read_wallpaper.py"]
+        running: true
+        stdout: SplitParser {
+            onRead: data => {
+                try {
+                    let parsed = JSON.parse(data.trim())
+                    if (parsed && parsed.wallpaper && parsed.wallpaper !== "") {
+                        root.activeCustomWallpaper = parsed.wallpaper
+                        let fileUrl = parsed.wallpaper.startsWith("file://") ? parsed.wallpaper : "file://" + parsed.wallpaper
+                        Theme.wallpaperPath = fileUrl
+                        let rawPath = parsed.wallpaper.replace("file://", "")
+                        Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+
     // Auto-scan wallpapers in ~/Pictures/Wallpapers and ~/.config/quickshell/wallpapers
     Process {
         id: scanProc
@@ -43,6 +64,7 @@ Item {
     }
 
     Component.onCompleted: {
+        readWallpaperProc.running = true
         scanProc.running = true
     }
 
@@ -53,6 +75,7 @@ Item {
         Theme.wallpaperPath = fileUrl
         let rawPath = filePath.replace("file://", "")
         Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+        Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/save_wallpaper.py", rawPath])
     }
 
     function refresh() {

@@ -165,9 +165,13 @@ Item {
                 AppLauncherService.reload()
 
                 let imgPath = getVariantWallpaper(v.name)
-                wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
-                let rawPath = imgPath.replace("file://", "")
-                Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                if (WallpaperService) {
+                    WallpaperService.applyWallpaper(imgPath)
+                } else {
+                    wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
+                    let rawPath = imgPath.replace("file://", "")
+                    Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                }
                 Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
 
                 // Persist selected theme variant to disk
