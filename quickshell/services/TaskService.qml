@@ -150,13 +150,14 @@ Item {
         }
         root.activeAppId = execCmd.toLowerCase()
 
-        if (execCmd.startsWith("org.") || execCmd.startsWith("io.") || execCmd.startsWith("com.")) {
-            Quickshell.execDetached(["gtk-launch", execCmd])
+        // Handle flatpak / desktop ID vs raw command execution safely using shell wrapper
+        if (execCmd.startsWith("flatpak run ") || execCmd.includes("flatpak ")) {
+            Quickshell.execDetached(["sh", "-c", execCmd + " &"])
+        } else if ((execCmd.startsWith("org.") || execCmd.startsWith("io.") || execCmd.startsWith("com.") || execCmd.startsWith("app.")) && !execCmd.includes(" ")) {
+            let desktopName = execCmd.replace(/\.desktop$/, "")
+            Quickshell.execDetached(["sh", "-c", "flatpak run " + desktopName + " 2>/dev/null || gtk-launch " + desktopName + " 2>/dev/null || gtk-launch " + desktopName + ".desktop 2>/dev/null || " + execCmd + " &"])
         } else {
-            let parts = execCmd.split(/\s+/).filter(p => p !== "")
-            if (parts.length > 0) {
-                Quickshell.execDetached(parts)
-            }
+            Quickshell.execDetached(["sh", "-c", execCmd + " &"])
         }
     }
 

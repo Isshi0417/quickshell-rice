@@ -217,9 +217,8 @@ Item {
 
                         onPositionChanged: (mouse) => {
                             if (pressed && (mouse.buttons & Qt.LeftButton)) {
-                                var delta = mouse.x - pressStartX
-                                dragXOffset += delta
-                                if (Math.abs(dragXOffset) > 8) {
+                                dragXOffset = mouse.x - pressStartX
+                                if (Math.abs(dragXOffset) > 6) {
                                     isDragActive = true
                                 }
                                 dockRow.activeDragXOffset = dragXOffset
@@ -244,17 +243,13 @@ Item {
                                         TaskService.reorderPinnedApps(index, targetIndex)
                                     }
                                 }
+                            } else if (mouse.button === Qt.LeftButton) {
+                                let globalPos = dockItem.mapToItem(null, 0, 0)
+                                TaskService.focusApp(modelData.appId, modelData.cmd, globalPos.x, globalPos.y)
                             } else if (mouse.button === Qt.RightButton) {
                                 root.contextTargetApp = modelData
                                 root.contextTargetX = Math.round(dockItem.mapToItem(null, 0, 0).x)
                                 PopupService.toggleDockMenu()
-                            }
-                        }
-
-                        onClicked: (mouse) => {
-                            if (mouse.button === Qt.LeftButton && !isDragActive) {
-                                let globalPos = dockItem.mapToItem(null, 0, 0)
-                                TaskService.focusApp(modelData.appId, modelData.cmd, globalPos.x, globalPos.y)
                             }
                         }
                     }
