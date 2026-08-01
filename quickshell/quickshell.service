@@ -1,0 +1,13 @@
+[Unit]
+Description=QuickShell Desktop Shell Ecosystem
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/quickshell -p %h/.config/quickshell
+Restart=always
+RestartSec=2
+Environment=QT_QPA_PLATFORM=wayland
+
+[Install]
+WantedBy=graphical-session.target
