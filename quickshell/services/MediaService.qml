@@ -53,15 +53,15 @@ Item {
     }
 
     function playPause() {
-        playPauseProc.running = true
+        Quickshell.execDetached(["playerctl", "play-pause"])
     }
 
     function next() {
-        nextProc.running = true
+        Quickshell.execDetached(["playerctl", "next"])
     }
 
     function previous() {
-        prevProc.running = true
+        Quickshell.execDetached(["playerctl", "previous"])
     }
 
     function seek(targetSec) {
@@ -72,14 +72,13 @@ Item {
             seekTimer.restart()
 
             var targetMicro = Math.floor(validSec * 1000000)
-            seekProc.command = [
+            Quickshell.execDetached([
                 "bash", "-c",
                 "PLAYER_SERVICE=$(busctl --user list | grep -m1 'org.mpris.MediaPlayer2' | awk '{print $1}'); " +
                 "TRACK_ID=$(playerctl metadata --format '{{mpris:trackid}}' | tr -d \"'\"); " +
                 "[ -z \"$TRACK_ID\" ] && TRACK_ID=\"/org/mpris/MediaPlayer2/TrackList/NoTrack\"; " +
                 "busctl --user call \"$PLAYER_SERVICE\" /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player SetPosition ox \"$TRACK_ID\" " + targetMicro
-            ]
-            seekProc.running = true
+            ])
         }
     }
 
@@ -89,11 +88,6 @@ Item {
         repeat: false
         onTriggered: root.isSeeking = false
     }
-
-    Process { id: playPauseProc; command: ["playerctl", "play-pause"] }
-    Process { id: nextProc; command: ["playerctl", "next"] }
-    Process { id: prevProc; command: ["playerctl", "previous"] }
-    Process { id: seekProc }
 
     Process {
         id: statusProc
