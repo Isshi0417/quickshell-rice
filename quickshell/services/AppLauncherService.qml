@@ -118,12 +118,23 @@ Item {
                             for (let i = 0; i < parsed.apps.length; i++) {
                                 let a = parsed.apps[i]
                                 if (a.icon) {
-                                    if (a.id) newMap[a.id.toLowerCase()] = a.icon
-                                    if (a.id) newMap[a.id.replace(/\.desktop$/, "").toLowerCase()] = a.icon
+                                    if (a.id) {
+                                        let rawId = a.id.toLowerCase()
+                                        let cleanId = rawId.replace(/\.desktop$/, "")
+                                        newMap[rawId] = a.icon
+                                        newMap[cleanId] = a.icon
+                                        let parts = cleanId.split(".")
+                                        if (parts.length > 1) {
+                                            let lastPart = parts[parts.length - 1]
+                                            if (lastPart) newMap[lastPart] = a.icon
+                                        }
+                                    }
                                     if (a.name) newMap[a.name.toLowerCase()] = a.icon
                                     if (a.exec) {
                                         let cleanExec = a.exec.replace(/%[a-zA-Z]/g, "").trim().split(/\s+/)[0]
+                                        let execName = cleanExec.split("/").pop().toLowerCase()
                                         newMap[cleanExec.toLowerCase()] = a.icon
+                                        newMap[execName] = a.icon
                                     }
                                 }
                             }

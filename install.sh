@@ -253,6 +253,13 @@ deploy_configs() {
         ln -snf "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch" || cp -r "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch"
     fi
 
+    # Wallpapers Deployment
+    if [ -d "${SCRIPT_DIR}/quickshell/wallpapers" ]; then
+        info "Deploying default wallpapers to ~/Pictures/Wallpapers..."
+        mkdir -p "${HOME}/Pictures/Wallpapers"
+        cp -rn "${SCRIPT_DIR}/quickshell/wallpapers/"* "${HOME}/Pictures/Wallpapers/" 2>/dev/null || true
+    fi
+
     success "QuickShell configuration linked successfully to ${TARGET_CONFIG_DIR}!"
 }
 

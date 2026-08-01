@@ -217,16 +217,23 @@ def sync_discord(bg, surface, current_line, fg, accent, sub_accent, is_dark):
             f.write(css_content)
 
     for client_dir in [
+        os.path.expanduser('~/.config/vesktop/themes'),
+        os.path.expanduser('~/.config/Vencord/themes'),
         os.path.expanduser('~/.config/equibop/themes'),
         os.path.expanduser('~/.config/equicord/themes'),
-        os.path.expanduser('~/.config/Vencord/themes'),
-        os.path.expanduser('~/.config/vesktop/themes')
+        os.path.expanduser('~/.config/discord/themes'),
+        os.path.expanduser('~/.var/app/dev.vencord.Vesktop/config/vesktop/themes'),
+        os.path.expanduser('~/.var/app/dev.vencord.Vesktop/config/Vencord/themes'),
+        os.path.expanduser('~/.var/app/com.discordapp.Discord/config/discord/themes'),
+        os.path.expanduser('~/.var/app/com.discordapp.Discord/config/Vencord/themes')
     ]:
-        if os.path.exists(os.path.dirname(client_dir)):
+        try:
             os.makedirs(client_dir, exist_ok=True)
             css_file = os.path.join(client_dir, 'quickshell-theme.css')
-            with open(css_file, 'w') as f:
+            with open(css_file, 'w', encoding='utf-8') as f:
                 f.write(css_content)
+        except Exception:
+            pass
 
 def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark):
     import json
