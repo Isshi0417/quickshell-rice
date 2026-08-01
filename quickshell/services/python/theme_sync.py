@@ -685,7 +685,20 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
         "panel.background": surface,
         "panelTitle.activeBorder": accent,
         "terminal.background": bg,
-        "terminal.foreground": fg
+        "terminal.foreground": fg,
+
+        "editorBracketHighlight.foreground1": keyword_color,
+        "editorBracketHighlight.foreground2": function_color,
+        "editorBracketHighlight.foreground3": type_color,
+        "editorBracketHighlight.foreground4": string_color,
+        "editorBracketHighlight.foreground5": number_color,
+        "editorBracketHighlight.foreground6": operator_color,
+        "editorBracketHighlight.unexpectedBracket.foreground": "#ff9580" if is_dark else "#dc2626",
+        "editorBracketMatch.background": current_line,
+        "editorBracketMatch.border": accent,
+        "editorBracketPairGuide.activeBackground1": keyword_color,
+        "editorBracketPairGuide.activeBackground2": function_color,
+        "editorBracketPairGuide.activeBackground3": type_color
     }
 
     token_colors = {
@@ -832,6 +845,8 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
 
             data["workbench.colorCustomizations"] = colors_dict
             data["editor.tokenColorCustomizations"] = token_colors
+            data["editor.bracketPairColorization.enabled"] = True
+            data["editor.guides.bracketPairs"] = "active"
             data["workbench.colorTheme"] = "Default Dark Modern" if is_dark else "Default Light Modern"
 
             with open(settings_path, 'w', encoding='utf-8') as f:
