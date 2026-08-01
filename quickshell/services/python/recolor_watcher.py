@@ -65,9 +65,17 @@ PALETTES = {
 }
 
 def find_lutgen():
-    cargo_path = os.path.expanduser('~/.cargo/bin/lutgen')
-    if os.path.exists(cargo_path):
-        return cargo_path
+    for p in [
+        os.path.expanduser('~/.cargo/bin/lutgen'),
+        os.path.expanduser('~/.cargo/bin/lutgen-cli'),
+        os.path.expanduser('~/.local/bin/lutgen'),
+        os.path.expanduser('~/.local/bin/lutgen-cli'),
+        '/usr/bin/lutgen',
+        '/usr/local/bin/lutgen',
+        '/usr/bin/lutgen-cli'
+    ]:
+        if os.path.exists(p):
+            return p
     return shutil.which('lutgen') or shutil.which('lutgen-cli')
 
 def recolor_and_replace(img_path, palette_hex_list, out_path):
