@@ -246,6 +246,13 @@ deploy_configs() {
         chmod +x "${TARGET_CONFIG_DIR}/quickshell/services/python/"*.py 2>/dev/null || true
     fi
 
+    # Fastfetch Hampter Config
+    if [ -d "${SCRIPT_DIR}/fastfetch" ]; then
+        info "Deploying Fastfetch Hampter configuration to ${TARGET_CONFIG_DIR}/fastfetch..."
+        mkdir -p "${TARGET_CONFIG_DIR}/fastfetch"
+        cp -r "${SCRIPT_DIR}/fastfetch/"* "${TARGET_CONFIG_DIR}/fastfetch/"
+    fi
+
     success "QuickShell configuration deployed successfully!"
 }
 
