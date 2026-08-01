@@ -160,9 +160,6 @@ Item {
                 Quickshell.execDetached(["gsettings", "set", "org.gnome.desktop.interface", "color-scheme", isDark ? "prefer-dark" : "prefer-light"])
                 Quickshell.execDetached(["kwriteconfig6", "--group", "Icons", "--key", "Theme", iconTheme])
                 
-                let kdeScheme = v.name.replace(/[^a-zA-Z0-9]/g, '')
-                Quickshell.execDetached(["plasma-apply-colorscheme", kdeScheme])
-                
                 Quickshell.execDetached([
                     "python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/theme_sync.py",
                     "--bg", v.bg,
