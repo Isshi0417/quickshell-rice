@@ -186,7 +186,53 @@ install_quickshell() {
     success "QuickShell built and installed from source!"
 }
 
-# 4. Copying and Linking Configurations
+# 4. Wallust & Lutgen Binary Check / Installation
+install_wallust_lutgen() {
+    info "Checking wallust and lutgen installation..."
+
+    ensure_cargo() {
+        if ! command -v cargo &>/dev/null && [ ! -f "$HOME/.cargo/bin/cargo" ]; then
+            info "Installing Cargo package manager for Rust tools..."
+            case "$PM" in
+                dnf) sudo dnf install -y cargo rust || true ;;
+                pacman) sudo pacman -S --needed --noconfirm rust cargo || true ;;
+                apt) sudo apt-get install -y cargo rustc || true ;;
+            esac
+        fi
+    }
+
+    # Install wallust
+    if command -v wallust &>/dev/null || [ -f "$HOME/.cargo/bin/wallust" ]; then
+        success "wallust binary found!"
+    else
+        info "Installing wallust..."
+        if [ "$PM" = "pacman" ] && command -v yay &>/dev/null; then
+            yay -S --needed --noconfirm wallust || { ensure_cargo; cargo install wallust; } || warn "Could not install wallust"
+        elif [ "$PM" = "pacman" ] && command -v paru &>/dev/null; then
+            paru -S --needed --noconfirm wallust || { ensure_cargo; cargo install wallust; } || warn "Could not install wallust"
+        else
+            ensure_cargo
+            cargo install wallust || warn "Could not install wallust"
+        fi
+    fi
+
+    # Install lutgen
+    if command -v lutgen &>/dev/null || [ -f "$HOME/.cargo/bin/lutgen" ] || command -v lutgen-cli &>/dev/null; then
+        success "lutgen binary found!"
+    else
+        info "Installing lutgen..."
+        if [ "$PM" = "pacman" ] && command -v yay &>/dev/null; then
+            yay -S --needed --noconfirm lutgen-cli || { ensure_cargo; cargo install lutgen; } || warn "Could not install lutgen"
+        elif [ "$PM" = "pacman" ] && command -v paru &>/dev/null; then
+            paru -S --needed --noconfirm lutgen-cli || { ensure_cargo; cargo install lutgen; } || warn "Could not install lutgen"
+        else
+            ensure_cargo
+            cargo install lutgen || warn "Could not install lutgen"
+        fi
+    fi
+}
+
+# 5. Copying and Linking Configurations
 deploy_configs() {
     info "Deploying QuickShell configuration to ${TARGET_CONFIG_DIR}..."
     mkdir -p "${TARGET_CONFIG_DIR}"
@@ -278,6 +324,7 @@ run_initial_sync() {
 # Execution Flow
 install_dependencies
 install_quickshell
+install_wallust_lutgen
 deploy_configs
 setup_bashrc
 setup_systemd_service

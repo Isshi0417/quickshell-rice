@@ -8,7 +8,7 @@ Item {
     id: root
 
     property string currentVariant: "Pro"
-    property string wallpaperPath: "file:///home/sho/Pictures/Wallpapers/Pro/lutgen_Pro_wallhaven.png"
+    property string wallpaperPath: "file://" + Quickshell.env("HOME") + "/Pictures/Wallpapers/Pro/lutgen_Pro_wallhaven.png"
 
     readonly property var themeCategories: [
         "All", "Zoey Pink", "Dracula Pro", "Gruvbox", "Rosé Pine", "Catppuccin", "Everforest", "Tokyo Night", "Nord", "Solarized", "One Theme", "Monokai", "Cyberpunk"
@@ -168,7 +168,7 @@ Item {
                 wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
                 let rawPath = imgPath.replace("file://", "")
                 Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
-                Quickshell.execDetached(["/home/sho/.cargo/bin/wallust", "run", rawPath])
+                Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
 
                 // Persist selected theme variant to disk
                 Quickshell.execDetached(["sh", "-c", "echo '" + v.name + "' > ~/.config/quickshell_current_theme.txt"])
@@ -202,7 +202,7 @@ Item {
                 }
             }
         }
-        return "/home/sho/Pictures/Wallpapers/" + varName + "/wallhaven-yqg6r7_1920x1080.png"
+        return Quickshell.env("HOME") + "/Pictures/Wallpapers/" + varName + "/wallhaven-yqg6r7_1920x1080.png"
     }
 
     function cycleVariant() {
