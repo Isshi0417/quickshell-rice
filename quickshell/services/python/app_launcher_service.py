@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+import os
+import json
+import configparser
+import sys
+import time
+
+def get_system_theme():
+    kde_cfg = os.path.expanduser('~/.config/kdeglobals')
+    if os.path.exists(kde_cfg):
+        cp = configparser.ConfigParser(interpolation=None)
+        try:
+            cp.read(kde_cfg)
+            t = cp.get('Icons', 'Theme', fallback=None)
+            if t:
+                return t
+        except Exception:
+            pass
+
+    gtk_cfg = os.path.expanduser('~/.config/gtk-3.0/settings.ini')
+    if os.path.exists(gtk_cfg):
+        cp = configparser.ConfigParser(interpolation=None)
+        try:
+            cp.read(gtk_cfg)
+            t = cp.get('Settings', 'gtk-icon-theme-name', fallback=None)
+            if t:
+                return t
+        except Exception:
+            pass
+
+    return 'hicolor'
+
+def parse_desktop_apps():
+    sys_theme = get_system_theme()
+    themes_to_search = [sys_theme]
+
+    def add_inherits(t_name):
+        for base in [os.path.expanduser('~/.local/share/icons'), '/usr/share/icons']:
+            idx = os.path.join(base, t_name, 'index.theme')
+            if os.path.exists(idx):
+                cp = configparser.ConfigParser(interpolation=None)
+                try:
+                    cp.read(idx)
+                    inh = cp.get('Icon Theme', 'Inherits', fallback='')
+                    for parent in inh.split(','):
+                        parent = parent.strip()
+                        if parent and parent not in themes_to_search:
+                            themes_to_search.append(parent)
+                            add_inherits(parent)
+                except Exception:
+                    pass
+
+    add_inherits(sys_theme)
+    for fallback_theme in ['hicolor', 'breeze', 'Papirus', 'Adwaita']:
+        if fallback_theme not in themes_to_search:
+            themes_to_search.append(fallback_theme)
+
+    search_dirs = []
+    bases = [os.path.expanduser('~/.local/share/icons'), '/usr/share/icons']
+    subdirs = [
+        '64x64/apps', '48x48/apps', 'scalable/apps', '128x128/apps', '256x256/apps', '32x32/apps',
+        '64x64@2x/apps', '48x48@2x/apps', 'apps/64', 'apps/48', 'apps/scalable', 'apps'
+    ]
+
+    for t in themes_to_search:
+        for b in bases:
+            for sd in subdirs:
+                d = os.path.join(b, t, sd)
+                if os.path.exists(d) and d not in search_dirs:
+                    search_dirs.append(d)
+
+    search_dirs.append('/usr/share/pixmaps')
+    EXTS = ['.svg', '.png', '.xpm']
+
+    def resolve_fallback():
+        for fallback_name in ['application-x-executable', 'preferences-system-windows', 'applications-other', 'utilities-terminal']:
+            for d in search_dirs:
+                for ext in EXTS:
+                    p = os.path.join(d, fallback_name + ext)
+                    if os.path.exists(p):
+                        return p
+        return ''
+
+    fallback_path = resolve_fallback()
+
+    def resolve_icon(name):
+        if not name:
+            return fallback_path
+        if os.path.isabs(name) and os.path.exists(name):
+            return name
+        for d in search_dirs:
+            for ext in EXTS:
+                p = os.path.join(d, name + ext)
+                if os.path.exists(p):
+                    return p
+                if name.endswith(ext):
+                    p2 = os.path.join(d, name)
+                    if os.path.exists(p2):
+                        return p2
+        return fallback_path
+
+    def parse_desktop(f):
+        entry = {}
+        in_desktop = False
+        try:
+            with open(f, 'r', encoding='utf-8', errors='ignore') as fp:
+                for line in fp:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    if line.startswith('['):
+                        in_desktop = (line == '[Desktop Entry]')
+                        continue
+                    if in_desktop and '=' in line:
+                        k, v = line.split('=', 1)
+                        k = k.strip()
+                        if k not in entry:
+                            entry[k] = v.strip()
+        except Exception:
+            pass
+        return entry
+
+    desktop_dirs = [
+        os.path.expanduser('~/.local/share/applications'),
+        os.path.expanduser('~/.local/share/flatpak/exports/share/applications'),
+        '/usr/local/share/applications',
+        '/usr/share/applications',
+        '/var/lib/flatpak/exports/share/applications'
+    ]
+
+    import re
+    def normalize_exec(cmd):
+        if not cmd:
+            return ""
+        return re.sub(r'%[a-zA-Z]', '', cmd).strip()
+
+    seen_ids = set()
+    seen_apps = set()
+    apps = []
+
+    for d in desktop_dirs:
+        if not os.path.exists(d):
+            continue
+        try:
+            for entry in sorted(os.scandir(d), key=lambda e: e.name):
+                if not entry.name.endswith('.desktop'):
+                    continue
+
+                desktop_id = entry.name
+                if desktop_id in seen_ids:
+                    continue
+
+                s = parse_desktop(entry.path)
+                if s.get('Type', '') != 'Application':
+                    continue
+                if s.get('NoDisplay', 'false').strip().lower() == 'true':
+                    continue
+                if s.get('Hidden', 'false').strip().lower() == 'true':
+                    continue
+                if s.get('Terminal', 'false').strip().lower() in ['true', '1']:
+                    continue
+
+                only_in = [x.strip().lower() for x in s.get('OnlyShowIn', '').split(';') if x.strip()]
+                not_in = [x.strip().lower() for x in s.get('NotShowIn', '').split(';') if x.strip()]
+                if only_in and 'kde' not in only_in:
+                    continue
+                if not_in and 'kde' in not_in:
+                    continue
+
+                name = s.get('Name', '')
+                if not name:
+                    continue
+
+                exec_cmd = s.get('Exec', '')
+                norm_exec = normalize_exec(exec_cmd)
+                app_key = (name.strip().lower(), norm_exec.lower())
+
+                if app_key in seen_apps:
+                    continue
+
+                seen_ids.add(desktop_id)
+                seen_apps.add(app_key)
+
+                cats = [c for c in s.get('Categories', '').split(';') if c.strip()]
+                icon = resolve_icon(s.get('Icon', ''))
+                apps.append({
+                    'id': desktop_id,
+                    'name': name,
+                    'exec': exec_cmd,
+                    'icon': icon,
+                    'categories': cats
+                })
+        except Exception:
+            pass
+
+    apps.sort(key=lambda a: a['name'].lower())
+    print(json.dumps({'fallback': fallback_path, 'apps': apps}), flush=True)
+
+def watch_directory_changes():
+    import select
+    dirs = [
+        '/usr/share/applications',
+        '/usr/local/share/applications',
+        '/var/lib/flatpak/exports/share/applications',
+        os.path.expanduser('~/.local/share/applications'),
+        os.path.expanduser('~/.local/share/flatpak/exports/share/applications')
+    ]
+
+    def get_state_snapshot():
+        snapshot = {}
+        for d in dirs:
+            if os.path.exists(d):
+                try:
+                    snapshot[d] = os.path.stat(d).st_mtime
+                    for entry in os.scandir(d):
+                        if entry.name.endswith('.desktop'):
+                            try:
+                                snapshot[entry.path] = entry.stat().st_mtime
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+        return snapshot
+
+    last_snapshot = get_state_snapshot()
+    parse_desktop_apps()
+
+    while True:
+        try:
+            # Check for non-blocking stdin input (reload requests from QML)
+            rlist, _, _ = select.select([sys.stdin], [], [], 0.5)
+            if rlist:
+                line = sys.stdin.readline()
+                if line:
+                    parse_desktop_apps()
+                    last_snapshot = get_state_snapshot()
+                    continue
+
+            current_snapshot = get_state_snapshot()
+            if current_snapshot != last_snapshot:
+                last_snapshot = current_snapshot
+                parse_desktop_apps()
+        except Exception:
+            time.sleep(0.5)
+
+if __name__ == '__main__':
+    watch_directory_changes()
