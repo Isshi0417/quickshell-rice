@@ -103,7 +103,7 @@ Item {
     property int blurRadius: 0
     property int cornerRadius: 10
 
-    function setVariant(name) {
+    function setVariant(name, isStartupRestoration) {
         for (let i = 0; i < variants.length; i++) {
             let v = variants[i]
             if (v.name === name) {
@@ -164,16 +164,18 @@ Item {
                 
                 AppLauncherService.reload()
 
-                let imgPath = getVariantWallpaper(v.name)
-                if (WallpaperService) {
-                    WallpaperService.applyWallpaper(imgPath, v.name)
-                } else {
-                    wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
+                if (!isStartupRestoration) {
+                    let imgPath = getVariantWallpaper(v.name)
+                    if (WallpaperService) {
+                        WallpaperService.applyWallpaper(imgPath, v.name)
+                    } else {
+                        wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
+                        let rawPath = imgPath.replace("file://", "")
+                        Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                    }
                     let rawPath = imgPath.replace("file://", "")
-                    Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                    Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
                 }
-                let rawPath = imgPath.replace("file://", "")
-                Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
 
                 // Persist selected theme variant to disk
                 Quickshell.execDetached(["sh", "-c", "echo '" + v.name + "' > ~/.config/quickshell_current_theme.txt"])
@@ -191,7 +193,7 @@ Item {
             onRead: data => {
                 let saved = data.trim()
                 if (saved && saved !== "" && saved !== root.currentVariant) {
-                    root.setVariant(saved)
+                    root.setVariant(saved, true)
                 }
             }
         }

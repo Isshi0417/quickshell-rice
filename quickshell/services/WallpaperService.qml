@@ -10,6 +10,7 @@ Item {
     property var wallpapers: []
     property string activeCustomWallpaper: ""
     property var cachedThemeWallpapers: ({})
+    property bool isLoaded: false
 
     // Automatic recolor watcher background daemon
     Process {
@@ -40,6 +41,7 @@ Item {
                         }
                     }
                 } catch (e) {}
+                root.isLoaded = true
             }
         }
     }
@@ -74,7 +76,7 @@ Item {
         scanProc.running = true
     }
 
-    function applyWallpaper(filePath, variantName) {
+    function applyWallpaper(filePath, variantName, skipSave) {
         if (!filePath) return;
         let vName = variantName || (Theme ? Theme.currentVariant : "")
         activeCustomWallpaper = filePath
@@ -89,7 +91,10 @@ Item {
         }
 
         Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
-        Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/save_wallpaper.py", rawPath, vName])
+
+        if (!skipSave) {
+            Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/save_wallpaper.py", rawPath, vName])
+        }
     }
 
     function refresh() {

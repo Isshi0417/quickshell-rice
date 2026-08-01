@@ -7,43 +7,33 @@ pragma Singleton
 Item {
     id: root
 
-    Process {
-        id: execProc
-    }
-
     function captureRegion() {
         PopupService.closeAll()
-        execProc.command = ["spectacle", "-r"]
-        execProc.running = true
+        Quickshell.execDetached(["spectacle", "-r"])
     }
 
     function captureFullscreen() {
         PopupService.closeAll()
-        execProc.command = ["spectacle", "-f", "-b", "-c"]
-        execProc.running = true
+        Quickshell.execDetached(["spectacle", "-f", "-b", "-c"])
     }
 
     function captureWindow() {
         PopupService.closeAll()
-        execProc.command = ["spectacle", "-a", "-b", "-c"]
-        execProc.running = true
+        Quickshell.execDetached(["spectacle", "-a", "-b", "-c"])
     }
 
     function recordRegion() {
         PopupService.closeAll()
-        execProc.command = ["spectacle", "-R", "r"]
-        execProc.running = true
+        Quickshell.execDetached(["spectacle", "-R", "r"])
     }
 
     function recordScreen() {
         PopupService.closeAll()
-        execProc.command = ["spectacle", "-R", "s"]
-        execProc.running = true
+        Quickshell.execDetached(["spectacle", "-R", "s"])
     }
 
     function openGui() {
         PopupService.closeAll()
-        execProc.command = ["spectacle", "-g"]
-        execProc.running = true
+        Quickshell.execDetached(["spectacle", "-g"])
     }
 }

@@ -473,7 +473,7 @@ GlassPanel {
                             hoverEnabled: true
                             onClicked: {
                                 PopupService.closeAll()
-                                ScreenshotService.captureRegion()
+                                CaptureService.captureRegion()
                             }
                         }
                     }
@@ -504,7 +504,7 @@ GlassPanel {
                             hoverEnabled: true
                             onClicked: {
                                 PopupService.closeAll()
-                                ScreenshotService.captureFullscreen()
+                                CaptureService.captureFullscreen()
                             }
                         }
                     }
@@ -535,7 +535,7 @@ GlassPanel {
                             hoverEnabled: true
                             onClicked: {
                                 PopupService.closeAll()
-                                ScreenshotService.captureWindow()
+                                CaptureService.captureWindow()
                             }
                         }
                     }
@@ -586,7 +586,7 @@ GlassPanel {
                             hoverEnabled: true
                             onClicked: {
                                 PopupService.closeAll()
-                                ScreenshotService.recordRegion()
+                                CaptureService.recordRegion()
                             }
                         }
                     }
@@ -617,7 +617,7 @@ GlassPanel {
                             hoverEnabled: true
                             onClicked: {
                                 PopupService.closeAll()
-                                ScreenshotService.recordScreen()
+                                CaptureService.recordScreen()
                             }
                         }
                     }
