@@ -13,12 +13,10 @@ Item {
     property var workspaceNames: []
 
     function switchTo(index) {
-        switchProc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/workspace_service.py", "switch", index.toString()]
-        switchProc.running = true
-    }
-
-    Process {
-        id: switchProc
+        if (index <= 0) return;
+        // Optimistic UI update for zero visual latency
+        root.activeWorkspace = index
+        Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/workspace_service.py", "switch", index.toString()])
     }
 
     Process {
@@ -51,7 +49,7 @@ Item {
     }
 
     Timer {
-        interval: 400
+        interval: 120
         running: true
         repeat: true
         onTriggered: {
