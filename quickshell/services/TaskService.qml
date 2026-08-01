@@ -139,51 +139,25 @@ Item {
         }
     }
 
+    property real lastLaunchTime: 0
+    property string lastLaunchCmd: ""
+
     function launchApp(cmd) {
         if (!cmd) return;
         let cleanCmd = cmd.trim()
         if (cleanCmd === "") return;
 
+        let now = Date.now()
+        if (cleanCmd === lastLaunchCmd && (now - lastLaunchTime) < 600) {
+            return; // Ignore rapid double-clicks within 600ms
+        }
+        lastLaunchTime = now
+        lastLaunchCmd = cleanCmd
+
         let execCmd = cleanCmd.replace(/%[a-zA-Z]/g, "").trim()
         root.activeAppId = execCmd.toLowerCase()
 
-        if (execCmd.startsWith("flatpak run ") || execCmd.includes("flatpak ")) {
-            Quickshell.execDetached(["sh", "-c", execCmd + " &"])
-            return;
-        }
-
-        let baseName = execCmd.replace(/\.desktop$/, "").trim()
-
-        // Build universal Flatpak + desktop launcher + native binary fallback chain
-        let shellCmd = ""
-        if (baseName.startsWith("org.") || baseName.startsWith("io.") || baseName.startsWith("com.") || baseName.startsWith("app.")) {
-            let shortName = baseName.split(".").pop()
-            shellCmd = "flatpak run " + baseName + " 2>/dev/null || flatpak run " + shortName + " 2>/dev/null || gtk-launch " + baseName + " 2>/dev/null || gtk-launch " + shortName + " 2>/dev/null || " + shortName + " 2>/dev/null || " + execCmd + " &"
-        } else {
-            // Known reverse domain mappings for common Flatpak apps like spotify, feishin, zen, vesktop, discord, etc.
-            let flatpakMapping = {
-                "spotify": "com.spotify.Client",
-                "feishin": "io.github.jeffvli.feishin",
-                "zen": "io.github.zen_browser.zen",
-                "zen-browser": "io.github.zen_browser.zen",
-                "vesktop": "dev.vencord.Vesktop",
-                "discord": "com.discordapp.Discord",
-                "code": "com.visualstudio.code",
-                "vscodium": "com.vscodium.codium",
-                "obs": "com.obsproject.Studio",
-                "steam": "com.valvesoftware.Steam",
-                "heroic": "com.heroicgameslauncher.hgl"
-            }
-
-            let mappedFlatpak = flatpakMapping[baseName.toLowerCase()] || ""
-            if (mappedFlatpak !== "") {
-                shellCmd = "flatpak run " + mappedFlatpak + " 2>/dev/null || flatpak run " + baseName + " 2>/dev/null || gtk-launch " + mappedFlatpak + " 2>/dev/null || gtk-launch " + baseName + " 2>/dev/null || " + execCmd + " &"
-            } else {
-                shellCmd = "flatpak run " + baseName + " 2>/dev/null || gtk-launch " + baseName + " 2>/dev/null || " + execCmd + " &"
-            }
-        }
-
-        Quickshell.execDetached(["sh", "-c", shellCmd])
+        Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/launch_app.py", cleanCmd])
     }
 
     function closeApp(appId) {
