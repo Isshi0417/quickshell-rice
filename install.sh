@@ -264,6 +264,13 @@ deploy_configs() {
         ln -snf "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch" || cp -r "${SCRIPT_DIR}/fastfetch" "${TARGET_CONFIG_DIR}/fastfetch"
     fi
 
+    # Alacritty Configuration (Symlinked to repo so quality of life updates apply automatically)
+    if [ -d "${SCRIPT_DIR}/alacritty" ]; then
+        info "Unlinking existing & linking Alacritty configuration..."
+        safe_unlink "${TARGET_CONFIG_DIR}/alacritty"
+        ln -snf "${SCRIPT_DIR}/alacritty" "${TARGET_CONFIG_DIR}/alacritty" || cp -r "${SCRIPT_DIR}/alacritty" "${TARGET_CONFIG_DIR}/alacritty"
+    fi
+
     # Wallpapers Deployment
     if [ -d "${SCRIPT_DIR}/quickshell/wallpapers" ]; then
         info "Deploying default wallpapers to ~/Pictures/Wallpapers..."

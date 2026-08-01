@@ -137,11 +137,15 @@ def sync_gtk(bg, surface, current_line, fg, accent, is_dark):
 
 def sync_alacritty(bg, surface, current_line, fg, accent, sub_accent):
     import glob, os, re
-    alacritty_dir = os.path.expanduser('~/.config/alacritty')
-    os.makedirs(alacritty_dir, exist_ok=True)
-    colors_file = os.path.join(alacritty_dir, 'colors.toml')
-    toml_file = os.path.join(alacritty_dir, 'alacritty.toml')
-    
+    alacritty_dirs = get_app_config_dirs(['alacritty', 'Alacritty'])
+    for fb in [
+        os.path.expanduser('~/.config/alacritty'),
+        os.path.expanduser('~/.var/app/io.github.alacritty.Alacritty/config/alacritty'),
+        os.path.expanduser('~/.var/app/org.alacritty.Alacritty/config/alacritty')
+    ]:
+        if fb not in alacritty_dirs:
+            alacritty_dirs.append(fb)
+
     colors_block = f"""[colors.primary]
 background = "{bg}"
 foreground = "{fg}"
@@ -174,50 +178,52 @@ magenta = "{sub_accent}"
 cyan    = "#80ffea"
 white   = "{fg}"
 """
-    try:
-        with open(colors_file, 'w', encoding='utf-8') as f:
-            f.write(colors_block)
-            f.flush()
-            os.fsync(f.fileno())
-    except Exception:
-        pass
 
-    if os.path.exists(toml_file):
+    for alacritty_dir in alacritty_dirs:
         try:
-            with open(toml_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            lines = content.splitlines()
-            cleaned_lines = []
-            in_colors = False
-            for line in lines:
-                stripped = line.strip()
-                if stripped.startswith('[colors') or stripped.startswith('[[colors'):
-                    in_colors = True
-                    continue
-                elif in_colors and stripped.startswith('[') and not stripped.startswith('[colors') and not stripped.startswith('[[colors'):
-                    in_colors = False
+            os.makedirs(alacritty_dir, exist_ok=True)
+            colors_file = os.path.join(alacritty_dir, 'colors.toml')
+            toml_file = os.path.join(alacritty_dir, 'alacritty.toml')
 
-                if not in_colors:
-                    cleaned_lines.append(line)
-            
-            content = '\n'.join(cleaned_lines)
+            with open(colors_file, 'w', encoding='utf-8') as f:
+                f.write(colors_block)
+                f.flush()
+                os.fsync(f.fileno())
 
-            if 'colors.toml' not in content:
-                import_line = 'import = ["colors.toml"]\n'
-                if '[general]' in content:
-                    content = content.replace('[general]', '[general]\n' + import_line)
-                else:
-                    content = '[general]\n' + import_line + '\n' + content
+            if os.path.exists(toml_file):
+                with open(toml_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
 
-            with open(toml_file, 'w', encoding='utf-8') as f:
-                f.write(content.strip() + '\n')
+                lines = content.splitlines()
+                cleaned_lines = []
+                in_colors = False
+                for line in lines:
+                    stripped = line.strip()
+                    if stripped.startswith('[colors') or stripped.startswith('[[colors'):
+                        in_colors = True
+                        continue
+                    elif in_colors and stripped.startswith('[') and not stripped.startswith('[colors') and not stripped.startswith('[[colors'):
+                        in_colors = False
+
+                    if not in_colors:
+                        cleaned_lines.append(line)
+
+                content = '\n'.join(cleaned_lines)
+
+                if 'colors.toml' not in content:
+                    import_line = 'import = ["colors.toml"]\n'
+                    if '[general]' in content:
+                        content = content.replace('[general]', '[general]\n' + import_line)
+                    else:
+                        content = '[general]\n' + import_line + '\n' + content
+
+                with open(toml_file, 'w', encoding='utf-8') as f:
+                    f.write(content.strip() + '\n')
+            else:
+                with open(toml_file, 'w', encoding='utf-8') as f:
+                    f.write('[general]\nimport = ["colors.toml"]\nlive_config_reload = true\n')
         except Exception:
             pass
-    else:
-        try:
-            with open(toml_file, 'w', encoding='utf-8') as f:
-                f.write('[general]\nimport = ["colors.toml"]\nlive_config_reload = true\n')
         except Exception:
             pass
 
