@@ -231,6 +231,8 @@ def parse_desktop_apps():
 
 def watch_directory_changes():
     import select
+    import ctypes
+
     dirs = [
         '/usr/share/applications',
         '/usr/local/share/applications',
@@ -238,6 +240,27 @@ def watch_directory_changes():
         os.path.expanduser('~/.local/share/applications'),
         os.path.expanduser('~/.local/share/flatpak/exports/share/applications')
     ]
+
+    # Initialize Linux kernel inotify for 0ms instant file creation/deletion notifications
+    inotify_fd = -1
+    try:
+        libc = ctypes.CDLL("libc.so.6")
+        inotify_init = libc.inotify_init
+        inotify_add_watch = libc.inotify_add_watch
+        inotify_init.restype = ctypes.c_int
+        inotify_add_watch.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32]
+        inotify_add_watch.restype = ctypes.c_int
+
+        fd = inotify_init()
+        if fd >= 0:
+            # IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO | IN_ATTRIB
+            mask = 0x00000100 | 0x00000200 | 0x00000002 | 0x00000040 | 0x00000080 | 0x00000004
+            for d in dirs:
+                if os.path.exists(d):
+                    inotify_add_watch(fd, d.encode('utf-8'), mask)
+            inotify_fd = fd
+    except Exception:
+        inotify_fd = -1
 
     def get_state_snapshot():
         snapshot = {}
@@ -260,21 +283,33 @@ def watch_directory_changes():
 
     while True:
         try:
-            # Check for non-blocking stdin input (reload requests from QML)
-            rlist, _, _ = select.select([sys.stdin], [], [], 0.5)
+            read_fds = [sys.stdin]
+            if inotify_fd >= 0:
+                read_fds.append(inotify_fd)
+
+            rlist, _, _ = select.select(read_fds, [], [], 0.4)
             if rlist:
-                line = sys.stdin.readline()
-                if line:
-                    parse_desktop_apps()
-                    last_snapshot = get_state_snapshot()
-                    continue
+                for fd in rlist:
+                    if fd == sys.stdin:
+                        line = sys.stdin.readline()
+                        if line:
+                            parse_desktop_apps()
+                            last_snapshot = get_state_snapshot()
+                    elif fd == inotify_fd:
+                        # Flush inotify events and trigger re-parse
+                        try:
+                            os.read(inotify_fd, 4096)
+                        except Exception: pass
+                        parse_desktop_apps()
+                        last_snapshot = get_state_snapshot()
+                continue
 
             current_snapshot = get_state_snapshot()
             if current_snapshot != last_snapshot:
                 last_snapshot = current_snapshot
                 parse_desktop_apps()
         except Exception:
-            time.sleep(0.5)
+            time.sleep(0.4)
 
 if __name__ == '__main__':
     watch_directory_changes()

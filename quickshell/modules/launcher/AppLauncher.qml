@@ -51,6 +51,7 @@ PanelWindow {
             openProgress = 0.0
             openAnim.restart()
             AppLauncherService.reset()
+            AppLauncherService.reload()
             searchField.text = ""
             root.selectedIndex = 0
             Qt.callLater(() => {
