@@ -1,42 +1,33 @@
-// KWin JavaScript Script: Focus, Restore, or Minimize Application Window
+// KWin JavaScript Script: Focus, Restore, or Cycle Application Windows
 var name = "%APP_NAME%".toLowerCase().trim();
 var ix = %ICON_X%;
 var iy = %ICON_Y%;
 
 if (name && name !== "") {
     var windows = workspace.windowList();
+    var matchingWindows = [];
+
     for (var i = 0; i < windows.length; i++) {
         var win = windows[i];
         if (!win.normalWindow && !win.fullScreen && !win.managed) continue;
 
         var cls = (win.desktopFileName || win.resourceClass || win.resourceName || "").toLowerCase().trim();
         var caption = (win.caption || "").toLowerCase().trim();
-        
         if (!cls && !caption) continue;
 
         var matches = false;
 
-        // 1. Exact match check
         if (cls === name) {
             matches = true;
-        }
-
-        // 2. Overwatch & Steam game window targeting
-        if (!matches && (name.indexOf("overwatch") !== -1 || name.indexOf("2357570") !== -1)) {
+        } else if (name.indexOf("overwatch") !== -1 || name.indexOf("2357570") !== -1) {
             if (cls.indexOf("overwatch") !== -1 || caption.indexOf("overwatch") !== -1 || cls === "steam_app_2357570") {
                 matches = true;
             }
-        }
-
-        // 3. Steam App ID window targeting (must NOT match main "steam" client window)
-        if (!matches && name.indexOf("steam_app_") !== -1) {
+        } else if (name.indexOf("steam_app_") !== -1) {
             if (cls === name || cls.indexOf(name) !== -1) {
                 matches = true;
             }
-        }
-
-        // 4. General matching (exclude steam client when searching for steam_app_)
-        if (!matches && name !== "steam") {
+        } else if (name !== "steam") {
             if (cls && cls !== "steam" && (cls.indexOf(name) !== -1 || name.indexOf(cls) !== -1)) {
                 matches = true;
             } else if (caption && caption.indexOf(name) !== -1) {
@@ -45,17 +36,37 @@ if (name && name !== "") {
         }
 
         if (matches) {
-            try {
-                win.setMinimizeIconGeometry(Qt.rect(ix, iy, 42, 42));
-            } catch(e) {}
-            
-            if (workspace.activeWindow === win && !win.minimized) {
-                win.minimized = true;
-            } else {
-                win.minimized = false;
-                workspace.activeWindow = win;
-            }
-            break;
+            matchingWindows.push(win);
         }
+    }
+
+    if (matchingWindows.length === 1) {
+        var targetWin = matchingWindows[0];
+        try { targetWin.setMinimizeIconGeometry(Qt.rect(ix, iy, 42, 42)); } catch(e) {}
+
+        if (workspace.activeWindow === targetWin && !targetWin.minimized) {
+            targetWin.minimized = true;
+        } else {
+            targetWin.minimized = false;
+            workspace.activeWindow = targetWin;
+        }
+    } else if (matchingWindows.length > 1) {
+        var activeIdx = -1;
+        for (var j = 0; j < matchingWindows.length; j++) {
+            if (workspace.activeWindow === matchingWindows[j] && !matchingWindows[j].minimized) {
+                activeIdx = j;
+                break;
+            }
+        }
+
+        var nextIdx = 0;
+        if (activeIdx !== -1) {
+            nextIdx = (activeIdx + 1) % matchingWindows.length;
+        }
+
+        var winToActivate = matchingWindows[nextIdx];
+        try { winToActivate.setMinimizeIconGeometry(Qt.rect(ix, iy, 42, 42)); } catch(e) {}
+        winToActivate.minimized = false;
+        workspace.activeWindow = winToActivate;
     }
 }

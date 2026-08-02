@@ -30,10 +30,20 @@ function updateWindows() {
                                      cls.indexOf("status_icon") !== -1 || cls.indexOf("tray") !== -1 || cls.indexOf("desktop") !== -1);
                 if (!isSystemShell) {
                     var winId = String(w.internalId || w.windowId || (cls + "_" + i));
+                    var fg = w.frameGeometry || w.clientGeometry || w.bufferGeometry || {};
+                    var wx = Math.round(fg.x !== undefined ? fg.x : (w.x || 0));
+                    var wy = Math.round(fg.y !== undefined ? fg.y : (w.y || 0));
+                    var ww = Math.round(fg.width !== undefined ? fg.width : (w.width || 800));
+                    var wh = Math.round(fg.height !== undefined ? fg.height : (w.height || 600));
+
                     openApps.push({
                         id: winId,
                         appId: cls,
                         caption: w.caption || cls,
+                        x: wx,
+                        y: wy,
+                        width: ww,
+                        height: wh,
                         minimized: w.minimized || false,
                         active: (w === activeWin || w.active || false)
                     });

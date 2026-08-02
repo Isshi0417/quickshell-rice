@@ -198,24 +198,44 @@ Item {
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                         onEntered: {
+                            previewCloseTimer.stop()
                             if (TaskService.isRunning(modelData.appId)) {
-                                let instances = TaskService.getWindowsForApp(modelData.appId)
-                                if (instances && instances.length > 0) {
-                                    root.previewTargetApp = modelData
-                                    root.previewWindowInstances = instances
-                                    root.previewTargetX = Math.round(dockItem.mapToItem(null, 0, 0).x)
-                                    root.isPreviewHovered = true
-                                    previewCloseTimer.stop()
-                                    previewPopOut.running = false
-                                    dockWindowPreview.visible = true
-                                    previewPopIn.restart()
-                                }
-                            }
-                        }
+                                 let instances = TaskService.getWindowsForApp(modelData.appId)
+                                 if (instances && instances.length > 0) {
+                                     let targetParent = root.dockWindow ? root.dockWindow.contentItem : root
+                                     let pt = itemMouse.mapToItem(targetParent, 0, 0)
+                                     root.previewTargetX = Math.round(pt.x + itemMouse.width / 2)
+                                     root.isPreviewHovered = true
+                                     root.previewActive = true
+
+                                     let oldLen = root.previewWindowInstances ? root.previewWindowInstances.length : 0
+                                     let newLen = instances.length
+                                     let isDifferentApp = (root.previewTargetApp !== modelData)
+
+                                     root.previewTargetApp = modelData
+                                     if (isDifferentApp && oldLen !== newLen && dockWindowPreview.visible) {
+                                         root.previewWindowInstances = []
+                                         Qt.callLater(() => {
+                                             if (root.isPreviewHovered || root.previewActive) {
+                                                 root.previewWindowInstances = instances
+                                             }
+                                         })
+                                     } else {
+                                         root.previewWindowInstances = instances
+                                     }
+                                 } else {
+                                     root.isPreviewHovered = false
+                                     previewCloseTimer.restart()
+                                 }
+                             } else {
+                                 root.isPreviewHovered = false
+                                 previewCloseTimer.restart()
+                             }
+                         }
 
                         onExited: {
                             root.isPreviewHovered = false
-                            previewCloseTimer.start()
+                            previewCloseTimer.restart()
                         }
 
                         property real dragXOffset: 0
@@ -265,12 +285,20 @@ Item {
                                     }
                                 }
                             } else if (mouse.button === Qt.LeftButton) {
-                                let globalPos = dockItem.mapToItem(null, 0, 0)
+                                let globalPos = itemMouse.mapToItem(root, 0, 0)
                                 TaskService.focusApp(modelData.appId, modelData.cmd, globalPos.x, globalPos.y)
                             } else if (mouse.button === Qt.RightButton) {
+                                root.isPreviewHovered = false
+                                root.isCardHovered = false
+                                previewCloseTimer.stop()
+
                                 root.contextTargetApp = modelData
-                                root.contextTargetX = Math.round(dockItem.mapToItem(null, 0, 0).x)
-                                PopupService.toggleDockMenu()
+                                let targetParent = root.dockWindow ? root.dockWindow.contentItem : root
+                                let posInWindow = itemMouse.mapToItem(targetParent, 0, 0).x
+                                root.contextTargetX = Math.round(posInWindow)
+
+                                dockContextMenu.visible = true
+                                PopupService.dockMenuOpen = true
                             }
                         }
                     }
@@ -433,6 +461,54 @@ Item {
         return raw.charAt(0).toUpperCase() + raw.slice(1);
     }
 
+    function getToplevelForWindow(winObj) {
+        if (!winObj || typeof ToplevelManager === "undefined" || !ToplevelManager.toplevels) return null;
+        let list = ToplevelManager.toplevels.values;
+        if (!list || list.length === 0) return null;
+
+        let targetApp = (winObj.appId || "").toLowerCase().trim();
+        let targetTitle = (winObj.caption || winObj.name || "").toLowerCase().trim();
+
+        for (let i = 0; i < list.length; i++) {
+            let t = list[i];
+            if (!t) continue;
+            let tApp = (t.appId || "").toLowerCase().trim();
+            let tTitle = (t.title || "").toLowerCase().trim();
+
+            if (tApp === targetApp || (tApp && targetApp && (tApp.includes(targetApp) || targetApp.includes(tApp)))) {
+                if (!targetTitle || tTitle.includes(targetTitle) || targetTitle.includes(tTitle)) {
+                    return t;
+                }
+            }
+        }
+
+        for (let i = 0; i < list.length; i++) {
+            let t = list[i];
+            if (!t) continue;
+            let tApp = (t.appId || "").toLowerCase().trim();
+            if (tApp === targetApp || (tApp && targetApp && (tApp.includes(targetApp) || targetApp.includes(tApp)))) {
+                return t;
+            }
+        }
+
+        return null;
+    }
+
+    function calculateCardsRowWidth(instances) {
+        if (!instances || !Array.isArray(instances) || instances.length === 0) return 180;
+        let totalW = 0;
+        for (let i = 0; i < instances.length; i++) {
+            let w = instances[i];
+            let winW = (w && w.width && Number(w.width) > 50) ? Number(w.width) : 1280;
+            let winH = (w && w.height && Number(w.height) > 50) ? Number(w.height) : 800;
+            let aspect = Math.max(0.6, Math.min(2.2, winW / winH));
+            let cardW = Math.max(160, Math.min(260, Math.round(130 * aspect)));
+            totalW += cardW;
+        }
+        totalW += Math.max(0, (instances.length - 1) * 10);
+        return totalW;
+    }
+
     property var dockWindow: null
 
     // Window Preview Hover State Properties
@@ -440,72 +516,54 @@ Item {
     property var previewWindowInstances: []
     property int previewTargetX: 0
     property bool isPreviewHovered: false
+    property bool isCardHovered: false
+    property bool previewActive: false
 
     Timer {
         id: previewCloseTimer
-        interval: 220
+        interval: 180
         repeat: false
         onTriggered: {
-            if (!root.isPreviewHovered && !previewMouseArea.containsMouse) {
-                previewPopIn.running = false
-                previewPopOut.restart()
+            if (!root.isPreviewHovered && !previewMouseArea.containsMouse && !root.isCardHovered) {
+                root.previewActive = false
+                root.isPreviewHovered = false
+                root.isCardHovered = false
             }
         }
     }
 
-    // Live Window Preview Floating Popup Window
+    // Live Window Preview Floating Popup Window (Hysteresis Active Binding)
     PopupWindow {
         id: dockWindowPreview
         anchor.window: root.dockWindow
         anchor.rect.x: Math.max(10, Math.min(root.dockWindow ? root.dockWindow.width - previewGlass.implicitWidth - 10 : 800, root.previewTargetX - Math.round(previewGlass.implicitWidth / 2) + 21))
         anchor.rect.y: 0
         anchor.edges: Edges.Top | Edges.Left
-        visible: false
+        visible: root.previewActive && (root.previewWindowInstances && root.previewWindowInstances.length > 0)
         color: "transparent"
 
         implicitWidth: previewGlass.implicitWidth
         implicitHeight: previewGlass.implicitHeight
 
-        property real animProgress: 0.0
-
-        NumberAnimation on animProgress {
-            id: previewPopIn
-            running: false
-            to: 1.0
-            duration: 220
-            easing.type: Easing.OutBack
-            easing.overshoot: 1.15
-        }
-
-        NumberAnimation on animProgress {
-            id: previewPopOut
-            running: false
-            to: 0.0
-            duration: 160
-            easing.type: Easing.InQuad
-            onFinished: dockWindowPreview.visible = false
-        }
-
         MouseArea {
             id: previewMouseArea
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: previewCloseTimer.stop()
-            onExited: previewCloseTimer.start()
+            onEntered: {
+                previewCloseTimer.stop()
+                root.previewActive = true
+            }
+            onExited: {
+                if (!root.isPreviewHovered) {
+                    previewCloseTimer.restart()
+                }
+            }
 
             GlassPanel {
                 id: previewGlass
                 implicitWidth: previewMainCol.implicitWidth + 24
                 implicitHeight: previewMainCol.implicitHeight + 16
                 anchors.fill: parent
-
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
-                }
-
-                opacity: dockWindowPreview.animProgress
-                scale: 0.90 + 0.10 * dockWindowPreview.animProgress
-                transformOrigin: Item.Bottom
 
                 ColumnLayout {
                     id: previewMainCol
@@ -564,6 +622,7 @@ Item {
                     // Window Preview Card Row (Single or Multiple Instances)
                     RowLayout {
                         id: previewCardsRow
+                        implicitWidth: root.calculateCardsRowWidth(root.previewWindowInstances)
                         spacing: 10
 
                         Repeater {
@@ -571,140 +630,144 @@ Item {
 
                             Item {
                                 id: cardItem
-                                width: Math.max(140, Math.min(220, cardCaptionText.implicitWidth + 36))
-                                height: 110
+                                property real winW: (modelData && modelData.width && Number(modelData.width) > 50) ? Number(modelData.width) : 1280
+                                property real winH: (modelData && modelData.height && Number(modelData.height) > 50) ? Number(modelData.height) : 800
+                                property real winAspect: Math.max(0.6, Math.min(2.2, winW / winH))
+                                implicitWidth: Math.max(160, Math.min(260, Math.round(130 * winAspect)))
+                                implicitHeight: 140
+                                Layout.preferredWidth: implicitWidth
+                                Layout.preferredHeight: implicitHeight
 
                                 property bool cardHovered: cardMouseArea.containsMouse
 
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: 10
-                                    color: cardItem.cardHovered ? Qt.rgba(255/255, 255/255, 255/255, 0.10) : Qt.rgba(255/255, 255/255, 255/255, 0.05)
+                                    color: cardItem.cardHovered ? Qt.rgba(255/255, 255/255, 255/255, 0.10) : Qt.rgba(0, 0, 0, 0.35)
                                     border.color: modelData.active ? Theme.accent : (cardItem.cardHovered ? Theme.subAccent : Theme.separator)
                                     border.width: modelData.active || cardItem.cardHovered ? 1.5 : 1
 
                                     Behavior on color { ColorAnimation { duration: 120 } }
                                     Behavior on border.color { ColorAnimation { duration: 120 } }
+                                    MouseArea {
+                                         id: cardMouseArea
+                                         anchors.fill: parent
+                                         hoverEnabled: true
+                                         acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                         onEntered: { root.isCardHovered = true; root.previewActive = true; previewCloseTimer.stop() }
+                                         onExited: { root.isCardHovered = false; previewCloseTimer.restart() }
+                                         onClicked: (mouse) => {
+                                             if (mouse.button === Qt.RightButton) {
+                                                 root.previewActive = false
+                                                 root.isPreviewHovered = false
+                                                 root.isCardHovered = false
+                                                 previewCloseTimer.stop()
+                                                 dockContextMenu.visible = true
+                                                 PopupService.dockMenuOpen = true
+                                             } else {
+                                                 let globalPos = cardItem.mapToItem(root, 0, 0)
+                                                 TaskService.focusSpecificWindow(modelData, globalPos.x, globalPos.y)
+                                                 root.previewActive = false
+                                                 root.isPreviewHovered = false
+                                                 root.isCardHovered = false
+                                             }
+                                         }
+                                     }
 
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 8
-                                        spacing: 6
+                                     ColumnLayout {
+                                         anchors.fill: parent
+                                         anchors.margins: 8
+                                         spacing: 6
 
-                                        // Card Header: Window Caption & Close Button
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 6
+                                         // Card Header: Window Caption & Close Button
+                                         RowLayout {
+                                             Layout.fillWidth: true
+                                             spacing: 6
 
-                                            Rectangle {
-                                                width: 6
-                                                height: 6
-                                                radius: 3
-                                                color: modelData.active ? Theme.accent : Theme.comment
-                                                Layout.alignment: Qt.AlignVCenter
-                                            }
+                                             Rectangle {
+                                                 width: 6
+                                                 height: 6
+                                                 radius: 3
+                                                 color: modelData.active ? Theme.accent : Theme.comment
+                                                 Layout.alignment: Qt.AlignVCenter
+                                             }
 
-                                            Text {
-                                                id: cardCaptionText
-                                                text: modelData.caption || modelData.name || "Window"
-                                                color: modelData.active ? Theme.accent : Theme.fg
-                                                font.pixelSize: 10
-                                                font.weight: modelData.active ? Font.Bold : Font.Normal
-                                                elide: Text.ElideRight
-                                                Layout.fillWidth: true
-                                                Layout.alignment: Qt.AlignVCenter
-                                            }
+                                             Text {
+                                                 id: cardCaptionText
+                                                 text: modelData.caption || modelData.name || "Window"
+                                                 color: modelData.active ? Theme.accent : Theme.fg
+                                                 font.pixelSize: 10
+                                                 font.weight: modelData.active ? Font.Bold : Font.Normal
+                                                 elide: Text.ElideRight
+                                                 Layout.fillWidth: true
+                                                 Layout.alignment: Qt.AlignVCenter
+                                             }
 
-                                            // Individual Window Close Button (✕)
-                                            Item {
-                                                width: 16
-                                                height: 16
-                                                Layout.alignment: Qt.AlignVCenter
-                                                visible: cardItem.cardHovered
+                                             // Individual Window Close Button (✕)
+                                             Item {
+                                                 width: 18
+                                                 height: 18
+                                                 z: 10
+                                                 Layout.alignment: Qt.AlignVCenter
 
-                                                Rectangle {
-                                                    anchors.fill: parent
-                                                    radius: 8
-                                                    color: closeMouse.containsMouse ? Qt.rgba(255/255, 85/255, 85/255, 0.35) : "transparent"
-                                                    Text {
-                                                        anchors.centerIn: parent
-                                                        text: "✕"
-                                                        color: closeMouse.containsMouse ? "#ff5555" : Theme.comment
-                                                        font.pixelSize: 9
-                                                    }
+                                                 Rectangle {
+                                                     anchors.fill: parent
+                                                     radius: 9
+                                                     color: closeMouse.containsMouse ? Qt.rgba(255/255, 85/255, 85/255, 0.70) : Qt.rgba(0, 0, 0, 0.40)
+                                                     Text {
+                                                         anchors.centerIn: parent
+                                                         text: "✕"
+                                                         color: closeMouse.containsMouse ? "#ffffff" : Theme.comment
+                                                         font.pixelSize: 10
+                                                         font.weight: Font.Bold
+                                                     }
 
-                                                    MouseArea {
-                                                        id: closeMouse
-                                                        anchors.fill: parent
-                                                        hoverEnabled: true
-                                                        onClicked: {
-                                                            TaskService.closeSpecificWindow(modelData)
-                                                            let rem = root.previewWindowInstances ? root.previewWindowInstances.filter(w => w.id !== modelData.id) : []
-                                                            root.previewWindowInstances = rem
-                                                            if (!rem || rem.length === 0) {
-                                                                previewPopIn.running = false
-                                                                previewPopOut.restart()
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                                                     MouseArea {
+                                                         id: closeMouse
+                                                         anchors.fill: parent
+                                                         hoverEnabled: true
+                                                         acceptedButtons: Qt.LeftButton
+                                                         onEntered: { root.isCardHovered = true; root.previewActive = true; previewCloseTimer.stop() }
+                                                         onExited: { root.isCardHovered = false; previewCloseTimer.restart() }
+                                                         onPressed: (mouse) => { mouse.accepted = true }
+                                                         onClicked: (mouse) => {
+                                                             mouse.accepted = true
+                                                             TaskService.closeSpecificWindow(modelData)
+                                                             let targetId = String(modelData ? (modelData.id || "") : "")
+                                                             let rem = root.previewWindowInstances ? root.previewWindowInstances.filter(w => String(w ? (w.id || "") : "") !== targetId) : []
+                                                             root.previewWindowInstances = rem
+                                                             if (!rem || rem.length === 0) {
+                                                                 root.previewActive = false
+                                                                 root.isPreviewHovered = false
+                                                                 root.isCardHovered = false
+                                                                 previewCloseTimer.stop()
+                                                             }
+                                                         }
+                                                     }
+                                                 }
+                                             }
+                                         }
 
-                                        // Miniature Glass Window Preview Container
+                                        // Lightweight Glass Window Card Viewport (0% CPU, 0ms lag)
                                         Rectangle {
                                             Layout.fillWidth: true
                                             Layout.fillHeight: true
                                             radius: 6
-                                            color: Qt.rgba(0, 0, 0, 0.25)
+                                            color: Qt.rgba(0, 0, 0, 0.45)
                                             border.color: Theme.separator
                                             border.width: 1
+                                            clip: true
 
-                                            // Mock Window Header Bar
-                                            Rectangle {
-                                                anchors.left: parent.left
-                                                anchors.right: parent.right
-                                                anchors.top: parent.top
-                                                height: 14
-                                                radius: 6
-                                                color: Qt.rgba(255/255, 255/255, 255/255, 0.06)
-
-                                                Row {
-                                                    anchors.left: parent.left
-                                                    anchors.leftMargin: 6
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    spacing: 4
-                                                    Rectangle { width: 5; height: 5; radius: 2.5; color: "#ff5555" }
-                                                    Rectangle { width: 5; height: 5; radius: 2.5; color: "#f1fa8c" }
-                                                    Rectangle { width: 5; height: 5; radius: 2.5; color: "#50fa7b" }
-                                                }
-                                            }
-
-                                            // App Icon Centerpiece inside Preview Box
                                             Image {
                                                 anchors.centerIn: parent
-                                                anchors.verticalCenterOffset: 4
-                                                width: 32
-                                                height: 32
-                                                sourceSize.width: 32
-                                                sourceSize.height: 32
+                                                width: 38
+                                                height: 38
+                                                sourceSize.width: 38
+                                                sourceSize.height: 38
                                                 fillMode: Image.PreserveAspectFit
-                                                opacity: cardItem.cardHovered ? 1.0 : 0.82
-                                                source: root.getIconPath(modelData.icon || root.previewTargetApp.icon)
+                                                opacity: 0.85
+                                                source: root.getIconPath(modelData.icon || (root.previewTargetApp ? root.previewTargetApp.icon : ""))
                                             }
-                                        }
-                                    }
-
-                                    // Mouse Area to Focus Specific Window
-                                    MouseArea {
-                                        id: cardMouseArea
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            let globalPos = cardItem.mapToItem(null, 0, 0)
-                                            TaskService.focusSpecificWindow(modelData, globalPos.x, globalPos.y)
-                                            previewPopIn.running = false
-                                            previewPopOut.restart()
                                         }
                                     }
                                 }
@@ -720,7 +783,7 @@ Item {
     PopupWindow {
         id: dockContextMenu
         anchor.window: root.dockWindow
-        anchor.rect.x: Math.round(root.contextTargetX)
+        anchor.rect.x: Math.max(10, Math.min(root.dockWindow ? root.dockWindow.width - dockCtxGlass.implicitWidth - 10 : 800, root.contextTargetX - Math.round(dockCtxGlass.implicitWidth / 2) + 21))
         anchor.rect.y: 0
         anchor.edges: Edges.Top | Edges.Left
         visible: false
@@ -921,7 +984,7 @@ Item {
             for (let i = 0; i < dockRepeater.count; i++) {
                 let item = dockRepeater.itemAt(i)
                 if (item && item.appId) {
-                    let pt = item.mapToItem(null, 0, 0)
+                    let pt = item.mapToItem(root, 0, 0)
                     map[item.appId.toLowerCase()] = { x: Math.round(pt.x), y: Math.round(pt.y) }
                 }
             }

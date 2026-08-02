@@ -94,14 +94,48 @@ Item {
         return false
     }
 
+    function appIdsMatch(id1, id2) {
+        if (!id1 || !id2) return false;
+        let a = id1.toLowerCase().trim()
+        let b = id2.toLowerCase().trim()
+
+        if (a === b) return true;
+
+        let aliases = [
+            ["equibop", "discord", "equicord", "vencord", "webcord"],
+            ["code", "vscode", "visual-studio-code", "code-oss"],
+            ["org.kde.konsole", "konsole", "terminal"],
+            ["org.kde.dolphin", "dolphin"],
+            ["feishin", "org.jeffvli.feishin", "io.github.jeffvli.feishin"],
+            ["zen-alpha", "zen", "zen-browser"],
+            ["com.antigravity.app", "antigravity"]
+        ]
+
+        for (let i = 0; i < aliases.length; i++) {
+            let grp = aliases[i]
+            let aIn = grp.some(x => a.includes(x))
+            let bIn = grp.some(x => b.includes(x))
+            if (aIn && bIn) return true;
+        }
+
+        if (!a.startsWith("steam_app_") && !b.startsWith("steam_app_") && a !== "steam" && b !== "steam") {
+            if (a.includes(b) || b.includes(a)) return true;
+        }
+
+        return false;
+    }
+
     function isRunning(appId) {
         if (!appId) return false;
-        let lower = appId.toLowerCase().trim()
 
         for (let i = 0; i < openWindowApps.length; i++) {
             let winObj = openWindowApps[i]
-            let winApp = typeof winObj === "string" ? winObj.toLowerCase().trim() : (winObj.appId || "").toLowerCase().trim()
-            if (winApp === lower || winApp.includes(lower) || lower.includes(winApp)) {
+            if (!winObj) continue;
+            let winApp = typeof winObj === "string" ? winObj : (winObj.appId || "")
+            let winName = typeof winObj === "object" ? (winObj.name || "") : ""
+            let winCap = typeof winObj === "object" ? (winObj.caption || "") : ""
+
+            if (appIdsMatch(appId, winApp) || appIdsMatch(appId, winName) || appIdsMatch(appId, winCap)) {
                 return true
             }
         }
@@ -116,7 +150,7 @@ Item {
 
         if (activeAppId && activeAppId !== "") {
             let actLower = activeAppId.toLowerCase().trim()
-            if (actLower === lower || actLower.includes(lower) || lower.includes(actLower)) {
+            if (appIdsMatch(lower, actLower)) {
                 return true
             }
         }
@@ -125,30 +159,25 @@ Item {
 
     function getWindowsForApp(appId) {
         if (!appId) return [];
-        let lower = appId.toLowerCase().trim()
         let matching = []
 
         for (let i = 0; i < openWindowApps.length; i++) {
             let winObj = openWindowApps[i]
             if (!winObj) continue;
-            let winApp = typeof winObj === "string" ? winObj.toLowerCase().trim() : (winObj.appId || "").toLowerCase().trim()
+            let winApp = typeof winObj === "string" ? winObj : (winObj.appId || "")
+            let winName = typeof winObj === "object" ? (winObj.name || "") : ""
+            let winCap = typeof winObj === "object" ? (winObj.caption || "") : ""
 
-            let isMatch = false
-            if (winApp === lower) {
-                isMatch = true
-            } else if (!winApp.startsWith("steam_app_") && !lower.startsWith("steam_app_") && lower !== "steam") {
-                if (winApp.includes(lower) || lower.includes(winApp)) {
-                    isMatch = true
-                }
-            }
-
-            if (isMatch) {
+            if (appIdsMatch(appId, winApp) || appIdsMatch(appId, winName) || appIdsMatch(appId, winCap)) {
                 matching.push({
                     id: typeof winObj === "object" ? (winObj.id || winApp) : winApp,
                     appId: winApp,
                     name: typeof winObj === "object" ? (winObj.name || winApp) : winApp,
                     icon: typeof winObj === "object" ? (winObj.icon || winApp) : winApp,
                     caption: typeof winObj === "object" ? (winObj.caption || winObj.name || winApp) : winApp,
+                    width: typeof winObj === "object" ? (winObj.width || 1280) : 1280,
+                    height: typeof winObj === "object" ? (winObj.height || 800) : 800,
+                    preview: typeof winObj === "object" ? (winObj.preview || "") : "",
                     minimized: typeof winObj === "object" ? (winObj.minimized || false) : false,
                     active: typeof winObj === "object" ? (winObj.active || false) : false
                 })
@@ -345,9 +374,9 @@ Item {
         }
     }
 
-    // 100ms High-speed State Reader Timer
+    // 200ms Lightweight State Reader Timer
     Timer {
-        interval: 100
+        interval: 200
         running: true
         repeat: true
         onTriggered: {

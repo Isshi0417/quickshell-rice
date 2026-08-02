@@ -155,7 +155,7 @@ Item {
         stdout: SplitParser {
             onRead: data => {
                 let posVal = parseFloat(data.trim())
-                if (!isNaN(posVal) && posVal >= 0 && !seekProc.running && !root.isSeeking) {
+                if (!isNaN(posVal) && posVal >= 0 && !root.isSeeking) {
                     root.position = posVal
                 }
             }
