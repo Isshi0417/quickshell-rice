@@ -205,12 +205,12 @@ Item {
 
         Item { Layout.preferredHeight: 4 }
 
-        // 3. Elegant Glass Input Card with Animated Typing Dots
+        // 3. Elegant Glass Input Card with Animated Typing Dots & Session Controls
         Rectangle {
             id: cardContainer
             Layout.fillWidth: true
             implicitHeight: cardLayout.implicitHeight + 36
-            radius: 20
+            radius: 24
             color: Theme.isDark ? Qt.rgba(30/255, 30/255, 46/255, 0.65) : Qt.rgba(240/255, 240/255, 245/255, 0.75)
             border.color: LockscreenService.authFailed ? Theme.red : (secretInput.activeFocus ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.18))
             border.width: LockscreenService.authFailed ? 2 : (secretInput.activeFocus ? 2 : 1)
@@ -223,255 +223,229 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.margins: 18
-                spacing: 14
+                spacing: 16
 
-                // Password Row: Input Field + Submit Button
-                RowLayout {
+                // Centered Password Input Field
+                Rectangle {
                     Layout.fillWidth: true
-                    spacing: 12
+                    implicitHeight: 48
+                    radius: 14
+                    color: Qt.rgba(0, 0, 0, 0.28)
+                    border.color: secretInput.activeFocus ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.4) : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
 
-                    // Password Visual Placeholder / Input Area
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 44
-                        radius: 12
-                        color: Qt.rgba(0, 0, 0, 0.25)
-                        border.color: Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.1)
+                    Behavior on border.color { ColorAnimation { duration: 150 } }
 
-                        // Empty State Placeholder Text
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.left: parent.left
-                            anchors.leftMargin: 16
-                            visible: LockscreenService.typedCount === 0 && !LockscreenService.isAuthenticating
-                            text: "Type password to unlock..."
-                            color: Theme.comment
-                            font.pixelSize: 14
-                        }
+                    // Empty State Placeholder Text (Centered)
+                    Text {
+                        anchors.centerIn: parent
+                        visible: LockscreenService.typedCount === 0 && !LockscreenService.isAuthenticating
+                        text: "Type password to unlock..."
+                        color: Theme.comment
+                        font.pixelSize: 14
+                    }
 
-                        // Authenticating Spinner / Status Text
-                        Text {
-                            anchors.centerIn: parent
-                            visible: LockscreenService.isAuthenticating
-                            text: "Verifying password..."
-                            color: Theme.accent
-                            font.pixelSize: 14
-                            font.weight: Font.Medium
-                        }
+                    // Authenticating Spinner / Status Text
+                    Text {
+                        anchors.centerIn: parent
+                        visible: LockscreenService.isAuthenticating
+                        text: "Verifying password..."
+                        color: Theme.accent
+                        font.pixelSize: 14
+                        font.weight: Font.Medium
+                    }
 
-                        ListModel {
-                            id: dotsModel
-                        }
+                    ListModel {
+                        id: dotsModel
+                    }
 
-                        Connections {
-                            target: LockscreenService
-                            function onTypedCountChanged() {
-                                let targetCount = LockscreenService.typedCount
-                                while (dotsModel.count < targetCount) {
-                                    dotsModel.append({ "id": dotsModel.count })
-                                }
-                                while (dotsModel.count > targetCount) {
-                                    dotsModel.remove(dotsModel.count - 1)
-                                }
+                    Connections {
+                        target: LockscreenService
+                        function onTypedCountChanged() {
+                            let targetCount = LockscreenService.typedCount
+                            while (dotsModel.count < targetCount) {
+                                dotsModel.append({ "id": dotsModel.count })
                             }
-                        }
-
-                        // ANIMATED TYPING DOTS (Ultra-smooth sliding dot array with add/remove/displaced transitions)
-                        Item {
-                            id: dotsContainer
-                            anchors.centerIn: parent
-                            implicitWidth: Math.min(320, dotsModel.count * 26)
-                            implicitHeight: 20
-                            visible: dotsModel.count > 0 && !LockscreenService.isAuthenticating
-
-                            Behavior on implicitWidth {
-                                NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
-                            }
-
-                            ListView {
-                                id: dotsView
-                                anchors.centerIn: parent
-                                width: Math.min(dotsContainer.implicitWidth, count * 26)
-                                height: 20
-                                orientation: ListView.Horizontal
-                                spacing: 12
-                                interactive: false
-                                model: dotsModel
-
-                                add: Transition {
-                                    ParallelAnimation {
-                                        NumberAnimation { property: "scale"; from: 0.1; to: 1.0; duration: 250; easing.type: Easing.OutBack; easing.overshoot: 1.6 }
-                                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutCubic }
-                                    }
-                                }
-
-                                remove: Transition {
-                                    ParallelAnimation {
-                                        NumberAnimation { property: "scale"; to: 0.0; duration: 180; easing.type: Easing.InBack }
-                                        NumberAnimation { property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutCubic }
-                                    }
-                                }
-
-                                displaced: Transition {
-                                    NumberAnimation { properties: "x,y"; duration: 220; easing.type: Easing.OutCubic }
-                                }
-
-                                delegate: Item {
-                                    width: 14
-                                    height: 14
-
-                                    Rectangle {
-                                        id: dot
-                                        anchors.fill: parent
-                                        radius: 7
-                                        color: index === dotsModel.count - 1 ? Theme.accent : Theme.fg
-
-                                        Behavior on color { ColorAnimation { duration: 180 } }
-
-                                        // Inner Glow Core
-                                        Rectangle {
-                                            anchors.centerIn: parent
-                                            width: 6
-                                            height: 6
-                                            radius: 3
-                                            color: "#ffffff"
-                                            opacity: index === dotsModel.count - 1 ? 1.0 : 0.6
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Focus Click Area
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                root.forceActiveFocus()
-                                secretInput.forceActiveFocus()
+                            while (dotsModel.count > targetCount) {
+                                dotsModel.remove(dotsModel.count - 1)
                             }
                         }
                     }
 
-                    // Submit / Unlock Arrow Button
-                    Rectangle {
-                        width: 44
-                        height: 44
-                        radius: 12
-                        color: submitMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25)
-                        border.color: Theme.accent
+                    // ANIMATED TYPING DOTS (Centered sliding dot array with add/remove/displaced transitions)
+                    Item {
+                        id: dotsContainer
+                        anchors.centerIn: parent
+                        implicitWidth: Math.min(320, dotsModel.count * 26)
+                        implicitHeight: 20
+                        visible: dotsModel.count > 0 && !LockscreenService.isAuthenticating
 
-                        Behavior on color { ColorAnimation { duration: 120 } }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "➔"
-                            color: submitMouse.containsMouse ? "#ffffff" : Theme.accent
-                            font.pixelSize: 18
-                            font.weight: Font.Bold
+                        Behavior on implicitWidth {
+                            NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
                         }
 
-                        MouseArea {
-                            id: submitMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: LockscreenService.submitPassword()
+                        ListView {
+                            id: dotsView
+                            anchors.centerIn: parent
+                            width: Math.min(dotsContainer.implicitWidth, count * 26)
+                            height: 20
+                            orientation: ListView.Horizontal
+                            spacing: 12
+                            interactive: false
+                            model: dotsModel
+
+                            add: Transition {
+                                ParallelAnimation {
+                                    NumberAnimation { property: "scale"; from: 0.1; to: 1.0; duration: 250; easing.type: Easing.OutBack; easing.overshoot: 1.6 }
+                                    NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutCubic }
+                                }
+                            }
+
+                            remove: Transition {
+                                ParallelAnimation {
+                                    NumberAnimation { property: "scale"; to: 0.0; duration: 180; easing.type: Easing.InBack }
+                                    NumberAnimation { property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutCubic }
+                                }
+                            }
+
+                            displaced: Transition {
+                                NumberAnimation { properties: "x,y"; duration: 220; easing.type: Easing.OutCubic }
+                            }
+
+                            delegate: Item {
+                                width: 14
+                                height: 14
+
+                                Rectangle {
+                                    id: dot
+                                    anchors.fill: parent
+                                    radius: 7
+                                    color: index === dotsModel.count - 1 ? Theme.accent : Theme.fg
+
+                                    Behavior on color { ColorAnimation { duration: 180 } }
+
+                                    // Inner Glow Core
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 6
+                                        height: 6
+                                        radius: 3
+                                        color: "#ffffff"
+                                        opacity: index === dotsModel.count - 1 ? 1.0 : 0.6
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Focus Click Area
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            root.forceActiveFocus()
+                            secretInput.forceActiveFocus()
                         }
                     }
                 }
 
-                // Dynamic Typing Status & Feedback Message
+                // Dynamic Auth Error Feedback Message
                 RowLayout {
                     Layout.fillWidth: true
                     visible: LockscreenService.authFailed
 
                     Item { Layout.fillWidth: true }
 
-                    // Auth Error Message Display
                     Text {
                         text: LockscreenService.authErrorMsg
                         color: Theme.red
                         font.pixelSize: 12
                         font.weight: Font.Bold
                     }
+
+                    Item { Layout.fillWidth: true }
                 }
-            }
-        }
 
-        Item { Layout.preferredHeight: 14 }
-
-        // 4. Session Action Buttons (Power & Unlock)
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 16
-
-            // Suspend Button
-            Rectangle {
-                implicitWidth: 110
-                implicitHeight: 38
-                radius: 10
-                color: suspendMouse.containsMouse ? Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15) : Qt.rgba(0, 0, 0, 0.3)
-                border.color: Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15)
-
+                // Prominent, Large Session Action Buttons (Right underneath Password Input)
                 RowLayout {
-                    anchors.centerIn: parent
-                    spacing: 6
-                    Text { text: "🌙"; font.pixelSize: 13 }
-                    Text { text: "Sleep"; color: Theme.fg; font.pixelSize: 12; font.weight: Font.Medium }
-                }
+                    Layout.fillWidth: true
+                    spacing: 12
 
-                MouseArea {
-                    id: suspendMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        Quickshell.execDetached(["systemctl", "suspend"])
+                    // Suspend / Sleep Button
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 48
+                        radius: 12
+                        color: suspendMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Qt.rgba(0, 0, 0, 0.3)
+                        border.color: suspendMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Text { text: "🌙"; font.pixelSize: 16 }
+                            Text { text: "Sleep"; color: Theme.fg; font.pixelSize: 14; font.weight: Font.SemiBold }
+                        }
+
+                        MouseArea {
+                            id: suspendMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: Quickshell.execDetached(["systemctl", "suspend"])
+                        }
                     }
-                }
-            }
 
-            // Reboot Button
-            Rectangle {
-                implicitWidth: 110
-                implicitHeight: 38
-                radius: 10
-                color: rebootMouse.containsMouse ? Qt.rgba(Theme.orange.r, Theme.orange.g, Theme.orange.b, 0.25) : Qt.rgba(0, 0, 0, 0.3)
-                border.color: Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15)
+                    // Reboot / Restart Button
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 48
+                        radius: 12
+                        color: rebootMouse.containsMouse ? Qt.rgba(Theme.orange.r, Theme.orange.g, Theme.orange.b, 0.3) : Qt.rgba(0, 0, 0, 0.3)
+                        border.color: rebootMouse.containsMouse ? Theme.orange : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
 
-                RowLayout {
-                    anchors.centerIn: parent
-                    spacing: 6
-                    Text { text: "🔄"; font.pixelSize: 13 }
-                    Text { text: "Restart"; color: Theme.fg; font.pixelSize: 12; font.weight: Font.Medium }
-                }
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
 
-                MouseArea {
-                    id: rebootMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: SessionService.reboot()
-                }
-            }
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Text { text: "🔄"; font.pixelSize: 16 }
+                            Text { text: "Restart"; color: Theme.fg; font.pixelSize: 14; font.weight: Font.SemiBold }
+                        }
 
-            // Shutdown Button
-            Rectangle {
-                implicitWidth: 110
-                implicitHeight: 38
-                radius: 10
-                color: powerMouse.containsMouse ? Qt.rgba(Theme.red.r, Theme.red.g, Theme.red.b, 0.25) : Qt.rgba(0, 0, 0, 0.3)
-                border.color: Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15)
+                        MouseArea {
+                            id: rebootMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: SessionService.reboot()
+                        }
+                    }
 
-                RowLayout {
-                    anchors.centerIn: parent
-                    spacing: 6
-                    Text { text: "⚡"; font.pixelSize: 13 }
-                    Text { text: "Power Off"; color: Theme.fg; font.pixelSize: 12; font.weight: Font.Medium }
-                }
+                    // Shutdown / Power Off Button
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 48
+                        radius: 12
+                        color: powerMouse.containsMouse ? Qt.rgba(Theme.red.r, Theme.red.g, Theme.red.b, 0.3) : Qt.rgba(0, 0, 0, 0.3)
+                        border.color: powerMouse.containsMouse ? Theme.red : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
 
-                MouseArea {
-                    id: powerMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: SessionService.shutdown()
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Text { text: "⏻"; font.pixelSize: 16; color: Theme.red }
+                            Text { text: "Power Off"; color: Theme.fg; font.pixelSize: 14; font.weight: Font.SemiBold }
+                        }
+
+                        MouseArea {
+                            id: powerMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: SessionService.shutdown()
+                        }
+                    }
                 }
             }
         }
