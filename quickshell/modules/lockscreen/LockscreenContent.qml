@@ -205,14 +205,14 @@ Item {
 
         Item { Layout.preferredHeight: 4 }
 
-        // 3. Elegant Glass Input Card with Animated Typing Dots & Session Controls
+        // 3. Opaque Solid Input Card with Animated Typing Dots & Session Controls
         Rectangle {
             id: cardContainer
             Layout.fillWidth: true
             implicitHeight: cardLayout.implicitHeight + 36
             radius: 24
-            color: Theme.isDark ? Qt.rgba(30/255, 30/255, 46/255, 0.65) : Qt.rgba(240/255, 240/255, 245/255, 0.75)
-            border.color: LockscreenService.authFailed ? Theme.red : (secretInput.activeFocus ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.18))
+            color: Theme.surface
+            border.color: LockscreenService.authFailed ? Theme.red : (secretInput.activeFocus ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.22))
             border.width: LockscreenService.authFailed ? 2 : (secretInput.activeFocus ? 2 : 1)
 
             Behavior on border.color { ColorAnimation { duration: 180 } }
@@ -230,8 +230,8 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: 48
                     radius: 14
-                    color: Qt.rgba(0, 0, 0, 0.28)
-                    border.color: secretInput.activeFocus ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.4) : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
+                    color: Theme.bg
+                    border.color: secretInput.activeFocus ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.2)
 
                     Behavior on border.color { ColorAnimation { duration: 150 } }
 
@@ -374,8 +374,8 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: 48
                         radius: 12
-                        color: suspendMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Qt.rgba(0, 0, 0, 0.3)
-                        border.color: suspendMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
+                        color: suspendMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Theme.bg
+                        border.color: suspendMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.2)
 
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -400,8 +400,8 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: 48
                         radius: 12
-                        color: rebootMouse.containsMouse ? Qt.rgba(Theme.orange.r, Theme.orange.g, Theme.orange.b, 0.3) : Qt.rgba(0, 0, 0, 0.3)
-                        border.color: rebootMouse.containsMouse ? Theme.orange : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
+                        color: rebootMouse.containsMouse ? Qt.rgba(Theme.orange.r, Theme.orange.g, Theme.orange.b, 0.25) : Theme.bg
+                        border.color: rebootMouse.containsMouse ? Theme.orange : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.2)
 
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -426,8 +426,8 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: 48
                         radius: 12
-                        color: powerMouse.containsMouse ? Qt.rgba(Theme.red.r, Theme.red.g, Theme.red.b, 0.3) : Qt.rgba(0, 0, 0, 0.3)
-                        border.color: powerMouse.containsMouse ? Theme.red : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.12)
+                        color: powerMouse.containsMouse ? Qt.rgba(Theme.red.r, Theme.red.g, Theme.red.b, 0.25) : Theme.bg
+                        border.color: powerMouse.containsMouse ? Theme.red : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.2)
 
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Behavior on border.color { ColorAnimation { duration: 150 } }
