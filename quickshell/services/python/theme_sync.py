@@ -2161,12 +2161,15 @@ def sync_papirus_folders(variant_name, accent="#ff79c6", sub_accent="#bd93f9"):
         else:
             chosen_color = "blue"
 
-    # Execute papirus-folders for all installed Papirus theme variants
-    for theme_name in ["Papirus", "Papirus-Dark", "Papirus-Light"]:
-        try:
-            subprocess.run(["papirus-folders", "-C", chosen_color, "-t", theme_name, "-u"], capture_output=True)
-        except Exception:
-            pass
+    # Execute papirus-folders asynchronously in background thread to prevent blocking theme engine
+    def run_papirus():
+        for theme_name in ["Papirus", "Papirus-Dark", "Papirus-Light"]:
+            try:
+                subprocess.run(["papirus-folders", "-C", chosen_color, "-t", theme_name, "-u"], capture_output=True, timeout=5)
+            except Exception:
+                pass
+    import threading
+    threading.Thread(target=run_papirus, daemon=True).start()
 
 def main():
     parser = argparse.ArgumentParser()

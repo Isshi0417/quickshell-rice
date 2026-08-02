@@ -39,7 +39,7 @@ def save_wallpaper():
     try:
         import subprocess
         file_url = wp_path if wp_path.startswith("file://") else f"file://{wp_path}"
-        subprocess.run(["kwriteconfig6", "--file", "kscreenlockerrc", "--group", "Greeter", "--group", "Wallpaper", "--group", "org.kde.image", "--group", "General", "--key", "Image", file_url], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kscreenlockerrc", "--group", "Greeter", "--group", "Wallpaper", "--group", "org.kde.image", "--group", "General", "--key", "Image", file_url], capture_output=True, timeout=2)
     except Exception:
         pass
 

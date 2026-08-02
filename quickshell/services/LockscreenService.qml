@@ -100,11 +100,13 @@ Item {
     Process {
         id: disableEffectsProc
         command: ["bash", "-c", "qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect overview 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect grid 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect presentwindows 2>/dev/null"]
+        onExited: running = false
     }
 
     Process {
         id: enableEffectsProc
         command: ["bash", "-c", "qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect overview 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect grid 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect presentwindows 2>/dev/null"]
+        onExited: running = false
     }
 
     function appendChar(ch) {
