@@ -14,6 +14,7 @@ Item {
     property int typedCount: 0
     property string username: ""
     property string realName: ""
+    property string avatarPath: ""
 
     // Signal emitted whenever a key is typed to trigger animated dot entry/bounce
     signal keyTyped(string char)
@@ -31,6 +32,18 @@ Item {
 
     Component.onCompleted: {
         usernameProc.running = true
+        avatarProc.running = true
+    }
+
+    Process {
+        id: avatarProc
+        command: ["python3", "-c", "import os; u = os.environ.get('USER', ''); paths = [f'/var/lib/AccountsService/icons/{u}', os.path.expanduser('~/.face'), os.path.expanduser('~/.face.icon')]; print(next((p for p in paths if os.path.exists(p) and os.path.getsize(p) > 0), ''))"]
+        stdout: SplitParser {
+            onRead: data => {
+                let p = data.trim()
+                if (p !== "") root.avatarPath = "file://" + p
+            }
+        }
     }
 
     Timer {

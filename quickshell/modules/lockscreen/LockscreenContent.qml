@@ -162,9 +162,23 @@ Item {
                 border.width: 2
                 Layout.alignment: Qt.AlignHCenter
 
-                // Avatar Icon / Initial Badge
+                clip: true
+
+                // Profile Picture from KDE Settings / AccountsService
+                Image {
+                    id: avatarImg
+                    anchors.fill: parent
+                    source: LockscreenService.avatarPath
+                    fillMode: Image.PreserveAspectCrop
+                    visible: status === Image.Ready && source !== ""
+                    smooth: true
+                    asynchronous: true
+                }
+
+                // Avatar Icon / Initial Badge (Fallback)
                 Text {
                     anchors.centerIn: parent
+                    visible: !avatarImg.visible
                     text: LockscreenService.username ? LockscreenService.username.charAt(0).toUpperCase() : "U"
                     color: Theme.accent
                     font.pixelSize: 42
