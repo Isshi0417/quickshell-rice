@@ -516,10 +516,18 @@ setup_kwin_overview_rules() {
         kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "wmclassmatch" "1"
         kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "skipoverview" "true"
         kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "skipoverviewrule" "2"
+
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "Description" "Ignore QuickShell Lockscreen from KWin Overview Effect"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "wmclass" "lockscreen"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "wmclassmatch" "1"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "skipoverview" "true"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "skipoverviewrule" "2"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "skipswitcher" "true"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-lockscreen-ignore-overview" --key "skipswitcherrule" "2"
         if command -v qdbus6 &>/dev/null; then
             qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
         fi
-        success "KWin Overview exclusion rule configured for QuickShell!"
+        success "KWin Overview exclusion rules configured for QuickShell & Lockscreen!"
     fi
 }
 

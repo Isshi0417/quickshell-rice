@@ -16,6 +16,7 @@ PanelWindow {
     }
 
     WlrLayershell.layer: WlrLayershell.Overlay
+    WlrLayershell.namespace: "lockscreen"
     WlrLayershell.keyboardFocus: LockscreenService.isLocked ? WlrLayershell.Exclusive : WlrLayershell.None
     exclusionMode: ExclusionMode.Ignore
 
