@@ -302,8 +302,8 @@ Item {
 
                             remove: Transition {
                                 ParallelAnimation {
-                                    NumberAnimation { property: "scale"; to: 0.0; duration: 180; easing.type: Easing.InBack }
-                                    NumberAnimation { property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutCubic }
+                                    NumberAnimation { property: "scale"; from: 1.0; to: 0.1; duration: 200; easing.type: Easing.InCubic }
+                                    NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 200; easing.type: Easing.OutCubic }
                                 }
                             }
 
