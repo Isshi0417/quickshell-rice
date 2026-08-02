@@ -1620,74 +1620,52 @@ def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent, is_dark=Tr
         os.path.expanduser('~/.var/app/com.github.fastfetch/config/fastfetch')
     ]
 
+    cyan_c = "#036a96" if not is_dark else "#80ffea"
+    green_c = "#14710a" if not is_dark else "#8aff80"
+    pink_c = "#a3144d" if not is_dark else "#ff80bf"
+    red_c = "#cb3a2a" if not is_dark else "#ff9580"
+    yellow_c = "#846e15" if not is_dark else "#ffff80"
+
     for ff_dir in fastfetch_dirs:
         try:
-            os.makedirs(ff_dir, exist_ok=True)
+            if not os.path.exists(ff_dir):
+                continue
             config_path = os.path.join(ff_dir, 'config.jsonc')
-            
-            data = {}
-            if os.path.exists(config_path):
-                try:
-                    with open(config_path, 'r', encoding='utf-8') as f:
-                        raw = f.read()
-                        cleaned = re.sub(r'//.*', '', raw)
-                        data = json.loads(cleaned) if cleaned.strip() else {}
-                except Exception:
-                    data = {}
+            if not os.path.exists(config_path):
+                config_path = os.path.join(ff_dir, 'config.json')
+            if not os.path.exists(config_path):
+                continue
 
-            if not data:
-                data = {
-                    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-                    "display": {
-                        "separator": "  ➜  "
-                    },
-                    "modules": [
-                        "title",
-                        "separator",
-                        "os",
-                        "host",
-                        "kernel",
-                        "uptime",
-                        "packages",
-                        "shell",
-                        "display",
-                        "de",
-                        "wm",
-                        "theme",
-                        "icons",
-                        "terminal",
-                        "cpu",
-                        "gpu",
-                        "memory",
-                        "disk",
-                        "break",
-                        "colors"
-                    ]
-                }
+            with open(config_path, 'r', encoding='utf-8') as f:
+                content = f.read()
 
-            if "display" not in data or not isinstance(data["display"], dict):
-                data["display"] = {}
-            
-            data["display"]["color"] = {
-                "keys": accent,
-                "title": sub_accent,
-                "output": fg,
-                "separator": current_line
-            }
+            # Update display.color in-place
+            if '"display"' in content and '"color"' in content:
+                content = re.sub(
+                    r'("display"\s*:\s*\{[\s\S]*?"color"\s*:\s*\{)([\s\S]*?)(\})',
+                    lambda m: m.group(1) + f'\n            "keys": "{accent}",\n            "title": "{sub_accent}",\n            "output": "{fg}",\n            "separator": "{current_line}"\n        ' + m.group(3),
+                    content,
+                    count=1
+                )
 
-            if "logo" in data and isinstance(data["logo"], dict):
-                data["logo"]["color"] = {
-                    "1": accent,
-                    "2": sub_accent
-                }
+            # Update logo.color in-place if logo present
+            if '"logo"' in content and '"color"' in content:
+                content = re.sub(
+                    r'("logo"\s*:\s*\{[\s\S]*?"color"\s*:\s*\{)([\s\S]*?)(\})',
+                    lambda m: m.group(1) + f'\n            "1": "{accent}",\n            "2": "{sub_accent}"\n        ' + m.group(3),
+                    content,
+                    count=1
+                )
 
-            if "modules" in data and isinstance(data["modules"], list):
-                for mod in data["modules"]:
-                    if isinstance(mod, dict) and "keyColor" in mod:
-                        del mod["keyColor"]
+            # Update keyColors on modules to theme-aware colors
+            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|cyan)"', r'\1"' + cyan_c + '"', content)
+            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|green)"', r'\1"' + green_c + '"', content)
+            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|magenta)"', r'\1"' + pink_c + '"', content)
+            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|red)"', r'\1"' + red_c + '"', content)
+            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|yellow)"', r'\1"' + yellow_c + '"', content)
 
             with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=4)
+                f.write(content)
         except Exception:
             pass
 
