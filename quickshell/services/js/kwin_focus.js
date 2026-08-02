@@ -7,21 +7,39 @@ if (name && name !== "") {
     var windows = workspace.windowList();
     for (var i = 0; i < windows.length; i++) {
         var win = windows[i];
-        if (!win.normalWindow || win.skipTaskbar) continue;
+        if (!win.normalWindow && !win.fullScreen && !win.managed) continue;
 
-        var cls = (win.resourceClass || win.desktopFileName || "").toLowerCase().trim();
+        var cls = (win.desktopFileName || win.resourceClass || win.resourceName || "").toLowerCase().trim();
         var caption = (win.caption || "").toLowerCase().trim();
         
         if (!cls && !caption) continue;
 
         var matches = false;
-        if (cls) {
-            if (cls.indexOf(name) !== -1 || name.indexOf(cls) !== -1) {
+
+        // 1. Exact match check
+        if (cls === name) {
+            matches = true;
+        }
+
+        // 2. Overwatch & Steam game window targeting
+        if (!matches && (name.indexOf("overwatch") !== -1 || name.indexOf("2357570") !== -1)) {
+            if (cls.indexOf("overwatch") !== -1 || caption.indexOf("overwatch") !== -1 || cls === "steam_app_2357570") {
                 matches = true;
             }
         }
-        if (!matches && caption) {
-            if (caption.indexOf(name) !== -1) {
+
+        // 3. Steam App ID window targeting (must NOT match main "steam" client window)
+        if (!matches && name.indexOf("steam_app_") !== -1) {
+            if (cls === name || cls.indexOf(name) !== -1) {
+                matches = true;
+            }
+        }
+
+        // 4. General matching (exclude steam client when searching for steam_app_)
+        if (!matches && name !== "steam") {
+            if (cls && cls !== "steam" && (cls.indexOf(name) !== -1 || name.indexOf(cls) !== -1)) {
+                matches = true;
+            } else if (caption && caption.indexOf(name) !== -1) {
                 matches = true;
             }
         }
