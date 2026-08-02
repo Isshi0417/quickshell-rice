@@ -165,7 +165,7 @@ Item {
                 // Avatar Icon / Initial Badge
                 Text {
                     anchors.centerIn: parent
-                    text: LockscreenService.username ? LockscreenService.username.charAt(0).toUpperCase() : "🔒"
+                    text: LockscreenService.username ? LockscreenService.username.charAt(0).toUpperCase() : "U"
                     color: Theme.accent
                     font.pixelSize: 42
                     font.weight: Font.Bold
@@ -229,13 +229,6 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
-
-                    // Lock Icon
-                    Text {
-                        text: "🔒"
-                        font.pixelSize: 18
-                        Layout.alignment: Qt.AlignVCenter
-                    }
 
                     // Password Visual Placeholder / Input Area
                     Rectangle {
