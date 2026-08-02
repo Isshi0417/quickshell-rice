@@ -186,8 +186,40 @@ Item {
         return matching
     }
 
+    property var originalActiveWin: null
+
+    function previewRaiseWindow(winObj) {
+        if (!winObj) return;
+        let winId = (winObj.id || "").toString().trim()
+        let query = (winObj.caption || winObj.appId || winObj.name || "").toLowerCase().trim()
+        if (winId === "" && query === "") return;
+        
+        if (!originalActiveWin) {
+            for (let i = 0; i < openWindowApps.length; i++) {
+                let w = openWindowApps[i]
+                if (w && typeof w === "object" && (w.active === true || w.active === "true")) {
+                    originalActiveWin = w
+                    break
+                }
+            }
+        }
+        
+        Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/kwin_preview_raise.py", winId, query])
+    }
+
+    function previewRestoreWindow() {
+        if (originalActiveWin) {
+            let target = originalActiveWin
+            originalActiveWin = null
+            let winId = (target.id || "").toString().trim()
+            let query = (target.caption || target.appId || target.name || "").toLowerCase().trim()
+            Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/kwin_preview_raise.py", winId, query])
+        }
+    }
+
     function focusSpecificWindow(winObj, iconX, iconY) {
         if (!winObj) return;
+        originalActiveWin = null
         let query = (winObj.caption || winObj.appId || "").toLowerCase().trim()
         let ix = Math.round(iconX || 0)
         let iy = Math.round(iconY || 0)
@@ -239,8 +271,8 @@ Item {
         if (cleanCmd === "") return;
 
         let now = Date.now()
-        if (cleanCmd === lastLaunchCmd && (now - lastLaunchTime) < 600) {
-            return; // Ignore rapid double-clicks within 600ms
+        if (cleanCmd === lastLaunchCmd && (now - lastLaunchTime) < 1200) {
+            return; // Ignore rapid double-clicks within 1200ms
         }
         lastLaunchTime = now
         lastLaunchCmd = cleanCmd

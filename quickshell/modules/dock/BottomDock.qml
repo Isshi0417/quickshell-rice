@@ -528,6 +528,7 @@ Item {
                 root.previewActive = false
                 root.isPreviewHovered = false
                 root.isCardHovered = false
+                TaskService.previewRestoreWindow()
             }
         }
     }
@@ -654,8 +655,17 @@ Item {
                                          anchors.fill: parent
                                          hoverEnabled: true
                                          acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                         onEntered: { root.isCardHovered = true; root.previewActive = true; previewCloseTimer.stop() }
-                                         onExited: { root.isCardHovered = false; previewCloseTimer.restart() }
+                                         onEntered: {
+                                             root.isCardHovered = true
+                                             root.previewActive = true
+                                             previewCloseTimer.stop()
+                                             TaskService.previewRaiseWindow(modelData)
+                                         }
+                                         onExited: {
+                                             root.isCardHovered = false
+                                             previewCloseTimer.restart()
+                                             TaskService.previewRestoreWindow()
+                                         }
                                          onClicked: (mouse) => {
                                              if (mouse.button === Qt.RightButton) {
                                                  root.previewActive = false
