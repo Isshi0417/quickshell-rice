@@ -2876,12 +2876,13 @@ Connections {
                     }
                 }
 
-                // Solid Divider (Only visible if app has menu items underneath)
+                // Solid Divider underneath the app name
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
                     color: Theme.currentLine
-                    visible: (root.activeTrayItem && root.activeTrayItem.hasMenu && root.activeTrayMenuOpener && root.activeTrayMenuOpener.children && root.activeTrayMenuOpener.children.length > 0)
+                    Layout.topMargin: 2
+                    Layout.bottomMargin: 2
                 }
 
                 // Render Pure Native DBus App Menu Items (Pre-Cached Real Time Model)
