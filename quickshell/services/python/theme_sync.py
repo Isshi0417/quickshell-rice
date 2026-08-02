@@ -1626,6 +1626,18 @@ def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent, is_dark=Tr
     red_c = "#cb3a2a" if not is_dark else "#ff9580"
     yellow_c = "#846e15" if not is_dark else "#ffff80"
 
+    module_color_map = {
+        "uptime": cyan_c,
+        "os": green_c,
+        "packages": pink_c,
+        "terminal": red_c,
+        "shell": yellow_c,
+        "cpu": sub_accent,
+        "memory": red_c,
+        "disk": green_c,
+        "colors": yellow_c
+    }
+
     for ff_dir in fastfetch_dirs:
         try:
             if not os.path.exists(ff_dir):
@@ -1657,12 +1669,10 @@ def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent, is_dark=Tr
                     count=1
                 )
 
-            # Update keyColors on modules to theme-aware colors
-            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|cyan)"', r'\1"' + cyan_c + '"', content)
-            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|green)"', r'\1"' + green_c + '"', content)
-            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|magenta)"', r'\1"' + pink_c + '"', content)
-            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|red)"', r'\1"' + red_c + '"', content)
-            content = re.sub(r'("keyColor"\s*:\s*)"(?:#[0-9a-fA-F]{3,6}|yellow)"', r'\1"' + yellow_c + '"', content)
+            # Update keyColor for each specific module type distinctly
+            for mod_type, col in module_color_map.items():
+                pattern = r'(\{\s*"type"\s*:\s*"' + mod_type + r'"[\s\S]*?"keyColor"\s*:\s*)"[^"]*"'
+                content = re.sub(pattern, r'\1"' + col + '"', content)
 
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(content)
