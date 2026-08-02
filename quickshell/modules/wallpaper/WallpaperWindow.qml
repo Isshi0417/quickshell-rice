@@ -17,6 +17,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     color: Theme.bg
 
+    mask: Region {}
+
     Image {
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
