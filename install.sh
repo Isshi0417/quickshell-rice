@@ -440,26 +440,18 @@ if os.path.exists(var_app):
 
 for td in target_dirs:
     if os.path.exists(td):
-        # 1. Set preferences.json theme to defaultDark
-        pref_file = os.path.join(td, 'preferences.json')
-        try:
-            pdata = {}
-            if os.path.exists(pref_file):
-                with open(pref_file, 'r', encoding='utf-8') as f:
-                    pdata = json.load(f)
-            pdata['theme'] = 'defaultDark'
-            with open(pref_file, 'w', encoding='utf-8') as f:
-                json.dump(pdata, f, indent=2)
-        except Exception: pass
-
-        # 2. Clean up corrupted config.json / settings.json
-        for bad in ['config.json', 'settings.json']:
-            bp = os.path.join(td, bad)
-            if os.path.exists(bp):
+        # Clean up / sanitize invalid Electron theme strings in config.json, preferences.json, settings.json
+        for fn in ['config.json', 'preferences.json', 'settings.json']:
+            fp = os.path.join(td, fn)
+            if os.path.exists(fp):
                 try:
-                    with open(bp, 'r', encoding='utf-8') as f: bd = json.load(f)
-                    if isinstance(bd, dict) and list(bd.keys()) == ['theme']:
-                        os.remove(bp)
+                    with open(fp, 'r', encoding='utf-8') as f: data = json.load(f)
+                    if isinstance(data, dict):
+                        if list(data.keys()) == ['theme'] and data['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
+                            os.remove(fp)
+                        elif 'theme' in data and data['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
+                            data['theme'] = 'dark'
+                            with open(fp, 'w', encoding='utf-8') as f: json.dump(data, f, indent=2)
                 except Exception: pass
 " 2>/dev/null || true
 }

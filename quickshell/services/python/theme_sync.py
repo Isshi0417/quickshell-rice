@@ -1298,15 +1298,21 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                 with open(os.path.join(themes_dir, "quickshell.json"), 'w', encoding='utf-8') as f:
                     json.dump(qs_json, f, indent=2)
 
-            # Repair/remove any corrupted config.json or settings.json files created by previous bad writes
-            for bad_file_name in ['config.json', 'settings.json']:
-                bad_path = os.path.join(base_dir, bad_file_name)
-                if os.path.exists(bad_path):
+            # Ensure config.json, preferences.json, and settings.json maintain valid Electron themeSource ("dark" or "light")
+            valid_electron_theme = "dark" if is_dark else "light"
+            for conf_file_name in ['config.json', 'preferences.json', 'settings.json']:
+                conf_path = os.path.join(base_dir, conf_file_name)
+                if os.path.exists(conf_path):
                     try:
-                        with open(bad_path, 'r', encoding='utf-8') as f:
-                            bad_data = json.load(f)
-                        if isinstance(bad_data, dict) and list(bad_data.keys()) == ['theme']:
-                            os.remove(bad_path)
+                        with open(conf_path, 'r', encoding='utf-8') as f:
+                            cdata = json.load(f)
+                        if isinstance(cdata, dict):
+                            if list(cdata.keys()) == ['theme'] and cdata['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
+                                os.remove(conf_path)
+                            elif 'theme' in cdata and cdata['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
+                                cdata['theme'] = valid_electron_theme
+                                with open(conf_path, 'w', encoding='utf-8') as f:
+                                    json.dump(cdata, f, indent=2)
                     except Exception:
                         pass
         except Exception:
