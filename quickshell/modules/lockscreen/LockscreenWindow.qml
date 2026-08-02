@@ -20,42 +20,49 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
 
     visible: LockscreenService.isLocked
-    color: Theme.bg
+    color: "#000000"
 
-    // Raw System Wallpaper Image
+    // Raw System Wallpaper Image (Hidden from direct view, used as texture source)
     Image {
         id: bgImage
         anchors.fill: parent
         source: Theme.wallpaperPath
         fillMode: Image.PreserveAspectCrop
+        visible: false
 
         Behavior on source {
             PropertyAnimation { duration: 300 }
         }
     }
 
-    // Blurred Background of the current system wallpaper
+    // ShaderEffectSource texture capture of wallpaper
+    ShaderEffectSource {
+        id: wallpaperSource
+        anchors.fill: parent
+        sourceItem: bgImage
+        hideSource: false
+        live: true
+    }
+
+    // 100% Solid GPU Blurred Background (Isolated strictly to background layer)
     MultiEffect {
         anchors.fill: parent
-        source: bgImage
+        source: wallpaperSource
         blurEnabled: true
         blur: 1.0
-        blurMax: 64
-        opacity: 0.85
+        blurMax: 56
+        opacity: 1.0
     }
 
-    // Glass Dark Backdrop Overlay with Gradient
+    // Subtle Dark Vignette Overlay for Readability
     Rectangle {
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.isDark ? Qt.rgba(15/255, 15/255, 25/255, 0.45) : Qt.rgba(20/255, 20/255, 30/255, 0.35) }
-            GradientStop { position: 0.5; color: Theme.isDark ? Qt.rgba(20/255, 20/255, 32/255, 0.55) : Qt.rgba(25/255, 25/255, 38/255, 0.45) }
-            GradientStop { position: 1.0; color: Theme.isDark ? Qt.rgba(10/255, 10/255, 18/255, 0.65) : Qt.rgba(15/255, 15/255, 25/255, 0.55) }
-        }
+        color: Theme.isDark ? Qt.rgba(0, 0, 0, 0.35) : Qt.rgba(0, 0, 0, 0.25)
     }
 
-    // Lockscreen Content Layout
+    // Razor-Sharp Lockscreen UI Content Layer (Profile, Password Box, Buttons)
     LockscreenContent {
         anchors.fill: parent
+        z: 10
     }
 }
