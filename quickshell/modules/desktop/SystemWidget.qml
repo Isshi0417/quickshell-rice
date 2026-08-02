@@ -267,10 +267,10 @@ PanelWindow {
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 12
-                    spacing: 4
+                    spacing: 6
 
                     Text {
-                        text: "🌡️ Sensors & Net"
+                        text: "🌡️ Sensors & Network"
                         color: Theme.fg
                         font.pixelSize: 12
                         font.weight: Font.Bold
@@ -278,33 +278,82 @@ PanelWindow {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: "💾 NVMe: " + SystemMonitorService.nvmeTemp + "°C"; color: Theme.cyan; font.pixelSize: 10; font.weight: Font.Bold }
+                        spacing: 4
+
+                        RowLayout {
+                            spacing: 4
+                            Text { text: "💾 NVMe:"; color: Theme.comment; font.pixelSize: 10; font.weight: Font.Bold }
+                            Text { text: SystemMonitorService.nvmeTemp + "°C"; color: Theme.cyan; font.pixelSize: 10; font.weight: Font.Bold }
+                        }
+
                         Item { Layout.fillWidth: true }
-                        Text { text: "📶 Wi-Fi: " + SystemMonitorService.wifiTemp + "°C"; color: Theme.yellow; font.pixelSize: 10; font.weight: Font.Bold }
+
+                        RowLayout {
+                            spacing: 4
+                            Text { text: "📶 Wi-Fi:"; color: Theme.comment; font.pixelSize: 10; font.weight: Font.Bold }
+                            Text { text: SystemMonitorService.wifiSignal; color: Theme.subAccent; font.pixelSize: 10; font.weight: Font.Bold }
+                        }
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: "⬇ " + SystemMonitorService.netRx; color: Theme.green; font.pixelSize: 10; font.weight: Font.Bold }
+                        spacing: 4
+
+                        RowLayout {
+                            spacing: 4
+                            Text { text: "⬇ Net:"; color: Theme.comment; font.pixelSize: 10; font.weight: Font.Bold }
+                            Text { text: SystemMonitorService.netRx; color: Theme.green; font.pixelSize: 10; font.weight: Font.Bold }
+                        }
+
                         Item { Layout.fillWidth: true }
-                        Text { text: "⬆ " + SystemMonitorService.netTx; color: Theme.subAccent; font.pixelSize: 10; font.weight: Font.Bold }
+
+                        RowLayout {
+                            spacing: 4
+                            Text { text: "⬆ Up:"; color: Theme.comment; font.pixelSize: 10; font.weight: Font.Bold }
+                            Text { text: SystemMonitorService.netTx; color: Theme.purple; font.pixelSize: 10; font.weight: Font.Bold }
+                        }
                     }
 
-                    Text { text: "🔥 " + SystemMonitorService.topProc + " (" + SystemMonitorService.procCount + " procs)"; color: Theme.pink; font.pixelSize: 10 }
-
-                    // Disk Usage Gauge Bar
-                    Rectangle {
+                    RowLayout {
                         Layout.fillWidth: true
-                        height: 6
-                        radius: 3
-                        color: Theme.bg
+                        spacing: 4
+                        Text { text: "🔥 Top:"; color: Theme.comment; font.pixelSize: 10; font.weight: Font.Bold }
+                        Text {
+                            text: SystemMonitorService.topProc + " (" + SystemMonitorService.procCount + " procs)"
+                            color: Theme.pink
+                            font.pixelSize: 10
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                    }
+
+                    Item { Layout.fillHeight: true }
+
+                    // Storage Gauge Bar
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 3
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Text { text: "Storage"; color: Theme.comment; font.pixelSize: 9 }
+                            Item { Layout.fillWidth: true }
+                            Text { text: SystemMonitorService.diskUsed + " / " + SystemMonitorService.diskTotal + " GB (" + SystemMonitorService.diskPct + "%)"; color: Theme.yellow; font.pixelSize: 9 }
+                        }
 
                         Rectangle {
-                            height: parent.height
-                            width: parent.width * (SystemMonitorService.diskPct / 100.0)
+                            Layout.fillWidth: true
+                            height: 6
                             radius: 3
-                            color: Theme.yellow
-                            Behavior on width { NumberAnimation { duration: 300 } }
+                            color: Theme.bg
+
+                            Rectangle {
+                                height: parent.height
+                                width: parent.width * (SystemMonitorService.diskPct / 100.0)
+                                radius: 3
+                                color: Theme.accent
+                                Behavior on width { NumberAnimation { duration: 300 } }
+                            }
                         }
                     }
                 }

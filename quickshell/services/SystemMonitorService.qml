@@ -23,6 +23,7 @@ Item {
 
     property real nvmeTemp: 0.0
     property real wifiTemp: 0.0
+    property string wifiSignal: "100%"
 
     property real ramUsed: 0.0
     property real ramTotal: 30.6
@@ -69,6 +70,7 @@ Item {
 
                         if (parsed.nvme_temp !== undefined) root.nvmeTemp = parsed.nvme_temp
                         if (parsed.wifi_temp !== undefined) root.wifiTemp = parsed.wifi_temp
+                        if (parsed.wifi_signal !== undefined) root.wifiSignal = parsed.wifi_signal
 
                         if (parsed.ram_used !== undefined) root.ramUsed = parsed.ram_used
                         if (parsed.ram_total !== undefined) root.ramTotal = parsed.ram_total

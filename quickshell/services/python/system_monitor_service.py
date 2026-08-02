@@ -118,6 +118,20 @@ def get_top_process_and_count():
         pass
     return top_proc, proc_count
 
+def get_wifi_signal():
+    try:
+        if os.path.exists('/proc/net/wireless'):
+            with open('/proc/net/wireless', 'r') as f:
+                lines = f.readlines()
+                if len(lines) > 2:
+                    parts = lines[2].split()
+                    link_quality = float(parts[2].rstrip('.'))
+                    pct = min(100, int((link_quality / 70.0) * 100))
+                    return f"{pct}%"
+    except Exception:
+        pass
+    return "100%"
+
 def get_hardware_metrics():
     hw = {
         "cpu_temp": 0.0,
@@ -129,7 +143,8 @@ def get_hardware_metrics():
         "gpu_power": "20W / 78W",
         "gpu_fan": 0,
         "nvme_temp": 0.0,
-        "wifi_temp": 0.0
+        "wifi_temp": 0.0,
+        "wifi_signal": get_wifi_signal()
     }
 
     # NVIDIA GPU metrics via nvidia-smi
@@ -277,6 +292,7 @@ def stream_stats():
                 "gpu_history": list(gpu_history),
                 "nvme_temp": hw["nvme_temp"],
                 "wifi_temp": hw["wifi_temp"],
+                "wifi_signal": hw["wifi_signal"],
                 "ram_used": ram_used,
                 "ram_total": ram_total,
                 "ram_pct": ram_pct,
