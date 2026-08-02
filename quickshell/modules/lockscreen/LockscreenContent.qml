@@ -259,13 +259,30 @@ Item {
                             font.weight: Font.Medium
                         }
 
+                        ListModel {
+                            id: dotsModel
+                        }
+
+                        Connections {
+                            target: LockscreenService
+                            function onTypedCountChanged() {
+                                let targetCount = LockscreenService.typedCount
+                                while (dotsModel.count < targetCount) {
+                                    dotsModel.append({ "id": dotsModel.count })
+                                }
+                                while (dotsModel.count > targetCount) {
+                                    dotsModel.remove(dotsModel.count - 1)
+                                }
+                            }
+                        }
+
                         // ANIMATED TYPING DOTS (Ultra-smooth sliding dot array with add/remove/displaced transitions)
                         Item {
                             id: dotsContainer
                             anchors.centerIn: parent
-                            implicitWidth: Math.min(320, LockscreenService.typedCount * 26)
+                            implicitWidth: Math.min(320, dotsModel.count * 26)
                             implicitHeight: 20
-                            visible: LockscreenService.typedCount > 0 && !LockscreenService.isAuthenticating
+                            visible: dotsModel.count > 0 && !LockscreenService.isAuthenticating
 
                             Behavior on implicitWidth {
                                 NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
@@ -279,7 +296,7 @@ Item {
                                 orientation: ListView.Horizontal
                                 spacing: 12
                                 interactive: false
-                                model: LockscreenService.typedCount
+                                model: dotsModel
 
                                 add: Transition {
                                     ParallelAnimation {
@@ -290,7 +307,7 @@ Item {
 
                                 remove: Transition {
                                     ParallelAnimation {
-                                        NumberAnimation { property: "scale"; to: 0.0; duration: 180; easing.type: Easing.InCubic }
+                                        NumberAnimation { property: "scale"; to: 0.0; duration: 180; easing.type: Easing.InBack }
                                         NumberAnimation { property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutCubic }
                                     }
                                 }
@@ -307,7 +324,7 @@ Item {
                                         id: dot
                                         anchors.fill: parent
                                         radius: 7
-                                        color: index === LockscreenService.typedCount - 1 ? Theme.accent : Theme.fg
+                                        color: index === dotsModel.count - 1 ? Theme.accent : Theme.fg
 
                                         Behavior on color { ColorAnimation { duration: 180 } }
 
@@ -318,7 +335,7 @@ Item {
                                             height: 6
                                             radius: 3
                                             color: "#ffffff"
-                                            opacity: index === LockscreenService.typedCount - 1 ? 1.0 : 0.6
+                                            opacity: index === dotsModel.count - 1 ? 1.0 : 0.6
                                         }
                                     }
                                 }
