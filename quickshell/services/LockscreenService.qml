@@ -33,11 +33,24 @@ Item {
         usernameProc.running = true
     }
 
-    FileWatcher {
-        id: lockTriggerWatcher
-        path: "/tmp/quickshell_lock_trigger"
-        onFileChanged: {
-            root.lock()
+    Timer {
+        interval: 300
+        running: true
+        repeat: true
+        onTriggered: {
+            if (!checkLockTriggerProc.running) checkLockTriggerProc.running = true
+        }
+    }
+
+    Process {
+        id: checkLockTriggerProc
+        command: ["bash", "-c", "if [ -f /tmp/quickshell_lock_trigger ]; then rm -f /tmp/quickshell_lock_trigger; echo 'LOCK'; fi"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (data.trim() === "LOCK") {
+                    root.lock()
+                }
+            }
         }
     }
 
@@ -58,6 +71,7 @@ Item {
         authFailed = false
         authErrorMsg = ""
         isLocked = true
+        disableEffectsProc.running = true
     }
 
     function unlock() {
@@ -66,6 +80,17 @@ Item {
         authFailed = false
         authErrorMsg = ""
         isLocked = false
+        enableEffectsProc.running = true
+    }
+
+    Process {
+        id: disableEffectsProc
+        command: ["bash", "-c", "qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect overview 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect grid 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect presentwindows 2>/dev/null"]
+    }
+
+    Process {
+        id: enableEffectsProc
+        command: ["bash", "-c", "qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect overview 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect grid 2>/dev/null; qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect presentwindows 2>/dev/null"]
     }
 
     function appendChar(ch) {
