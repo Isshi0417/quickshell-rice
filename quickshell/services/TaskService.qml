@@ -53,9 +53,15 @@ Item {
             let isAlreadyAdded = false
             for (let k = 0; k < addedAppIds.length; k++) {
                 let pinId = addedAppIds[k]
-                if (winApp === pinId || winApp.includes(pinId) || pinId.includes(winApp)) {
+                if (winApp === pinId) {
                     isAlreadyAdded = true
                     break
+                }
+                if (!winApp.startsWith("steam_app_") && !pinId.startsWith("steam_app_") && pinId !== "steam") {
+                    if (winApp.includes(pinId) || pinId.includes(winApp)) {
+                        isAlreadyAdded = true
+                        break
+                    }
                 }
             }
 

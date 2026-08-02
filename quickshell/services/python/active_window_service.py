@@ -87,8 +87,30 @@ def parse_desktop(f):
     except Exception: pass
     return entry
 
+def get_steam_library_paths():
+    paths = [
+        os.path.expanduser('~/.steam/root/steamapps'),
+        os.path.expanduser('~/.local/share/Steam/steamapps'),
+        os.path.expanduser('~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps')
+    ]
+    lib_vdf = os.path.expanduser('~/.local/share/Steam/steamapps/libraryfolders.vdf')
+    if os.path.exists(lib_vdf):
+        try:
+            with open(lib_vdf, 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    if '"path"' in line:
+                        parts = line.split('"path"')
+                        if len(parts) > 1:
+                            lib_path = parts[1].replace('"', '').strip()
+                            sa_path = os.path.join(lib_path, 'steamapps')
+                            if os.path.exists(sa_path) and sa_path not in paths:
+                                paths.append(sa_path)
+        except Exception:
+            pass
+    return paths
+
 def resolve_game_info(app_lower):
-    # Handle Steam Apps (e.g. steam_app_1245620 or steam_app_570)
+    # Handle Steam Apps (e.g. steam_app_1245620 or steam_app_2357570 or steam_app_570)
     if 'steam_app_' in app_lower:
         parts = app_lower.split('steam_app_')
         if len(parts) > 1:
@@ -106,11 +128,13 @@ def resolve_game_info(app_lower):
                     game_icon = entry.get('Icon')
                     if game_name: break
 
-            # 2. Search Steam App Manifest VDF files
+            # 2. Search Steam App Manifest VDF files across all discovered Steam libraries
             if not game_name:
-                vdf_paths = glob.glob(os.path.expanduser(f'~/.steam/root/steamapps/appmanifest_{steam_id}.vdf')) + \
-                            glob.glob(os.path.expanduser(f'~/.local/share/Steam/steamapps/appmanifest_{steam_id}.vdf')) + \
-                            glob.glob(os.path.expanduser(f'~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/appmanifest_{steam_id}.vdf'))
+                vdf_paths = []
+                for lib_dir in get_steam_library_paths():
+                    vdf_file = os.path.join(lib_dir, f'appmanifest_{steam_id}.vdf')
+                    if os.path.exists(vdf_file):
+                        vdf_paths.append(vdf_file)
                 for vp in vdf_paths:
                     try:
                         with open(vp, 'r', encoding='utf-8', errors='ignore') as f:
@@ -129,13 +153,17 @@ def resolve_game_info(app_lower):
                 else:
                     game_icon = "com.valvesoftware.Steam"
 
+            if steam_id == '2357570':
+                if not game_name: game_name = "Overwatch 2"
+                if not game_icon or game_icon == "com.valvesoftware.Steam": game_icon = "overwatch"
+
             if not game_name:
                 game_name = f"Steam Game ({steam_id})"
 
             return {
                 "appId": app_lower,
                 "name": game_name,
-                "icon": game_icon
+                "icon": game_icon or "com.valvesoftware.Steam"
             }
 
     # Handle Overwatch & Battle.net games
