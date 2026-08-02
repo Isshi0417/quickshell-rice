@@ -6,8 +6,12 @@ function updateWindows() {
     var wins = workspace.windowList();
     var activeWin = workspace.activeWindow;
 
-    if (activeWin && !activeWin.skipTaskbar) {
-        actApp = (activeWin.resourceClass || activeWin.desktopFileName || "").toLowerCase();
+    if (activeWin) {
+        var actCls = (activeWin.resourceClass || activeWin.desktopFileName || activeWin.resourceName || "").toLowerCase();
+        if (!actCls && activeWin.caption) actCls = activeWin.caption.toLowerCase();
+        if (actCls && actCls !== "quickshell" && actCls !== "plasmashell") {
+            actApp = actCls;
+        }
         if (activeWin.fullScreen) {
             isFullscreen = true;
         }
@@ -18,12 +22,16 @@ function updateWindows() {
         if (w.fullScreen && (w.active || w === activeWin)) {
             isFullscreen = true;
         }
-        if ((w.normalWindow || w.fullScreen || w.managed) && !w.skipTaskbar) {
-            var cls = (w.resourceClass || w.desktopFileName || "").toLowerCase();
+        if (w.normalWindow || w.fullScreen || w.managed) {
+            var cls = (w.desktopFileName || w.resourceClass || w.resourceName || "").toLowerCase();
             if (!cls && w.caption) cls = w.caption.toLowerCase();
-            if (cls && cls !== "quickshell" && cls !== "plasmashell" && cls.indexOf("status_icon") === -1 && cls.indexOf("tray") === -1 && cls.indexOf("desktop") === -1) {
-                if (openApps.indexOf(cls) === -1) {
-                    openApps.push(cls);
+            if (cls) {
+                var isSystemShell = (cls === "quickshell" || cls === "plasmashell" || cls === "krunner" ||
+                                     cls.indexOf("status_icon") !== -1 || cls.indexOf("tray") !== -1 || cls.indexOf("desktop") !== -1);
+                if (!isSystemShell) {
+                    if (openApps.indexOf(cls) === -1) {
+                        openApps.push(cls);
+                    }
                 }
             }
         }

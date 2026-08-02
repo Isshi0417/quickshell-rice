@@ -138,6 +138,44 @@ def resolve_game_info(app_lower):
                 "icon": game_icon
             }
 
+    # Handle Overwatch & Battle.net games
+    if 'overwatch' in app_lower:
+        ow_icon = "overwatch"
+        for d in _search_dirs:
+            if not os.path.exists(d): continue
+            for ext in ['.svg', '.png']:
+                t = os.path.join(d, "overwatch" + ext)
+                if os.path.exists(t):
+                    ow_icon = t
+                    break
+        return {
+            "appId": app_lower,
+            "name": "Overwatch",
+            "icon": ow_icon
+        }
+
+    if 'battle.net' in app_lower or 'battlenet' in app_lower:
+        return {
+            "appId": app_lower,
+            "name": "Battle.net",
+            "icon": "battle.net"
+        }
+
+    # Handle Heroic & Bottles games
+    if 'heroic' in app_lower:
+        return {
+            "appId": app_lower,
+            "name": "Heroic Games Launcher",
+            "icon": "com.heroicgameslauncher.hgl"
+        }
+
+    if 'bottles' in app_lower:
+        return {
+            "appId": app_lower,
+            "name": "Bottles Game",
+            "icon": "com.usebottles.bottles"
+        }
+
     # Handle Lutris games
     if 'lutris' in app_lower:
         lutris_desktops = glob.glob(os.path.expanduser('~/.local/share/applications/lutris-*.desktop'))
@@ -151,10 +189,11 @@ def resolve_game_info(app_lower):
                 }
 
     # Handle Wine / Proton / Gamescope generic titles
-    if app_lower in ['wine', 'wine64', 'proton', 'gamescope']:
+    if app_lower in ['wine', 'wine64', 'proton', 'gamescope'] or 'wine' in app_lower or 'proton' in app_lower or app_lower.endswith('.exe'):
+        clean_name = os.path.basename(app_lower).replace('.exe', '').replace('_', ' ').title()
         return {
             "appId": app_lower,
-            "name": app_lower.capitalize() + " Game",
+            "name": clean_name if clean_name else "Game",
             "icon": "com.valvesoftware.Steam"
         }
 
