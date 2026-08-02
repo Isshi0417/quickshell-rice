@@ -2063,6 +2063,88 @@ body, .theme-dark, .theme-light, :root, html {{
             os.utime(app_file, None)
         except Exception: pass
 
+def sync_papirus_folders(variant_name, accent="#ff79c6", sub_accent="#bd93f9"):
+    """
+    Colorizes Papirus icon theme folders to match the active color scheme.
+    Uses papirus-folders utility and user icon theme overlay if needed.
+    """
+    import os, subprocess, shutil
+
+    if not shutil.which("papirus-folders"):
+        return
+
+    home = os.path.expanduser('~')
+    local_icons = os.path.join(home, '.local', 'share', 'icons')
+
+    # Ensure user-writable copies of Papirus themes exist so papirus-folders can run cleanly without root
+    for theme in ['Papirus', 'Papirus-Dark', 'Papirus-Light']:
+        sys_path = os.path.join('/usr/share/icons', theme)
+        usr_path = os.path.join(local_icons, theme)
+        if os.path.exists(sys_path) and not os.path.exists(usr_path):
+            try:
+                os.makedirs(local_icons, exist_ok=True)
+                subprocess.run(['cp', '-r', sys_path, usr_path], capture_output=True)
+            except Exception: pass
+
+    name_lower = variant_name.lower().strip()
+
+    color_map = {
+        "zoey": "pink",
+        "dracula": "violet",
+        "catppuccin": "magenta" if ("latte" in name_lower or "frappe" in name_lower) else "violet",
+        "gruvbox": "orange",
+        "rosé pine": "pink",
+        "rose pine": "pink",
+        "everforest": "green",
+        "tokyo night": "indigo",
+        "nord": "nordic",
+        "solarized": "cyan",
+        "one dark": "blue",
+        "monokai": "yellow",
+        "cyberpunk": "magenta",
+    }
+
+    chosen_color = None
+    for key, col in color_map.items():
+        if key in name_lower:
+            chosen_color = col
+            break
+
+    if not chosen_color:
+        hex_c = accent.lstrip('#')
+        if len(hex_c) == 6:
+            r = int(hex_c[0:2], 16) / 255.0
+            g = int(hex_c[2:4], 16) / 255.0
+            b = int(hex_c[4:6], 16) / 255.0
+
+            if r > 0.8 and g < 0.5 and b > 0.6:
+                chosen_color = "pink"
+            elif r > 0.5 and b > 0.7:
+                chosen_color = "violet"
+            elif b > 0.7 and g > 0.7:
+                chosen_color = "cyan"
+            elif b > 0.7:
+                chosen_color = "blue"
+            elif g > 0.7 and r < 0.6:
+                chosen_color = "green"
+            elif r > 0.8 and g > 0.7:
+                chosen_color = "yellow"
+            elif r > 0.8 and g > 0.4:
+                chosen_color = "orange"
+            elif r > 0.8:
+                chosen_color = "red"
+            else:
+                chosen_color = "blue"
+        else:
+            chosen_color = "blue"
+
+    # Execute papirus-folders for all installed Papirus theme variants
+    for theme_name in ["Papirus", "Papirus-Dark", "Papirus-Light"]:
+        try:
+            subprocess.run(["papirus-folders", "-C", chosen_color, "-t", theme_name, "-u"], capture_output=True)
+        except Exception:
+            pass
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--bg', required=True)
@@ -2092,6 +2174,7 @@ def main():
     sync_micro(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_konsole(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_xresources(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
+    sync_papirus_folders(args.variantName, args.accent, args.subAccent)
 
 if __name__ == '__main__':
     main()
