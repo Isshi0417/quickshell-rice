@@ -402,17 +402,55 @@ GlassPanel {
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.captureMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: capGlass.implicitWidth
         implicitHeight: capGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: capPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: capPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: captureMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onCaptureMenuOpenChanged() {
+                if (PopupService.captureMenuOpen) {
+                    capPopOut.running = false
+                    captureMenu.visible = true
+                    capPopIn.restart()
+                } else if (captureMenu.visible) {
+                    capPopIn.running = false
+                    capPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: capGlass
             implicitWidth: 280
             implicitHeight: Math.min(420, capCardLayout.implicitHeight + 24)
             anchors.fill: parent
+
+            opacity: captureMenu.animProgress
+            scale: 0.90 + 0.10 * captureMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: capCardLayout
@@ -668,17 +706,55 @@ GlassPanel {
         anchor.rect.x: root.x + (root.width / 2) - (implicitWidth / 2)
         anchor.rect.y: 42
         anchor.edges: Edges.Bottom
-        visible: PopupService.notificationMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: notifGlass.implicitWidth
         implicitHeight: notifGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: notifPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: notifPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: notifMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onNotificationMenuOpenChanged() {
+                if (PopupService.notificationMenuOpen) {
+                    notifPopOut.running = false
+                    notifMenu.visible = true
+                    notifPopIn.restart()
+                } else if (notifMenu.visible) {
+                    notifPopIn.running = false
+                    notifPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: notifGlass
             implicitWidth: 320
             implicitHeight: notifLayout.implicitHeight + 20
             anchors.fill: parent
+
+            opacity: notifMenu.animProgress
+            scale: 0.90 + 0.10 * notifMenu.animProgress
+            transformOrigin: Item.Top
 
             ColumnLayout {
                 id: notifLayout
@@ -864,24 +940,62 @@ GlassPanel {
         }
     }
 
-    // Clipboard Manager Detached Popup Window
+    // Clipboard Manager
     PopupWindow {
-        id: clipboardMenu
+        id: clipMenu
         anchor.window: window
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.clipboardMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: clipGlass.implicitWidth
         implicitHeight: clipGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: clipPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: clipPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: clipMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onClipboardMenuOpenChanged() {
+                if (PopupService.clipboardMenuOpen) {
+                    clipPopOut.running = false
+                    clipMenu.visible = true
+                    clipPopIn.restart()
+                } else if (clipMenu.visible) {
+                    clipPopIn.running = false
+                    clipPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: clipGlass
             implicitWidth: 320
             implicitHeight: Math.min(500, clipCardLayout.implicitHeight + 24)
             anchors.fill: parent
+
+            opacity: clipMenu.animProgress
+            scale: 0.90 + 0.10 * clipMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: clipCardLayout
@@ -1056,22 +1170,60 @@ GlassPanel {
 
     // Bluetooth Control Detached Popup Window
     PopupWindow {
-        id: bluetoothMenu
+        id: btMenu
         anchor.window: window
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.bluetoothMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: btGlass.implicitWidth
         implicitHeight: btGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: btPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: btPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: btMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onBluetoothMenuOpenChanged() {
+                if (PopupService.bluetoothMenuOpen) {
+                    btPopOut.running = false
+                    btMenu.visible = true
+                    btPopIn.restart()
+                } else if (btMenu.visible) {
+                    btPopIn.running = false
+                    btPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: btGlass
             implicitWidth: 300
             implicitHeight: BluetoothService.isPowered ? 240 : 80
             anchors.fill: parent
+
+            opacity: btMenu.animProgress
+            scale: 0.90 + 0.10 * btMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: btCardLayout
@@ -1325,17 +1477,55 @@ GlassPanel {
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.audioMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: audioGlass.implicitWidth
         implicitHeight: audioGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: audioPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: audioPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: audioMenu.visible = false
+        }
+
+Connections {
+            target: PopupService
+            function onAudioMenuOpenChanged() {
+                if (PopupService.audioMenuOpen) {
+                    audioPopOut.running = false
+                    audioMenu.visible = true
+                    audioPopIn.restart()
+                } else if (audioMenu.visible) {
+                    audioPopIn.running = false
+                    audioPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: audioGlass
             implicitWidth: 300
             implicitHeight: Math.min(480, audioCardLayout.implicitHeight + 24)
             anchors.fill: parent
+
+            opacity: audioMenu.animProgress
+            scale: 0.90 + 0.10 * audioMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: audioCardLayout
@@ -1598,17 +1788,55 @@ GlassPanel {
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.brightnessMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: brightGlass.implicitWidth
         implicitHeight: brightGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: brightPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: brightPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: brightMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onBrightnessMenuOpenChanged() {
+                if (PopupService.brightnessMenuOpen) {
+                    brightPopOut.running = false
+                    brightMenu.visible = true
+                    brightPopIn.restart()
+                } else if (brightMenu.visible) {
+                    brightPopIn.running = false
+                    brightPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: brightGlass
             implicitWidth: 300
             implicitHeight: Math.min(400, brightCardLayout.implicitHeight + 24)
             anchors.fill: parent
+
+            opacity: brightMenu.animProgress
+            scale: 0.90 + 0.10 * brightMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: brightCardLayout
@@ -1766,17 +1994,55 @@ GlassPanel {
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.mountMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: mountGlass.implicitWidth
         implicitHeight: mountGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: mountPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: mountPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: mountMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onMountMenuOpenChanged() {
+                if (PopupService.mountMenuOpen) {
+                    mountPopOut.running = false
+                    mountMenu.visible = true
+                    mountPopIn.restart()
+                } else if (mountMenu.visible) {
+                    mountPopIn.running = false
+                    mountPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: mountGlass
             implicitWidth: 320
             implicitHeight: Math.min(480, mountCardLayout.implicitHeight + 24)
             anchors.fill: parent
+
+            opacity: mountMenu.animProgress
+            scale: 0.90 + 0.10 * mountMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: mountCardLayout
@@ -1976,17 +2242,55 @@ GlassPanel {
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.networkMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: netGlass.implicitWidth
         implicitHeight: netGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: netPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: netPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: netMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onNetworkMenuOpenChanged() {
+                if (PopupService.networkMenuOpen) {
+                    netPopOut.running = false
+                    netMenu.visible = true
+                    netPopIn.restart()
+                } else if (netMenu.visible) {
+                    netPopIn.running = false
+                    netPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: netGlass
             implicitWidth: 300
             implicitHeight: NetworkService.isWifiPowered ? 240 : 80
             anchors.fill: parent
+
+            opacity: netMenu.animProgress
+            scale: 0.90 + 0.10 * netMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: netCardLayout
@@ -2178,17 +2482,55 @@ GlassPanel {
         anchor.rect.x: Math.round(root.x + root.width - implicitWidth)
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Right
-        visible: PopupService.batteryMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: batGlass.implicitWidth
         implicitHeight: batGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: batPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: batPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: batMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onBatteryMenuOpenChanged() {
+                if (PopupService.batteryMenuOpen) {
+                    batPopOut.running = false
+                    batMenu.visible = true
+                    batPopIn.restart()
+                } else if (batMenu.visible) {
+                    batPopIn.running = false
+                    batPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: batGlass
             implicitWidth: 300
             implicitHeight: Math.min(450, batCardLayout.implicitHeight + 24)
             anchors.fill: parent
+
+            opacity: batMenu.animProgress
+            scale: 0.90 + 0.10 * batMenu.animProgress
+            transformOrigin: Item.TopRight
 
             ColumnLayout {
                 id: batCardLayout
@@ -2444,17 +2786,55 @@ GlassPanel {
         anchor.rect.x: Math.round(Math.max(10, Math.min(window.width - 175, root.x + root.activeTrayX + 12 - 87)))
         anchor.rect.y: 40
         anchor.edges: Edges.Bottom | Edges.Left
-        visible: PopupService.trayMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: trayGlass.implicitWidth
         implicitHeight: trayGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: trayPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: trayPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: trayContextMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onTrayMenuOpenChanged() {
+                if (PopupService.trayMenuOpen) {
+                    trayPopOut.running = false
+                    trayContextMenu.visible = true
+                    trayPopIn.restart()
+                } else if (trayContextMenu.visible) {
+                    trayPopIn.running = false
+                    trayPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: trayGlass
             implicitWidth: 170
             implicitHeight: trayCol.implicitHeight + 16
             anchors.fill: parent
+
+            opacity: trayContextMenu.animProgress
+            scale: 0.90 + 0.10 * trayContextMenu.animProgress
+            transformOrigin: Item.TopLeft
 
             ColumnLayout {
                 id: trayCol

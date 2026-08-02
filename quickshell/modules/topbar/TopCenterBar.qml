@@ -147,17 +147,55 @@ GlassPanel {
         anchor.rect.x: root.x + (root.width / 2) - (implicitWidth / 2)
         anchor.rect.y: 42
         anchor.edges: Edges.Bottom
-        visible: PopupService.calendarMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: calendarGlass.implicitWidth
         implicitHeight: calendarGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: calPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: calPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: timeMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onCalendarMenuOpenChanged() {
+                if (PopupService.calendarMenuOpen) {
+                    calPopOut.running = false
+                    timeMenu.visible = true
+                    calPopIn.restart()
+                } else if (timeMenu.visible) {
+                    calPopIn.running = false
+                    calPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: calendarGlass
             implicitWidth: calWidget.implicitWidth + 24
             implicitHeight: calWidget.implicitHeight + 20
             anchors.fill: parent
+
+            opacity: timeMenu.animProgress
+            scale: 0.90 + 0.10 * timeMenu.animProgress
+            transformOrigin: Item.Top
 
             CalendarWidget {
                 id: calWidget
@@ -173,17 +211,55 @@ GlassPanel {
         anchor.rect.x: root.x + (root.width / 2) - (implicitWidth / 2)
         anchor.rect.y: 42
         anchor.edges: Edges.Bottom
-        visible: PopupService.mediaMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: playerGlass.implicitWidth
         implicitHeight: playerGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: mediaPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: mediaPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: mediaMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onMediaMenuOpenChanged() {
+                if (PopupService.mediaMenuOpen) {
+                    mediaPopOut.running = false
+                    mediaMenu.visible = true
+                    mediaPopIn.restart()
+                } else if (mediaMenu.visible) {
+                    mediaPopIn.running = false
+                    mediaPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: playerGlass
             implicitWidth: 240
             implicitHeight: playerLayout.implicitHeight + 24
             anchors.fill: parent
+
+            opacity: mediaMenu.animProgress
+            scale: 0.90 + 0.10 * mediaMenu.animProgress
+            transformOrigin: Item.Top
 
             ColumnLayout {
                 id: playerLayout

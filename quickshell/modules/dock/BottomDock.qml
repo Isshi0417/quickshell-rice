@@ -417,17 +417,55 @@ Item {
         anchor.rect.x: Math.round(root.contextTargetX)
         anchor.rect.y: 0
         anchor.edges: Edges.Top | Edges.Left
-        visible: PopupService.dockMenuOpen
+        visible: false
         color: "transparent"
 
         implicitWidth: dockCtxGlass.implicitWidth
         implicitHeight: dockCtxGlass.implicitHeight
+
+        property real animProgress: 0.0
+
+        NumberAnimation on animProgress {
+            id: dockMenuPopIn
+            running: false
+            to: 1.0
+            duration: 220
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.15
+        }
+
+        NumberAnimation on animProgress {
+            id: dockMenuPopOut
+            running: false
+            to: 0.0
+            duration: 160
+            easing.type: Easing.InQuad
+            onFinished: dockContextMenu.visible = false
+        }
+
+        Connections {
+            target: PopupService
+            function onDockMenuOpenChanged() {
+                if (PopupService.dockMenuOpen) {
+                    dockMenuPopOut.running = false
+                    dockContextMenu.visible = true
+                    dockMenuPopIn.restart()
+                } else if (dockContextMenu.visible) {
+                    dockMenuPopIn.running = false
+                    dockMenuPopOut.restart()
+                }
+            }
+        }
 
         GlassPanel {
             id: dockCtxGlass
             implicitWidth: 160
             implicitHeight: ctxCol.implicitHeight + 16
             anchors.fill: parent
+
+            opacity: dockContextMenu.animProgress
+            scale: 0.90 + 0.10 * dockContextMenu.animProgress
+            transformOrigin: Item.BottomLeft
 
             ColumnLayout {
                 id: ctxCol

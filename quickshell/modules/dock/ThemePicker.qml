@@ -7,7 +7,44 @@ import "../../theme"
 Item {
     id: root
 
-    visible: PopupService.themePickerOpen
+    visible: false
+    opacity: animProgress
+    scale: 0.90 + 0.10 * animProgress
+    transformOrigin: Item.BottomRight
+
+    property real animProgress: 0.0
+
+    NumberAnimation on animProgress {
+        id: tpPopIn
+        running: false
+        to: 1.0
+        duration: 220
+        easing.type: Easing.OutBack
+        easing.overshoot: 1.15
+    }
+
+    NumberAnimation on animProgress {
+        id: tpPopOut
+        running: false
+        to: 0.0
+        duration: 160
+        easing.type: Easing.InQuad
+        onFinished: root.visible = false
+    }
+
+    Connections {
+        target: PopupService
+        function onThemePickerOpenChanged() {
+            if (PopupService.themePickerOpen) {
+                tpPopOut.running = false
+                root.visible = true
+                tpPopIn.restart()
+            } else if (root.visible) {
+                tpPopIn.running = false
+                tpPopOut.restart()
+            }
+        }
+    }
 
     property string activeTab: "themes" // "themes" or "wallpapers"
     property string activeCategory: "All"
