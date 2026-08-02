@@ -69,29 +69,30 @@ def launch():
 
     for fp_id in candidates_flatpak:
         if fp_id in installed_flatpaks:
-            subprocess.Popen(["flatpak", "run", fp_id], start_new_session=True)
-            return
+            subprocess.Popen(["flatpak", "run", fp_id], start_new_session=True, close_fds=True)
+            sys.exit(0)
         # Fallback check via flatpak info
         check = subprocess.run(["flatpak", "info", fp_id], capture_output=True, text=True)
         if check.returncode == 0:
-            subprocess.Popen(["flatpak", "run", fp_id], start_new_session=True)
-            return
+            subprocess.Popen(["flatpak", "run", fp_id], start_new_session=True, close_fds=True)
+            sys.exit(0)
 
     # 2. GTK Desktop launcher check (using clean desktop ID without paths)
     if shutil.which("gtk-launch"):
         for gtk_id in [base_name, f"{base_name}.desktop", lower_name]:
             res = subprocess.run(["gtk-launch", gtk_id], capture_output=True, text=True)
             if res.returncode == 0:
-                return
+                sys.exit(0)
 
     # 3. Direct binary execution
     bin_name = clean_cmd.split()[0]
     if shutil.which(bin_name):
-        subprocess.Popen(clean_cmd, shell=True, start_new_session=True)
-        return
+        subprocess.Popen(clean_cmd, shell=True, start_new_session=True, close_fds=True)
+        sys.exit(0)
 
     # 4. Fallback execution
-    subprocess.Popen(f"{clean_cmd} &", shell=True, start_new_session=True)
+    subprocess.Popen(f"{clean_cmd} &", shell=True, start_new_session=True, close_fds=True)
+    sys.exit(0)
 
 if __name__ == '__main__':
     launch()

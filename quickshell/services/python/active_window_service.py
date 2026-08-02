@@ -236,6 +236,19 @@ def resolve_game_info(app_lower):
 
     return None
 
+_desktop_file_cache = None
+
+def get_all_desktop_files():
+    global _desktop_file_cache
+    if _desktop_file_cache is None:
+        _desktop_file_cache = (
+            glob.glob('/usr/share/applications/*.desktop') +
+            glob.glob(os.path.expanduser('~/.local/share/applications/*.desktop')) +
+            glob.glob(os.path.expanduser('~/.local/share/flatpak/exports/share/applications/*.desktop')) +
+            glob.glob('/var/lib/flatpak/exports/share/applications/*.desktop')
+        )
+    return _desktop_file_cache
+
 def resolve_app_info(app_id):
     if not app_id:
         return {"appId": "", "name": "Application", "icon": ""}
@@ -249,12 +262,7 @@ def resolve_app_info(app_id):
         _icon_cache[app_lower] = game_info
         return game_info
 
-    desktop_files = (
-        glob.glob('/usr/share/applications/*.desktop') +
-        glob.glob('/usr/share/applications/**/*.desktop', recursive=True) +
-        glob.glob(os.path.expanduser('~/.local/share/applications/*.desktop')) +
-        glob.glob(os.path.expanduser('~/.local/share/applications/**/*.desktop'), recursive=True)
-    )
+    desktop_files = get_all_desktop_files()
 
     icon_name = None
     app_name = None
@@ -262,15 +270,27 @@ def resolve_app_info(app_id):
     for df in desktop_files:
         basename = os.path.basename(df).lower()
         base_no_ext = basename.replace('.desktop', '')
-        if app_lower == base_no_ext or app_lower in basename or base_no_ext in app_lower:
+        if app_lower == base_no_ext:
             entry = parse_desktop(df)
             if entry:
-                if 'Icon' in entry and not icon_name:
-                    icon_name = entry['Icon']
-                if 'Name' in entry and not app_name:
-                    app_name = entry['Name']
+                icon_name = entry.get('Icon')
+                app_name = entry.get('Name')
                 if icon_name and app_name:
                     break
+
+    if not icon_name or not app_name:
+        for df in desktop_files:
+            basename = os.path.basename(df).lower()
+            base_no_ext = basename.replace('.desktop', '')
+            if app_lower in basename or base_no_ext in app_lower:
+                entry = parse_desktop(df)
+                if entry:
+                    if 'Icon' in entry and not icon_name:
+                        icon_name = entry['Icon']
+                    if 'Name' in entry and not app_name:
+                        app_name = entry['Name']
+                    if icon_name and app_name:
+                        break
 
     if not icon_name:
         icon_name = app_lower
@@ -288,10 +308,6 @@ def resolve_app_info(app_id):
                 target = os.path.join(d, icon_name + ext)
                 if os.path.exists(target):
                     resolved_icon_path = target
-                    break
-                matches = glob.glob(os.path.join(d, f'*{icon_name}*{ext}'))
-                if matches:
-                    resolved_icon_path = matches[0]
                     break
             if resolved_icon_path:
                 break
