@@ -340,8 +340,21 @@ class ActiveAppService(dbus.service.Object):
 
             raw_wins = json.loads(open_windows_json)
             enriched_wins = []
-            for app_id in raw_wins:
-                enriched_wins.append(resolve_app_info(app_id))
+            for item in raw_wins:
+                if isinstance(item, dict):
+                    app_id = item.get("appId", "")
+                    info = resolve_app_info(app_id)
+                    enriched_wins.append({
+                        "id": item.get("id", app_id),
+                        "appId": app_id,
+                        "name": info.get("name", app_id),
+                        "icon": info.get("icon", app_id),
+                        "caption": item.get("caption", info.get("name", app_id)),
+                        "minimized": item.get("minimized", False),
+                        "active": item.get("active", False)
+                    })
+                elif isinstance(item, str):
+                    enriched_wins.append(resolve_app_info(item))
 
             with open(OPEN_WINS_FILE, "w") as f:
                 f.write(json.dumps(enriched_wins))

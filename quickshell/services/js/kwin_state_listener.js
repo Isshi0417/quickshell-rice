@@ -29,9 +29,14 @@ function updateWindows() {
                 var isSystemShell = (cls === "quickshell" || cls === "plasmashell" || cls === "krunner" ||
                                      cls.indexOf("status_icon") !== -1 || cls.indexOf("tray") !== -1 || cls.indexOf("desktop") !== -1);
                 if (!isSystemShell) {
-                    if (openApps.indexOf(cls) === -1) {
-                        openApps.push(cls);
-                    }
+                    var winId = String(w.internalId || w.windowId || (cls + "_" + i));
+                    openApps.push({
+                        id: winId,
+                        appId: cls,
+                        caption: w.caption || cls,
+                        minimized: w.minimized || false,
+                        active: (w === activeWin || w.active || false)
+                    });
                 }
             }
         }

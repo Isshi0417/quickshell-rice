@@ -123,6 +123,52 @@ Item {
         return false
     }
 
+    function getWindowsForApp(appId) {
+        if (!appId) return [];
+        let lower = appId.toLowerCase().trim()
+        let matching = []
+
+        for (let i = 0; i < openWindowApps.length; i++) {
+            let winObj = openWindowApps[i]
+            if (!winObj) continue;
+            let winApp = typeof winObj === "string" ? winObj.toLowerCase().trim() : (winObj.appId || "").toLowerCase().trim()
+
+            let isMatch = false
+            if (winApp === lower) {
+                isMatch = true
+            } else if (!winApp.startsWith("steam_app_") && !lower.startsWith("steam_app_") && lower !== "steam") {
+                if (winApp.includes(lower) || lower.includes(winApp)) {
+                    isMatch = true
+                }
+            }
+
+            if (isMatch) {
+                matching.push({
+                    id: typeof winObj === "object" ? (winObj.id || winApp) : winApp,
+                    appId: winApp,
+                    name: typeof winObj === "object" ? (winObj.name || winApp) : winApp,
+                    icon: typeof winObj === "object" ? (winObj.icon || winApp) : winApp,
+                    caption: typeof winObj === "object" ? (winObj.caption || winObj.name || winApp) : winApp,
+                    minimized: typeof winObj === "object" ? (winObj.minimized || false) : false,
+                    active: typeof winObj === "object" ? (winObj.active || false) : false
+                })
+            }
+        }
+        return matching
+    }
+
+    function focusSpecificWindow(winObj, iconX, iconY) {
+        if (!winObj) return;
+        let query = (winObj.caption || winObj.appId || "").toLowerCase().trim()
+        let ix = Math.round(iconX || 0)
+        let iy = Math.round(iconY || 0)
+
+        root.activeAppId = (winObj.appId || "").toLowerCase().trim()
+        proc.running = false
+        proc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/kwin_focus.py", query, ix.toString(), iy.toString()]
+        proc.running = true
+    }
+
     function focusApp(appId, cmd, iconX, iconY) {
         if (!appId) return;
         let lower = appId.toLowerCase().trim()
