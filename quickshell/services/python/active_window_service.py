@@ -396,6 +396,13 @@ def setup_kwin_listener():
 
 def main():
     try:
+        if not os.path.exists(ACTIVE_FILE):
+            with open(ACTIVE_FILE, "w") as f:
+                f.write("")
+        if not os.path.exists(OPEN_WINS_FILE):
+            with open(OPEN_WINS_FILE, "w") as f:
+                f.write("[]")
+
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         bus_name = dbus.service.BusName("io.quickshell.ActiveApp", bus=dbus.SessionBus())
         service = ActiveAppService(bus_name)
