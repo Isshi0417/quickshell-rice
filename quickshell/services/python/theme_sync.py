@@ -1612,9 +1612,84 @@ theme[upload_end]="#ff80bf"
         except Exception:
             pass
 
-def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent):
-    # Preserves user's exact master fastfetch configuration from ~/.config/fastfetch/
-    pass
+def sync_fastfetch(bg, surface, current_line, fg, accent, sub_accent, is_dark=True):
+    import json, os, re
+    
+    fastfetch_dirs = [
+        os.path.expanduser('~/.config/fastfetch'),
+        os.path.expanduser('~/.var/app/com.github.fastfetch/config/fastfetch')
+    ]
+
+    for ff_dir in fastfetch_dirs:
+        try:
+            os.makedirs(ff_dir, exist_ok=True)
+            config_path = os.path.join(ff_dir, 'config.jsonc')
+            
+            data = {}
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        raw = f.read()
+                        cleaned = re.sub(r'//.*', '', raw)
+                        data = json.loads(cleaned) if cleaned.strip() else {}
+                except Exception:
+                    data = {}
+
+            if not data:
+                data = {
+                    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+                    "display": {
+                        "separator": "  ➜  "
+                    },
+                    "modules": [
+                        "title",
+                        "separator",
+                        "os",
+                        "host",
+                        "kernel",
+                        "uptime",
+                        "packages",
+                        "shell",
+                        "display",
+                        "de",
+                        "wm",
+                        "theme",
+                        "icons",
+                        "terminal",
+                        "cpu",
+                        "gpu",
+                        "memory",
+                        "disk",
+                        "break",
+                        "colors"
+                    ]
+                }
+
+            if "display" not in data or not isinstance(data["display"], dict):
+                data["display"] = {}
+            
+            data["display"]["color"] = {
+                "keys": accent,
+                "title": sub_accent,
+                "output": fg,
+                "separator": current_line
+            }
+
+            if "logo" in data and isinstance(data["logo"], dict):
+                data["logo"]["color"] = {
+                    "1": accent,
+                    "2": sub_accent
+                }
+
+            if "modules" in data and isinstance(data["modules"], list):
+                for mod in data["modules"]:
+                    if isinstance(mod, dict) and "keyColor" in mod:
+                        del mod["keyColor"]
+
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
+        except Exception:
+            pass
 
 def sync_ghostty(bg, surface, current_line, fg, accent, sub_accent):
     ghostty_dir = os.path.expanduser('~/.config/ghostty')
@@ -2024,7 +2099,7 @@ def main():
     sync_starship(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
     sync_vim(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
     sync_btop(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
-    sync_fastfetch(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
+    sync_fastfetch(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
     sync_ghostty(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_micro(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_konsole(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
