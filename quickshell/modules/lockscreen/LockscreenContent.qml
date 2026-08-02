@@ -362,29 +362,10 @@ Item {
                     }
                 }
 
-                // Dynamic Typing Status / Letter Counter & Feedback Message
+                // Dynamic Typing Status & Feedback Message
                 RowLayout {
                     Layout.fillWidth: true
-
-                    // Typing Letter Counter Badge (Shows EXACT count of letters typed)
-                    Rectangle {
-                        implicitWidth: counterText.implicitWidth + 16
-                        implicitHeight: 24
-                        radius: 12
-                        color: LockscreenService.typedCount > 0 ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2) : "transparent"
-                        visible: LockscreenService.typedCount > 0
-
-                        Behavior on color { ColorAnimation { duration: 150 } }
-
-                        Text {
-                            id: counterText
-                            anchors.centerIn: parent
-                            text: `⌨️ ${LockscreenService.typedCount} ${LockscreenService.typedCount === 1 ? 'letter' : 'letters'} typed`
-                            color: Theme.accent
-                            font.pixelSize: 11
-                            font.weight: Font.Bold
-                        }
-                    }
+                    visible: LockscreenService.authFailed
 
                     Item { Layout.fillWidth: true }
 
@@ -394,7 +375,6 @@ Item {
                         color: Theme.red
                         font.pixelSize: 12
                         font.weight: Font.Bold
-                        visible: LockscreenService.authFailed
                     }
                 }
             }
