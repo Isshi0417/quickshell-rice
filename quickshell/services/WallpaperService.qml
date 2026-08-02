@@ -11,6 +11,7 @@ Item {
     property string activeCustomWallpaper: ""
     property var cachedThemeWallpapers: ({})
     property bool isLoaded: false
+    readonly property string currentWallpaper: Theme.wallpaperPath
 
     // Automatic recolor watcher background daemon
     Process {

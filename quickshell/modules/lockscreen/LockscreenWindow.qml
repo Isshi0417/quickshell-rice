@@ -20,13 +20,13 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
 
     visible: LockscreenService.isLocked
-    color: "black"
+    color: Theme.bg
 
     // Raw System Wallpaper Image
     Image {
         id: bgImage
         anchors.fill: parent
-        source: WallpaperService.currentWallpaper
+        source: Theme.wallpaperPath
         fillMode: Image.PreserveAspectCrop
 
         Behavior on source {
@@ -34,22 +34,13 @@ PanelWindow {
         }
     }
 
-    // ShaderEffectSource capturing bgImage GPU texture with hideSource: true
-    ShaderEffectSource {
-        id: wallpaperSource
-        anchors.fill: parent
-        sourceItem: bgImage
-        hideSource: true
-        live: true
-    }
-
     // Blurred Background of the current system wallpaper
     MultiEffect {
         anchors.fill: parent
-        source: wallpaperSource
+        source: bgImage
         blurEnabled: true
         blur: 1.0
-        blurMax: 48
+        blurMax: 64
         opacity: 0.85
     }
 
