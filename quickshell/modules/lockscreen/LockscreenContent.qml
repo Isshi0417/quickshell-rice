@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
@@ -153,29 +154,50 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             spacing: 12
 
-            Rectangle {
+            // User Avatar Container (Pure Circle with Mask & Breathing Ring)
+            Item {
                 width: 96
                 height: 96
-                radius: 48
-                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
-                border.color: Theme.accent
-                border.width: 2
                 Layout.alignment: Qt.AlignHCenter
 
-                clip: true
+                // Mask Item for Avatar Image Rounding
+                Rectangle {
+                    id: avatarMask
+                    anchors.fill: parent
+                    radius: 48
+                    color: "#ffffff"
+                    visible: false
+                    layer.enabled: true
+                }
 
-                // Profile Picture from KDE Settings / AccountsService
+                // Main Circular Background & Border
+                Rectangle {
+                    id: avatarCircle
+                    anchors.fill: parent
+                    radius: 48
+                    color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                    border.color: Theme.accent
+                    border.width: 2
+                }
+
+                // Profile Image masked to 100% pure circle
                 Image {
                     id: avatarImg
                     anchors.fill: parent
+                    anchors.margins: 2
                     source: LockscreenService.avatarPath
                     fillMode: Image.PreserveAspectCrop
                     visible: status === Image.Ready && source !== ""
                     smooth: true
                     asynchronous: true
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: avatarMask
+                    }
                 }
 
-                // Avatar Icon / Initial Badge (Fallback)
+                // Initial Letter Fallback
                 Text {
                     anchors.centerIn: parent
                     visible: !avatarImg.visible
@@ -185,7 +207,7 @@ Item {
                     font.weight: Font.Bold
                 }
 
-                // Breathing Glow Ring
+                // Breathing Glow Ring (Outside container, true 104px circle)
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: -4
