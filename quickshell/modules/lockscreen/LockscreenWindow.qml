@@ -22,26 +22,34 @@ PanelWindow {
     visible: LockscreenService.isLocked
     color: "black"
 
-    // Raw System Wallpaper (Hidden source item for MultiEffect blur)
+    // Raw System Wallpaper Image
     Image {
         id: bgImage
         anchors.fill: parent
         source: WallpaperService.currentWallpaper
         fillMode: Image.PreserveAspectCrop
-        visible: false
 
         Behavior on source {
             PropertyAnimation { duration: 300 }
         }
     }
 
+    // ShaderEffectSource capturing bgImage GPU texture with hideSource: true
+    ShaderEffectSource {
+        id: wallpaperSource
+        anchors.fill: parent
+        sourceItem: bgImage
+        hideSource: true
+        live: true
+    }
+
     // Blurred Background of the current system wallpaper
     MultiEffect {
         anchors.fill: parent
-        source: bgImage
+        source: wallpaperSource
         blurEnabled: true
         blur: 1.0
-        blurMax: 64
+        blurMax: 48
         opacity: 0.85
     }
 
