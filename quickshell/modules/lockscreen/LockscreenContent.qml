@@ -259,40 +259,67 @@ Item {
                             font.weight: Font.Medium
                         }
 
-                        // ANIMATED TYPING DOTS (Ultra-smooth scale, opacity, & glow entry)
-                        Row {
+                        // ANIMATED TYPING DOTS (Ultra-smooth sliding dot array with add/remove/displaced transitions)
+                        Item {
+                            id: dotsContainer
                             anchors.centerIn: parent
-                            spacing: 12
+                            implicitWidth: Math.min(320, LockscreenService.typedCount * 26)
+                            implicitHeight: 20
                             visible: LockscreenService.typedCount > 0 && !LockscreenService.isAuthenticating
 
-                            Repeater {
+                            Behavior on implicitWidth {
+                                NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+                            }
+
+                            ListView {
+                                id: dotsView
+                                anchors.centerIn: parent
+                                width: Math.min(dotsContainer.implicitWidth, count * 26)
+                                height: 20
+                                orientation: ListView.Horizontal
+                                spacing: 12
+                                interactive: false
                                 model: LockscreenService.typedCount
 
-                                Rectangle {
-                                    id: dot
+                                add: Transition {
+                                    ParallelAnimation {
+                                        NumberAnimation { property: "scale"; from: 0.1; to: 1.0; duration: 250; easing.type: Easing.OutBack; easing.overshoot: 1.6 }
+                                        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 200; easing.type: Easing.OutCubic }
+                                    }
+                                }
+
+                                remove: Transition {
+                                    ParallelAnimation {
+                                        NumberAnimation { property: "scale"; to: 0.0; duration: 180; easing.type: Easing.InCubic }
+                                        NumberAnimation { property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutCubic }
+                                    }
+                                }
+
+                                displaced: Transition {
+                                    NumberAnimation { properties: "x,y"; duration: 220; easing.type: Easing.OutCubic }
+                                }
+
+                                delegate: Item {
                                     width: 14
                                     height: 14
-                                    radius: 7
-                                    color: index === LockscreenService.typedCount - 1 ? Theme.accent : Theme.fg
 
-                                    Behavior on color { ColorAnimation { duration: 180 } }
-
-                                    scale: 1.0
-                                    opacity: 1.0
-
-                                    ParallelAnimation {
-                                        running: true
-                                        NumberAnimation { target: dot; property: "scale"; from: 0.1; to: 1.0; duration: 240; easing.type: Easing.OutBack; easing.overshoot: 1.8 }
-                                        NumberAnimation { target: dot; property: "opacity"; from: 0.0; to: 1.0; duration: 180; easing.type: Easing.OutCubic }
-                                    }
-
-                                    // Inner Glow Core
                                     Rectangle {
-                                        anchors.centerIn: parent
-                                        width: 6
-                                        height: 6
-                                        radius: 3
-                                        color: "#ffffff"
+                                        id: dot
+                                        anchors.fill: parent
+                                        radius: 7
+                                        color: index === LockscreenService.typedCount - 1 ? Theme.accent : Theme.fg
+
+                                        Behavior on color { ColorAnimation { duration: 180 } }
+
+                                        // Inner Glow Core
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width: 6
+                                            height: 6
+                                            radius: 3
+                                            color: "#ffffff"
+                                            opacity: index === LockscreenService.typedCount - 1 ? 1.0 : 0.6
+                                        }
                                     }
                                 }
                             }
