@@ -95,10 +95,20 @@ GlassPanel {
                             id: wsItemMouse
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: WorkspaceService.switchTo(wsItem.wsNumber)
+                            onClicked: {
+                                PopupService.closeAll()
+                                WorkspaceService.switchTo(wsItem.wsNumber)
+                            }
                         }
                     }
                 }
+            }
+
+            // Scroll Throttle Timer (Eliminates scroll lag during rapid mouse wheel scrolling)
+            Timer {
+                id: scrollThrottleTimer
+                interval: 120
+                repeat: false
             }
 
             // Global Mouse Wheel Scroll Area
@@ -108,6 +118,10 @@ GlassPanel {
                 acceptedButtons: Qt.NoButton
 
                 onWheel: (wheel) => {
+                    if (scrollThrottleTimer.running) return;
+                    scrollThrottleTimer.restart();
+                    PopupService.closeAll()
+
                     if (wheel.angleDelta.y < 0) {
                         if (WorkspaceService.activeWorkspace < WorkspaceService.totalWorkspaces) {
                             WorkspaceService.switchTo(WorkspaceService.activeWorkspace + 1)
