@@ -80,6 +80,7 @@ install_dependencies() {
                 alacritty \
                 wmctrl \
                 xdotool \
+                papirus-icon-theme \
                 qt6-qtdeclarative \
                 qt6-qtdeclarative-devel \
                 qt6-qtbase \
@@ -115,6 +116,7 @@ install_dependencies() {
                 lsblk \
                 starship \
                 alacritty \
+                papirus-icon-theme \
                 wmctrl \
                 xdotool || warn "Some packages failed to install via Pacman, continuing..."
             ;;
@@ -143,6 +145,7 @@ install_dependencies() {
                 lm-sensors \
                 starship \
                 alacritty \
+                papirus-icon-theme \
                 wmctrl \
                 xdotool || warn "Some packages failed to install via APT, continuing..."
             ;;
@@ -230,6 +233,35 @@ install_wallust_lutgen() {
             cargo install lutgen || warn "Could not install lutgen"
         fi
     fi
+}
+
+# 5. Papirus Folders Tool Installation
+install_papirus_folders() {
+    info "Checking papirus-folders installation..."
+    if command -v papirus-folders &>/dev/null; then
+        success "papirus-folders found at $(which papirus-folders)"
+        return 0
+    fi
+
+    info "Installing papirus-folders for dynamic Papirus folder colorization..."
+    if [ "$PM" = "pacman" ]; then
+        if command -v yay &>/dev/null; then
+            yay -S --needed --noconfirm papirus-folders-git 2>/dev/null && return 0
+        elif command -v paru &>/dev/null; then
+            paru -S --needed --noconfirm papirus-folders-git 2>/dev/null && return 0
+        fi
+    fi
+
+    # Universal install fallback via official Papirus git repo
+    info "Installing papirus-folders via official repository installer..."
+    curl -sS https://raw.githubusercontent.com/PapirusDevelopmentTeam/papirus-folders/master/install.sh | sh 2>/dev/null || {
+        BUILD_DIR=$(mktemp -d)
+        git clone https://github.com/PapirusDevelopmentTeam/papirus-folders.git "$BUILD_DIR"
+        sudo cp "$BUILD_DIR/papirus-folders" /usr/local/bin/papirus-folders 2>/dev/null || sudo cp "$BUILD_DIR/papirus-folders" /usr/bin/papirus-folders
+        sudo chmod +x /usr/local/bin/papirus-folders 2>/dev/null || sudo chmod +x /usr/bin/papirus-folders
+        rm -rf "$BUILD_DIR"
+    }
+    success "papirus-folders installed successfully!"
 }
 
 # Helper to safely unlink or remove existing config target before relinking
@@ -446,9 +478,33 @@ run_initial_sync() {
             --subAccent "#ff80bf" \
             --isDark true \
             --variantName Pro || warn "Theme sync script executed with warnings."
-        success "Multi-app themes dynamically generated across GTK, Alacritty, VSCode, Zen, Feishin, Starship, btop, fastfetch, ghostty, micro, konsole, and Xresources!"
+        success "Multi-app themes dynamically generated across GTK, Alacritty, VSCode, Zen, Feishin, Starship, btop, fastfetch, ghostty, micro, konsole, Papirus folders, and Xresources!"
     else
         warn "theme_sync.py not found at ${THEME_SYNC_SCRIPT}"
+    fi
+}
+
+# Helper to setup refresh-quickshell script and bash alias
+setup_refresh_script() {
+    info "Installing refresh-quickshell binary script to ~/.local/bin/refresh-quickshell..."
+    LOCAL_BIN="${HOME}/.local/bin"
+    mkdir -p "$LOCAL_BIN"
+
+    if [ -f "${SCRIPT_DIR}/refresh-quickshell" ]; then
+        cp "${SCRIPT_DIR}/refresh-quickshell" "${LOCAL_BIN}/refresh-quickshell"
+        chmod +x "${LOCAL_BIN}/refresh-quickshell"
+        success "refresh-quickshell installed to ${LOCAL_BIN}/refresh-quickshell"
+    fi
+
+    BASHRC="${HOME}/.bashrc"
+    if [ -f "$BASHRC" ]; then
+        if ! grep -q "refresh-quickshell" "$BASHRC"; then
+            echo "" >> "$BASHRC"
+            echo "# QuickShell refresh-quickshell alias" >> "$BASHRC"
+            echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$BASHRC"
+            echo "alias refresh-quickshell=\"\$HOME/.local/bin/refresh-quickshell\"" >> "$BASHRC"
+            success "Added refresh-quickshell alias to ~/.bashrc"
+        fi
     fi
 }
 
@@ -456,10 +512,12 @@ run_initial_sync() {
 install_dependencies
 install_quickshell
 install_wallust_lutgen
+install_papirus_folders
 deploy_configs
 deploy_kde_colorschemes
 repair_feishin_flatpak
 setup_bashrc
+setup_refresh_script
 setup_systemd_service
 run_initial_sync
 
@@ -468,6 +526,7 @@ echo -e "${GREEN}${BOLD}========================================================
 echo "    QuickShell Ecosystem Successfully Installed!         "
 echo "=========================================================="${NC}
 echo -e "${CYAN}Key Commands & Shortcuts:${NC}"
+echo " - Refresh Ecosystem Utility: refresh-quickshell (or ~/.local/bin/refresh-quickshell)"
 echo " - App Launcher Toggle Script: ${TARGET_CONFIG_DIR}/quickshell/toggle_launcher.sh"
 echo " - Systemd Service Management: systemctl --user [start|stop|restart|status] quickshell.service"
 echo " - Manual Theme Sync: python3 ${TARGET_CONFIG_DIR}/quickshell/services/python/theme_sync.py"
