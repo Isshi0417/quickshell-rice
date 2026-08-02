@@ -383,7 +383,7 @@ Item {
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: 8
-                            Text { text: "🌙"; font.pixelSize: 16 }
+                            Text { text: "󰒲"; font.pixelSize: 18; font.family: "JetBrainsMono Nerd Font, Symbols Nerd Font, CaskaydiaCove Nerd Font, Sans-Serif"; color: Theme.accent }
                             Text { text: "Sleep"; color: Theme.fg; font.pixelSize: 14; font.weight: Font.SemiBold }
                         }
 
@@ -409,7 +409,7 @@ Item {
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: 8
-                            Text { text: "🔄"; font.pixelSize: 16 }
+                            Text { text: "󰜉"; font.pixelSize: 18; font.family: "JetBrainsMono Nerd Font, Symbols Nerd Font, CaskaydiaCove Nerd Font, Sans-Serif"; color: Theme.orange }
                             Text { text: "Restart"; color: Theme.fg; font.pixelSize: 14; font.weight: Font.SemiBold }
                         }
 
@@ -435,7 +435,7 @@ Item {
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: 8
-                            Text { text: "⏻"; font.pixelSize: 16; color: Theme.red }
+                            Text { text: "󰐥"; font.pixelSize: 18; font.family: "JetBrainsMono Nerd Font, Symbols Nerd Font, CaskaydiaCove Nerd Font, Sans-Serif"; color: Theme.red }
                             Text { text: "Power Off"; color: Theme.fg; font.pixelSize: 14; font.weight: Font.SemiBold }
                         }
 
