@@ -122,12 +122,12 @@ Item {
                     interval: 1000
                     running: true
                     repeat: true
-                    onTriggered: clockText.text = {
+                    onTriggered: {
                         let date = new Date()
                         let h = date.getHours().toString().padStart(2, '0')
                         let m = date.getMinutes().toString().padStart(2, '0')
                         let s = date.getSeconds().toString().padStart(2, '0')
-                        return `${h}:${m}:${s}`
+                        clockText.text = `${h}:${m}:${s}`
                     }
                 }
             }
