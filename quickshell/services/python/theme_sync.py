@@ -1298,7 +1298,7 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                 with open(os.path.join(themes_dir, "quickshell.json"), 'w', encoding='utf-8') as f:
                     json.dump(qs_json, f, indent=2)
 
-            # Ensure config.json, preferences.json, and settings.json maintain valid Electron themeSource ("dark" or "light")
+            # Ensure config.json, preferences.json, and settings.json maintain valid Electron themeSource ("dark" or "light") and comfortable window bounds
             valid_electron_theme = "dark" if is_dark else "light"
             for conf_file_name in ['config.json', 'preferences.json', 'settings.json']:
                 conf_path = os.path.join(base_dir, conf_file_name)
@@ -1307,10 +1307,25 @@ def sync_feishin(bg, surface, current_line, fg, accent, sub_accent, is_dark, var
                         with open(conf_path, 'r', encoding='utf-8') as f:
                             cdata = json.load(f)
                         if isinstance(cdata, dict):
+                            modified = False
                             if list(cdata.keys()) == ['theme'] and cdata['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
                                 os.remove(conf_path)
+                                continue
                             elif 'theme' in cdata and cdata['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
                                 cdata['theme'] = valid_electron_theme
+                                modified = True
+
+                            bounds = cdata.get('bounds', {})
+                            if isinstance(bounds, dict) and (bounds.get('width', 0) < 1000 or bounds.get('height', 0) < 700):
+                                cdata['bounds'] = {
+                                    'x': bounds.get('x', 50),
+                                    'y': bounds.get('y', 50),
+                                    'width': 1280,
+                                    'height': 800
+                                }
+                                modified = True
+
+                            if modified:
                                 with open(conf_path, 'w', encoding='utf-8') as f:
                                     json.dump(cdata, f, indent=2)
                     except Exception:

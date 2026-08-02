@@ -440,17 +440,25 @@ if os.path.exists(var_app):
 
 for td in target_dirs:
     if os.path.exists(td):
-        # Clean up / sanitize invalid Electron theme strings in config.json, preferences.json, settings.json
+        # Clean up / sanitize invalid Electron theme strings and ensure comfortable window bounds
         for fn in ['config.json', 'preferences.json', 'settings.json']:
             fp = os.path.join(td, fn)
             if os.path.exists(fp):
                 try:
                     with open(fp, 'r', encoding='utf-8') as f: data = json.load(f)
                     if isinstance(data, dict):
+                        mod = False
                         if list(data.keys()) == ['theme'] and data['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
                             os.remove(fp)
+                            continue
                         elif 'theme' in data and data['theme'] not in ['dark', 'light', 'system', 'defaultDark', 'defaultLight']:
                             data['theme'] = 'dark'
+                            mod = True
+                        bounds = data.get('bounds', {})
+                        if isinstance(bounds, dict) and (bounds.get('width', 0) < 1000 or bounds.get('height', 0) < 700):
+                            data['bounds'] = {'x': bounds.get('x', 50), 'y': bounds.get('y', 50), 'width': 1280, 'height': 800}
+                            mod = True
+                        if mod:
                             with open(fp, 'w', encoding='utf-8') as f: json.dump(data, f, indent=2)
                 except Exception: pass
 " 2>/dev/null || true
