@@ -508,6 +508,21 @@ setup_refresh_script() {
     fi
 }
 
+setup_kwin_overview_rules() {
+    info "Configuring KWin Overview rules to ignore QuickShell components..."
+    if command -v kwriteconfig6 &>/dev/null; then
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "Description" "Ignore QuickShell from KWin Overview Effect"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "wmclass" "quickshell"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "wmclassmatch" "1"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "skipoverview" "true"
+        kwriteconfig6 --file kwinrulesrc --group "quickshell-ignore-overview" --key "skipoverviewrule" "2"
+        if command -v qdbus6 &>/dev/null; then
+            qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
+        fi
+        success "KWin Overview exclusion rule configured for QuickShell!"
+    fi
+}
+
 # Execution Flow
 install_dependencies
 install_quickshell
@@ -518,6 +533,7 @@ deploy_kde_colorschemes
 repair_feishin_flatpak
 setup_bashrc
 setup_refresh_script
+setup_kwin_overview_rules
 setup_systemd_service
 run_initial_sync
 

@@ -8,7 +8,6 @@ Item {
 
     function lock() {
         LockscreenService.lock()
-        lockProc.running = true
     }
 
     function logout() {

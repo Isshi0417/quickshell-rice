@@ -266,10 +266,10 @@ Item {
                             font.weight: Font.Medium
                         }
 
-                        // ANIMATED TYPING DOTS (Shows WHEN and HOW MANY letters are typed)
+                        // ANIMATED TYPING DOTS (Ultra-smooth scale, opacity, & glow entry)
                         Row {
                             anchors.centerIn: parent
-                            spacing: 10
+                            spacing: 12
                             visible: LockscreenService.typedCount > 0 && !LockscreenService.isAuthenticating
 
                             Repeater {
@@ -282,14 +282,15 @@ Item {
                                     radius: 7
                                     color: index === LockscreenService.typedCount - 1 ? Theme.accent : Theme.fg
 
-                                    Behavior on color { ColorAnimation { duration: 120 } }
+                                    Behavior on color { ColorAnimation { duration: 180 } }
 
-                                    // Spawn Bounce & Pulse Animation for each character typed
                                     scale: 1.0
-                                    SequentialAnimation on scale {
+                                    opacity: 1.0
+
+                                    ParallelAnimation {
                                         running: true
-                                        NumberAnimation { from: 0.2; to: 1.4; duration: 120; easing.type: Easing.OutQuad }
-                                        NumberAnimation { from: 1.4; to: 1.0; duration: 100; easing.type: Easing.OutBounce }
+                                        NumberAnimation { target: dot; property: "scale"; from: 0.1; to: 1.0; duration: 240; easing.type: Easing.OutBack; easing.overshoot: 1.8 }
+                                        NumberAnimation { target: dot; property: "opacity"; from: 0.0; to: 1.0; duration: 180; easing.type: Easing.OutCubic }
                                     }
 
                                     // Inner Glow Core
