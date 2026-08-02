@@ -1189,8 +1189,8 @@ GlassPanel {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 28
                                     radius: 5
-                                    color: Qt.rgba(80/255, 250/255, 123/255, 0.15)
-                                    border.color: Theme.green
+                                    color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.18)
+                                    border.color: Theme.accent
                                     border.width: 1
 
                                     RowLayout {
@@ -1199,11 +1199,11 @@ GlassPanel {
                                         anchors.rightMargin: 8
                                         spacing: 6
 
-                                        Rectangle { width: 6; height: 6; radius: 3; color: Theme.green }
+                                        Rectangle { width: 6; height: 6; radius: 3; color: Theme.accent }
 
                                         Text {
                                             text: modelData.name
-                                            color: Theme.green
+                                            color: Theme.accent
                                             font.pixelSize: 10
                                             font.weight: Font.Bold
                                             elide: Text.ElideRight
@@ -1551,8 +1551,8 @@ GlassPanel {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 24
                                     radius: 4
-                                    color: modelData.isActive ? (Theme.isDark ? Qt.rgba(80/255, 250/255, 123/255, 0.15) : Qt.rgba(80/255, 250/255, 123/255, 0.22)) : (srcItemMouse.containsMouse ? Theme.surface : "transparent")
-                                    border.color: modelData.isActive ? (Theme.isDark ? Theme.green : "#15803d") : "transparent"
+                                    color: modelData.isActive ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.18) : (srcItemMouse.containsMouse ? Theme.surface : "transparent")
+                                    border.color: modelData.isActive ? Theme.accent : "transparent"
                                     border.width: 1
 
                                     RowLayout {
@@ -1563,12 +1563,12 @@ GlassPanel {
 
                                         Rectangle {
                                             width: 6; height: 6; radius: 3
-                                            color: modelData.isActive ? (Theme.isDark ? Theme.green : "#15803d") : Theme.comment
+                                            color: modelData.isActive ? Theme.accent : Theme.comment
                                         }
 
                                         Text {
                                             text: modelData.name
-                                            color: modelData.isActive ? (Theme.isDark ? Theme.green : "#15803d") : Theme.fg
+                                            color: modelData.isActive ? Theme.accent : Theme.fg
                                             font.pixelSize: 10
                                             font.weight: modelData.isActive ? Font.Bold : Font.Normal
                                             elide: Text.ElideRight
@@ -2120,7 +2120,9 @@ GlassPanel {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 26
                                 radius: 5
-                                color: modelData.inUse ? Qt.rgba(80/255, 250/255, 123/255, 0.15) : (netItemMouse.containsMouse ? Theme.currentLine : "transparent")
+                                color: modelData.inUse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.18) : (netItemMouse.containsMouse ? Theme.currentLine : "transparent")
+                                border.color: modelData.inUse ? Theme.accent : "transparent"
+                                border.width: 1
 
                                 RowLayout {
                                     anchors.fill: parent
@@ -2137,7 +2139,7 @@ GlassPanel {
 
                                     Text {
                                         text: modelData.ssid
-                                        color: modelData.inUse ? Theme.green : Theme.fg
+                                        color: modelData.inUse ? Theme.accent : Theme.fg
                                         font.pixelSize: 10
                                         font.weight: modelData.inUse ? Font.Bold : Font.Normal
                                         elide: Text.ElideRight
@@ -2146,7 +2148,7 @@ GlassPanel {
 
                                     Text {
                                         text: modelData.inUse ? "Connected" : modelData.signal + "%"
-                                        color: modelData.inUse ? Theme.green : Theme.comment
+                                        color: modelData.inUse ? Theme.accent : Theme.comment
                                         font.pixelSize: 9
                                     }
                                 }
