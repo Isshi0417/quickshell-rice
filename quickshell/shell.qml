@@ -7,6 +7,7 @@ import "modules/launcher"
 import "modules/wallpaper"
 import "modules/notifications"
 import "modules/desktop"
+import "modules/lockscreen"
 import "services"
 
 Scope {
@@ -144,4 +145,7 @@ Scope {
 
     // Bottom-Right Notification Toast Overlay
     NotificationToast {}
+
+    // Lockscreen Overlay Window (Layer: Overlay)
+    LockscreenWindow {}
 }

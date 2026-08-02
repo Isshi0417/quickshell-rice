@@ -7,6 +7,7 @@ Item {
     id: root
 
     function lock() {
+        LockscreenService.lock()
         lockProc.running = true
     }
 
