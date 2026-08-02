@@ -155,7 +155,16 @@ def resolve_game_info(app_lower):
 
             if steam_id == '2357570':
                 if not game_name: game_name = "Overwatch 2"
-                if not game_icon or game_icon == "com.valvesoftware.Steam": game_icon = "overwatch"
+                ow_full = None
+                for d in _search_dirs:
+                    if not os.path.exists(d): continue
+                    for ext in ['.svg', '.png']:
+                        t = os.path.join(d, "overwatch" + ext)
+                        if os.path.exists(t): ow_full = t; break
+                        t2 = os.path.join(d, "lutris_overwatch" + ext)
+                        if os.path.exists(t2): ow_full = t2; break
+                    if ow_full: break
+                game_icon = ow_full or "overwatch"
 
             if not game_name:
                 game_name = f"Steam Game ({steam_id})"

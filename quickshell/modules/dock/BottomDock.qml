@@ -376,8 +376,11 @@ Item {
             return mapped.startsWith("file://") ? mapped : "file://" + mapped
         }
 
-        // 2. Hardcoded fallback overrides for common system apps
+        // 2. Hardcoded fallback overrides for common system apps & games
         let themeDir = Theme.iconTheme
+        if (clean.includes("overwatch") || clean.includes("2357570")) {
+            return "file:///usr/share/icons/" + themeDir + "/64x64/apps/overwatch.svg"
+        }
         if (clean.includes("alacritty")) return "file:///usr/share/icons/" + themeDir + "/32x32/apps/Alacritty.svg"
         if (clean.includes("dolphin")) return "file:///usr/share/icons/" + themeDir + "/32x32/apps/org.kde.dolphin.svg"
         if (clean.includes("firefox")) return "file:///usr/share/icons/" + themeDir + "/32x32/apps/firefox.svg"
@@ -390,12 +393,13 @@ Item {
     // Helper: Formatted Program Name Cleaner
     function getCleanProgramName(app) {
         if (!app) return "Application";
-        if (app.name && app.name !== "" && app.name !== app.appId) return app.name;
+        if (app.name && app.name !== "" && app.name !== app.appId && app.name !== "Steam Game (2357570)") return app.name;
         let id = app.appId || "";
         if (!id) return "Application";
         let raw = id.includes(".") ? id.split(".").pop() : id;
         raw = raw.replace(/[-_]/g, " ");
         let lower = raw.toLowerCase();
+        if (lower.includes("overwatch") || lower.includes("2357570")) return "Overwatch 2";
         if (lower === "alacritty") return "Alacritty";
         if (lower === "dolphin") return "Dolphin";
         if (lower === "firefox") return "Firefox";
