@@ -33,6 +33,14 @@ Item {
         usernameProc.running = true
     }
 
+    FileWatcher {
+        id: lockTriggerWatcher
+        path: "/tmp/quickshell_lock_trigger"
+        onFileChanged: {
+            root.lock()
+        }
+    }
+
     Process {
         id: usernameProc
         command: ["whoami"]
