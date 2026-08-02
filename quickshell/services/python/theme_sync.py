@@ -1345,6 +1345,8 @@ def sync_starship(bg, surface, current_line, fg, accent, sub_accent, is_dark):
     cyan_color = "#8be9fd" if is_dark else "#0284c7"
 
     starship_config = f"""# Starship Minimal & Efficient Theme with Nerd Fonts (Auto-synced with Quickshell)
+command_timeout = 2000
+
 format = \"\"\"
 $os\\
 $directory\\
