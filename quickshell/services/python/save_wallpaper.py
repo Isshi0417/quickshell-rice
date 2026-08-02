@@ -36,5 +36,12 @@ def save_wallpaper():
     except Exception:
         pass
 
+    try:
+        import subprocess
+        file_url = wp_path if wp_path.startswith("file://") else f"file://{wp_path}"
+        subprocess.run(["kwriteconfig6", "--file", "kscreenlockerrc", "--group", "Greeter", "--group", "Wallpaper", "--group", "org.kde.image", "--group", "General", "--key", "Image", file_url], capture_output=True)
+    except Exception:
+        pass
+
 if __name__ == '__main__':
     save_wallpaper()

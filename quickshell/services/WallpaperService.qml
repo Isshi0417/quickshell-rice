@@ -38,6 +38,7 @@ Item {
                             Theme.wallpaperPath = fileUrl
                             let rawPath = parsed.wallpaper.replace("file://", "")
                             Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                            Quickshell.execDetached(["kwriteconfig6", "--file", "kscreenlockerrc", "--group", "Greeter", "--group", "Wallpaper", "--group", "org.kde.image", "--group", "General", "--key", "Image", "file://" + rawPath])
                         }
                     }
                 } catch (e) {}
@@ -91,6 +92,7 @@ Item {
         }
 
         Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+        Quickshell.execDetached(["kwriteconfig6", "--file", "kscreenlockerrc", "--group", "Greeter", "--group", "Wallpaper", "--group", "org.kde.image", "--group", "General", "--key", "Image", "file://" + rawPath])
 
         if (!skipSave) {
             Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/save_wallpaper.py", rawPath, vName])

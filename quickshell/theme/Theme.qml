@@ -182,6 +182,7 @@ Item {
                         wallpaperPath = imgPath.startsWith("file://") ? imgPath : "file://" + imgPath
                         let rawPath = imgPath.replace("file://", "")
                         Quickshell.execDetached(["plasma-apply-wallpaperimage", rawPath])
+                        Quickshell.execDetached(["kwriteconfig6", "--file", "kscreenlockerrc", "--group", "Greeter", "--group", "Wallpaper", "--group", "org.kde.image", "--group", "General", "--key", "Image", "file://" + rawPath])
                     }
                     let rawPath = imgPath.replace("file://", "")
                     Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
