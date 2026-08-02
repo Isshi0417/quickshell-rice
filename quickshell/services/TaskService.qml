@@ -169,6 +169,16 @@ Item {
         proc.running = true
     }
 
+    function closeSpecificWindow(winObj) {
+        if (!winObj) return;
+        let winId = (winObj.id || "").toString().trim()
+        let query = (winObj.caption || winObj.appId || "").toLowerCase().trim()
+
+        proc.running = false
+        proc.command = ["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/kwin_close.py", winId, query]
+        proc.running = true
+    }
+
     function focusApp(appId, cmd, iconX, iconY) {
         if (!appId) return;
         let lower = appId.toLowerCase().trim()

@@ -495,9 +495,13 @@ Item {
 
             GlassPanel {
                 id: previewGlass
-                implicitWidth: previewMainCol.implicitWidth + 20
+                implicitWidth: previewMainCol.implicitWidth + 24
                 implicitHeight: previewMainCol.implicitHeight + 16
                 anchors.fill: parent
+
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                }
 
                 opacity: dockWindowPreview.animProgress
                 scale: 0.90 + 0.10 * dockWindowPreview.animProgress
@@ -634,9 +638,13 @@ Item {
                                                         anchors.fill: parent
                                                         hoverEnabled: true
                                                         onClicked: {
-                                                            TaskService.closeApp(modelData.appId)
-                                                            previewPopIn.running = false
-                                                            previewPopOut.restart()
+                                                            TaskService.closeSpecificWindow(modelData)
+                                                            let rem = root.previewWindowInstances ? root.previewWindowInstances.filter(w => w.id !== modelData.id) : []
+                                                            root.previewWindowInstances = rem
+                                                            if (!rem || rem.length === 0) {
+                                                                previewPopIn.running = false
+                                                                previewPopOut.restart()
+                                                            }
                                                         }
                                                     }
                                                 }
