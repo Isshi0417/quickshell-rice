@@ -18,7 +18,7 @@ PanelWindow {
     WlrLayershell.layer: WlrLayershell.Overlay
     WlrLayershell.keyboardFocus: WlrLayershell.Exclusive
 
-    visible: PopupService.appLauncherOpen
+    visible: PopupService.appLauncherOpen && !LockscreenService.isLocked
 
     // Currently highlighted app index for keyboard navigation
     property int selectedIndex: 0

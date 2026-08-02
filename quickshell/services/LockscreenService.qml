@@ -66,6 +66,7 @@ Item {
     }
 
     function lock() {
+        PopupService.closeAll()
         userPassword = ""
         typedCount = 0
         authFailed = false

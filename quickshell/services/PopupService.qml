@@ -133,6 +133,7 @@ Item {
     }
 
     function toggleAppLauncher() {
+        if (LockscreenService.isLocked) return;
         let state = !appLauncherOpen
         closeAll()
         appLauncherOpen = state
