@@ -63,7 +63,7 @@ GlassPanel {
             RowLayout {
                 id: wsRow
                 anchors.centerIn: parent
-                spacing: 2
+                spacing: 4
 
                 Repeater {
                     model: WorkspaceService.workspaceNames
@@ -77,8 +77,11 @@ GlassPanel {
                         Layout.preferredHeight: 22
                         radius: 5
                         color: isActive ? Theme.accent : (wsItemMouse.containsMouse ? Theme.currentLine : "transparent")
+                        border.color: isActive ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15)
+                        border.width: 1
 
                         Behavior on color { ColorAnimation { duration: 120 } }
+                        Behavior on border.color { ColorAnimation { duration: 120 } }
 
                         Text {
                             id: wsText
