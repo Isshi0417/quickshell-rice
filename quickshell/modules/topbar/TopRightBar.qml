@@ -1095,14 +1095,14 @@ GlassPanel {
                     // Power ON/OFF Button
                     Rectangle {
                         width: 50; height: 20; radius: 4
-                        color: BluetoothService.isPowered ? (Theme.isDark ? Qt.rgba(80/255, 250/255, 123/255, 0.2) : Qt.rgba(34/255, 197/255, 94/255, 0.25)) : (Theme.isDark ? Qt.rgba(255/255, 85/255, 85/255, 0.2) : Qt.rgba(239/255, 68/255, 68/255, 0.25))
-                        border.color: BluetoothService.isPowered ? (Theme.isDark ? Theme.green : "#15803d") : (Theme.isDark ? Theme.red : "#b91c1c")
+                        color: BluetoothService.isPowered ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.18) : Qt.rgba(Theme.comment.r, Theme.comment.g, Theme.comment.b, 0.15)
+                        border.color: BluetoothService.isPowered ? Theme.accent : Theme.currentLine
                         border.width: 1
 
                         Text {
                             anchors.centerIn: parent
                             text: BluetoothService.isPowered ? "ON" : "OFF"
-                            color: BluetoothService.isPowered ? (Theme.isDark ? Theme.green : "#15803d") : (Theme.isDark ? Theme.red : "#b91c1c")
+                            color: BluetoothService.isPowered ? Theme.accent : Theme.comment
                             font.pixelSize: 9
                             font.weight: Font.Bold
                         }
@@ -2010,14 +2010,14 @@ GlassPanel {
                     // Wi-Fi Power ON/OFF Toggle Button
                     Rectangle {
                         width: 50; height: 20; radius: 4
-                        color: NetworkService.isWifiPowered ? (Theme.isDark ? Qt.rgba(80/255, 250/255, 123/255, 0.2) : Qt.rgba(34/255, 197/255, 94/255, 0.25)) : (Theme.isDark ? Qt.rgba(255/255, 85/255, 85/255, 0.2) : Qt.rgba(239/255, 68/255, 68/255, 0.25))
-                        border.color: NetworkService.isWifiPowered ? (Theme.isDark ? Theme.green : "#15803d") : (Theme.isDark ? Theme.red : "#b91c1c")
+                        color: NetworkService.isWifiPowered ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.18) : Qt.rgba(Theme.comment.r, Theme.comment.g, Theme.comment.b, 0.15)
+                        border.color: NetworkService.isWifiPowered ? Theme.accent : Theme.currentLine
                         border.width: 1
 
                         Text {
                             anchors.centerIn: parent
                             text: NetworkService.isWifiPowered ? "ON" : "OFF"
-                            color: NetworkService.isWifiPowered ? (Theme.isDark ? Theme.green : "#15803d") : (Theme.isDark ? Theme.red : "#b91c1c")
+                            color: NetworkService.isWifiPowered ? Theme.accent : Theme.comment
                             font.pixelSize: 9
                             font.weight: Font.Bold
                         }
