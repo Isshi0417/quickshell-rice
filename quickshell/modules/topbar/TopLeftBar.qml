@@ -76,22 +76,17 @@ GlassPanel {
                         Layout.preferredWidth: wsText.implicitWidth + 14
                         Layout.preferredHeight: 22
                         radius: 5
-                        color: isActive ? Theme.accent : (wsItemMouse.containsMouse ? Theme.currentLine : "transparent")
-                        border.color: isActive ? Theme.accent : Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15)
+                        color: "transparent"
+                        border.color: Qt.rgba(Theme.fg.r, Theme.fg.g, Theme.fg.b, 0.15)
                         border.width: 1
-
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Behavior on border.color { ColorAnimation { duration: 120 } }
 
                         Text {
                             id: wsText
                             anchors.centerIn: parent
                             text: modelData
-                            color: wsItem.isActive ? (Theme.isDark ? Theme.bg : "#ffffff") : (wsItemMouse.containsMouse ? Theme.accent : Theme.fg)
+                            color: wsItem.isActive ? Theme.accent : Theme.fg
                             font.pixelSize: 11
                             font.weight: wsItem.isActive ? Font.Bold : Font.Medium
-
-                            Behavior on color { ColorAnimation { duration: 120 } }
                         }
 
                         MouseArea {
