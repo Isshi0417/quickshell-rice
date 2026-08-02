@@ -73,7 +73,7 @@ GlassPanel {
                         property int wsNumber: index + 1
                         property bool isActive: WorkspaceService.activeWorkspace === wsNumber
 
-                        Layout.preferredWidth: wsText.implicitWidth + 14
+                        Layout.preferredWidth: Math.max(26, wsText.implicitWidth + 14)
                         Layout.preferredHeight: 22
                         radius: 5
                         color: "transparent"
@@ -86,7 +86,7 @@ GlassPanel {
                             text: modelData
                             color: wsItem.isActive ? Theme.accent : Theme.fg
                             font.pixelSize: 11
-                            font.weight: wsItem.isActive ? Font.Bold : Font.Medium
+                            font.weight: Font.DemiBold
                         }
 
                         MouseArea {

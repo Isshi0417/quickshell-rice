@@ -12,10 +12,22 @@ Item {
     property var workspaces: []
     property var workspaceNames: []
 
+    property bool isManualSwitching: false
+
+    Timer {
+        id: manualSwitchGuardTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            root.isManualSwitching = false
+        }
+    }
+
     function switchTo(index) {
         if (index <= 0) return;
-        // Optimistic UI update for zero visual latency
+        root.isManualSwitching = true
         root.activeWorkspace = index
+        manualSwitchGuardTimer.restart()
         Quickshell.execDetached(["python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/workspace_service.py", "switch", index.toString()])
     }
 
@@ -29,7 +41,12 @@ Item {
                     let parsed = JSON.parse(data.trim())
                     if (parsed && typeof parsed === "object") {
                         root.hasWorkspaces = parsed.hasWorkspaces === true && parsed.totalWorkspaces > 0
-                        root.activeWorkspace = parsed.activeWorkspace || 1
+                        if (!root.isManualSwitching || parsed.activeWorkspace === root.activeWorkspace) {
+                            root.activeWorkspace = parsed.activeWorkspace || 1
+                            if (parsed.activeWorkspace === root.activeWorkspace) {
+                                root.isManualSwitching = false
+                            }
+                        }
                         root.totalWorkspaces = parsed.totalWorkspaces || 0
                         root.workspaces = parsed.workspaces || []
                         
