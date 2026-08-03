@@ -9,7 +9,7 @@ if ((name && name !== "") || (targetId && targetId !== "")) {
     var exactWin = null;
     var matchingWindows = [];
 
-    // Pass 1: Strict Target UUID Match
+    // Pass 1: Strict Target UUID Match (e.g. from preview card click)
     if (targetId && targetId !== "") {
         for (var i = 0; i < windows.length; i++) {
             var w1 = windows[i];
@@ -61,17 +61,25 @@ if ((name && name !== "") || (targetId && targetId !== "")) {
         }
     }
 
-    // If an exact window match was found (from preview card or direct focus)
-    if (exactWin) {
+    // 1. Direct Preview Card Specific Window Click (targetId is set)
+    if (exactWin && targetId && targetId !== "") {
         try { exactWin.setMinimizeIconGeometry(Qt.rect(ix, iy, 42, 42)); } catch(e) {}
         exactWin.minimized = false;
         workspace.activeWindow = exactWin;
-    } else if (matchingWindows.length === 1) {
+    }
+    // 2. Main Dock App Icon Click (Single Window -> Toggle Minimize / Focus)
+    else if (matchingWindows.length === 1) {
         var targetWin = matchingWindows[0];
         try { targetWin.setMinimizeIconGeometry(Qt.rect(ix, iy, 42, 42)); } catch(e) {}
-        targetWin.minimized = false;
-        workspace.activeWindow = targetWin;
-    } else if (matchingWindows.length > 1) {
+        if (workspace.activeWindow === targetWin && !targetWin.minimized) {
+            targetWin.minimized = true;
+        } else {
+            targetWin.minimized = false;
+            workspace.activeWindow = targetWin;
+        }
+    }
+    // 3. Main Dock App Icon Click (Multiple Windows -> Cycle or Unminimize)
+    else if (matchingWindows.length > 1) {
         var activeIdx = -1;
         for (var k = 0; k < matchingWindows.length; k++) {
             if (workspace.activeWindow === matchingWindows[k] && !matchingWindows[k].minimized) {

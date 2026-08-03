@@ -165,9 +165,9 @@ Item {
                     "--bg", v.bg,
                     "--surface", v.surface,
                     "--currentLine", v.currentLine,
-                    "--fg", v.fg ? v.fg : "#f8f8f2",
+                    "--fg", v.fg ? v.fg : (isDark ? "#f8f8f2" : "#282a36"),
                     "--accent", v.accent,
-                    "--subAccent", v.subAccent,
+                    "--subAccent", v.subAccent ? v.subAccent : v.accent,
                     "--isDark", isDark ? "true" : "false",
                     "--variantName", v.name
                 ])
