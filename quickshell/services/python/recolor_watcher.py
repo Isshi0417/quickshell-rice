@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #!/usr/bin/env python3
 import os
 import time
@@ -5,6 +6,7 @@ import sys
 import glob
 import shutil
 import subprocess
+import re
 
 # Variant Palettes Mapping
 PALETTES = {
@@ -12,6 +14,8 @@ PALETTES = {
     'Zoey Pink':         ['#fff0f5', '#fbcfe8', '#f472b6', '#4a044e', '#ec4899', '#a855f7', '#f43f5e', '#fbbf24', '#34d399'],
     'Zoey Night':        ['#251c2e', '#33263e', '#483659', '#f5e6f8', '#f472b6', '#c084fc', '#f43f5e', '#fbbf24', '#34d399'],
     'Emo Zoey':          ['#120914', '#1c0d20', '#32143a', '#f4d7f7', '#ff2a85', '#9333ea', '#e11d48', '#a855f7', '#4c1d95'],
+    'Zoey Nostalgia':    ['#faf0ec', '#ebdcd3', '#dfc4b4', '#362828', '#d85078', '#8f3f71', '#b57614', '#79740e', '#af3a03', '#427b58'],
+
     # Dracula Pro
     'Pro':               ['#22212c', '#2b2938', '#454158', '#f8f8f2', '#9580ff', '#ff80bf', '#80ffea', '#ffff80', '#ff9580'],
     'Blade':             ['#212c2a', '#293835', '#415854', '#f8f8f2', '#80ffea', '#8aff80', '#9580ff', '#ffff80', '#ff9580'],
@@ -78,6 +82,31 @@ def find_lutgen():
             return p
     return shutil.which('lutgen') or shutil.which('lutgen-cli')
 
+def get_palette(variant_name):
+    if variant_name in PALETTES:
+        return PALETTES[variant_name]
+    
+    # Dynamic fallback: Parse Theme.qml to support any newly added or custom themes
+    theme_qml = os.path.expanduser('~/.config/quickshell/theme/Theme.qml')
+    if not os.path.exists(theme_qml):
+        theme_qml = os.path.expanduser('~/Documents/themes/quickshell/theme/Theme.qml')
+
+    if os.path.exists(theme_qml):
+        try:
+            with open(theme_qml, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            pattern = rf'name:\s*"{re.escape(variant_name)}".*?\n'
+            match = re.search(pattern, content)
+            if match:
+                line = match.group(0)
+                hexes = re.findall(r'#[0-9a-fA-F]{6}', line)
+                if hexes:
+                    return hexes
+        except Exception:
+            pass
+    return None
+
 def recolor_and_replace(img_path, palette_hex_list, out_path):
     lutgen_bin = find_lutgen()
     try:
@@ -102,10 +131,11 @@ def watch_folder():
         try:
             for root, dirs, files in os.walk(base_dir):
                 variant_name = os.path.basename(root)
-                if variant_name.lower() == 'custom':
+                if variant_name.lower() == 'custom' or root == base_dir:
                     continue
-                if variant_name in PALETTES:
-                    palette = PALETTES[variant_name]
+
+                palette = get_palette(variant_name)
+                if palette:
                     for f in files:
                         ext = os.path.splitext(f)[1].lower()
                         # Process dropped image if it is NOT already a lutgen output
