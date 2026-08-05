@@ -305,6 +305,13 @@ deploy_configs() {
         ln -snf "${SCRIPT_DIR}/alacritty" "${TARGET_CONFIG_DIR}/alacritty" || cp -r "${SCRIPT_DIR}/alacritty" "${TARGET_CONFIG_DIR}/alacritty"
     fi
 
+    # Wallust Configuration (Symlinked to repo so template updates apply automatically)
+    if [ -d "${SCRIPT_DIR}/wallust" ]; then
+        info "Unlinking existing & linking Wallust configuration..."
+        safe_unlink "${TARGET_CONFIG_DIR}/wallust"
+        ln -snf "${SCRIPT_DIR}/wallust" "${TARGET_CONFIG_DIR}/wallust" || cp -r "${SCRIPT_DIR}/wallust" "${TARGET_CONFIG_DIR}/wallust"
+    fi
+
     # Wallpapers Deployment & Lutgen Folder Setup
     deploy_wallpaper_folders
 

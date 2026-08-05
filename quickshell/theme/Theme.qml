@@ -145,20 +145,6 @@ Item {
                 Quickshell.execDetached(["gsettings", "set", "org.gnome.desktop.interface", "color-scheme", isDark ? "prefer-dark" : "prefer-light"])
                 Quickshell.execDetached(["kwriteconfig6", "--group", "Icons", "--key", "Theme", iconTheme])
                 
-                Quickshell.execDetached([
-                    "python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/theme_sync.py",
-                    "--bg", v.bg,
-                    "--surface", v.surface,
-                    "--currentLine", v.currentLine,
-                    "--fg", v.fg ? v.fg : (isDark ? "#f8f8f2" : "#282a36"),
-                    "--accent", v.accent,
-                    "--subAccent", v.subAccent ? v.subAccent : v.accent,
-                    "--isDark", isDark ? "true" : "false",
-                    "--variantName", v.name
-                ])
-                
-                AppLauncherService.reload()
-
                 if (!isStartupRestoration) {
                     let imgPath = getVariantWallpaper(v.name)
                     if (WallpaperService) {
@@ -172,6 +158,20 @@ Item {
                     let rawPath = imgPath.replace("file://", "")
                     Quickshell.execDetached(["sh", "-c", "wallust run '" + rawPath + "' || ~/.cargo/bin/wallust run '" + rawPath + "' 2>/dev/null || true"])
                 }
+
+                Quickshell.execDetached([
+                    "python3", Quickshell.env("HOME") + "/.config/quickshell/services/python/theme_sync.py",
+                    "--bg", v.bg,
+                    "--surface", v.surface,
+                    "--currentLine", v.currentLine,
+                    "--fg", v.fg ? v.fg : (isDark ? "#f8f8f2" : "#282a36"),
+                    "--accent", v.accent,
+                    "--subAccent", v.subAccent ? v.subAccent : v.accent,
+                    "--isDark", isDark ? "true" : "false",
+                    "--variantName", v.name
+                ])
+                
+                AppLauncherService.reload()
 
                 // Persist selected theme variant to disk
                 Quickshell.execDetached(["sh", "-c", "echo '" + v.name + "' > ~/.config/quickshell_current_theme.txt"])

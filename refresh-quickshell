@@ -52,6 +52,11 @@ if [ -d "$THEMES_DIR/fastfetch" ]; then
     rsync -av "$THEMES_DIR/fastfetch/" "${HOME}/.config/fastfetch/"
 fi
 
+if [ -d "$THEMES_DIR/wallust" ]; then
+    mkdir -p "${HOME}/.config/wallust"
+    rsync -av "$THEMES_DIR/wallust/" "${HOME}/.config/wallust/"
+fi
+
 echo -e "${CYAN}${BOLD}[refresh-quickshell]${NC} Restarting QuickShell and desktop services..."
 
 if systemctl --user is-active --quiet quickshell.service 2>/dev/null; then
