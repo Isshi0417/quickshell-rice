@@ -888,6 +888,16 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
         "terminal.background": bg,
         "terminal.foreground": fg,
 
+        "list.activeSelectionBackground": accent,
+        "list.activeSelectionForeground": bg if is_dark else "#ffffff",
+        "list.inactiveSelectionBackground": current_line,
+        "list.inactiveSelectionForeground": fg,
+        "list.focusBackground": (accent + "40") if (accent.startswith("#") and len(accent) == 7) else accent,
+        "list.focusForeground": bg if is_dark else "#ffffff",
+        "list.hoverBackground": current_line,
+        "list.hoverForeground": fg,
+        "list.highlightForeground": accent,
+
         "editorBracketHighlight.foreground1": keyword_color,
         "editorBracketHighlight.foreground2": function_color,
         "editorBracketHighlight.foreground3": type_color,

@@ -17,7 +17,13 @@
         "tab.inactiveForeground": "{{color8}}",
         "panel.background": "{{color0}}",
         "terminal.background": "{{background}}",
-        "terminal.foreground": "{{foreground}}"
+        "terminal.foreground": "{{foreground}}",
+        "list.activeSelectionBackground": "{{color4}}",
+        "list.activeSelectionForeground": "{{background}}",
+        "list.inactiveSelectionBackground": "{{color0}}",
+        "list.inactiveSelectionForeground": "{{foreground}}",
+        "list.hoverBackground": "{{color0}}",
+        "list.highlightForeground": "{{color4}}"
     },
     "editor.tokenColorCustomizations": {
         "comments": "{{color8}}",
