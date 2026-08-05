@@ -325,7 +325,7 @@ deploy_wallpaper_folders() {
     mkdir -p "$WP_BASE"
 
     local VARIANTS=(
-        "Zoey Pink" "Zoey Night" "Emo Zoey"
+        "Zoey Pink" "Zoey Night" "Emo Zoey" "Zoey Nostalgia"
         "Pro" "Blade" "Buff" "Cyan" "Lincoln" "Morpheus" "Alucard"
         "Everblush"
         "Gruvbox Dark" "Gruvbox Material" "Gruvbox Light"

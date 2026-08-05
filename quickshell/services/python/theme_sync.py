@@ -830,7 +830,15 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
         operator_color = "#9d4edd"  # Purple
 
     elif "zoey" in v_lower:
-        if is_dark:
+        if "nostalgia" in v_lower:
+            comment_color = "#928374"
+            keyword_color = "#d35b80"   # Retro Dusty Zoey Pink
+            function_color = "#427b58"  # Vintage Teal
+            type_color = "#b57614"      # Vintage Mustard
+            string_color = "#79740e"    # Vintage Olive Green
+            number_color = "#af3a03"    # Vintage Terracotta
+            operator_color = "#8f3f71"  # Vintage Mauve
+        elif is_dark:
             comment_color = "#94a3b8"
             keyword_color = "#f472b6"   # Pink
             function_color = "#c084fc"  # Purple
@@ -1493,6 +1501,7 @@ PREDEFINED_VARIANTS = [
     {"name": "Zoey Pink", "isDark": False, "accent": "#ec4899", "bg": "#fff0f5", "surface": "#fbcfe8", "currentLine": "#f472b6", "fg": "#4a044e"},
     {"name": "Zoey Night", "isDark": True, "accent": "#f472b6", "bg": "#251c2e", "surface": "#33263e", "currentLine": "#483659", "fg": "#f5e6f8"},
     {"name": "Emo Zoey", "isDark": True, "accent": "#ff2a85", "bg": "#120914", "surface": "#1c0d20", "currentLine": "#32143a", "fg": "#f4d7f7"},
+    {"name": "Zoey Nostalgia", "isDark": False, "accent": "#d35b80", "bg": "#fbf1c7", "surface": "#ebdbb2", "currentLine": "#d5c4a1", "fg": "#3c3836"},
 
     {"name": "Pro", "isDark": True, "accent": "#9580ff", "bg": "#22212c", "surface": "#2b2938", "currentLine": "#454158", "fg": "#f8f8f2"},
     {"name": "Blade", "isDark": True, "accent": "#80ffea", "bg": "#212c2a", "surface": "#293835", "currentLine": "#415854", "fg": "#f8f8f2"},
