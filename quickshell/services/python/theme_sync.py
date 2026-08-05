@@ -136,6 +136,15 @@ def sync_kde(bg, surface, current_line, fg, accent, sub_accent, is_dark, variant
     kde_content = f"""[General]
 Name={variant_name}
 ColorScheme={clean_name}
+accentColor={rgb_acc}
+
+[WM]
+activeBackground={rgb_bg}
+activeBlend=255,255,255
+activeForeground={rgb_fg}
+inactiveBackground={rgb_surf}
+inactiveBlend=255,255,255
+inactiveForeground={rgb_line}
 
 [Colors:Window]
 BackgroundNormal={rgb_bg}
@@ -162,6 +171,15 @@ ForegroundNormal={"255,255,255" if is_dark else "0,0,0"}
 [Colors:Header]
 BackgroundNormal={rgb_bg}
 ForegroundNormal={rgb_fg}
+BackgroundAlternate={rgb_surf}
+
+[Colors:Header:Active]
+BackgroundNormal={rgb_bg}
+ForegroundNormal={rgb_fg}
+
+[Colors:Header:Inactive]
+BackgroundNormal={rgb_surf}
+ForegroundNormal={rgb_line}
 
 [Colors:Tooltip]
 BackgroundNormal={rgb_surf}
@@ -171,6 +189,23 @@ ForegroundNormal={rgb_fg}
         with open(scheme_file, 'w', encoding='utf-8') as f:
             f.write(kde_content)
         subprocess.run(["plasma-apply-colorscheme", clean_name], capture_output=True)
+
+        # Explicitly configure kdeglobals groups for KWin window decorations and Konsole headers
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "General", "--key", "ColorScheme", clean_name], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "General", "--key", "accentColor", rgb_acc], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "WM", "--key", "activeBackground", rgb_bg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "WM", "--key", "activeForeground", rgb_fg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "WM", "--key", "inactiveBackground", rgb_surf], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "WM", "--key", "inactiveForeground", rgb_line], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Header", "--key", "BackgroundNormal", rgb_bg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Header", "--key", "ForegroundNormal", rgb_fg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Header:Active", "--key", "BackgroundNormal", rgb_bg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Header:Active", "--key", "ForegroundNormal", rgb_fg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Header:Inactive", "--key", "BackgroundNormal", rgb_surf], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Header:Inactive", "--key", "ForegroundNormal", rgb_line], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Window", "--key", "BackgroundNormal", rgb_bg], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--file", "kdeglobals", "--group", "Colors:Window", "--key", "ForegroundNormal", rgb_fg], capture_output=True)
+        subprocess.run(["qdbus6", "org.kde.KWin", "/KWin", "reconfigure"], capture_output=True)
     except Exception:
         pass
 
