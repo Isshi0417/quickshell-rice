@@ -57,10 +57,10 @@ Item {
 
     Process {
         id: checkLockTriggerProc
-        command: ["bash", "-c", "if [ -f /tmp/quickshell_lock_trigger ]; then rm -f /tmp/quickshell_lock_trigger; echo 'LOCK'; fi"]
+        command: ["bash", "-c", "if [ -f /tmp/quickshell_lock_trigger ] || pgrep -x kscreenlocker_greet >/dev/null; then rm -f /tmp/quickshell_lock_trigger; echo 'LOCK'; fi"]
         stdout: SplitParser {
             onRead: data => {
-                if (data.trim() === "LOCK") {
+                if (data.trim() === "LOCK" && !root.isLocked) {
                     root.lock()
                 }
             }
@@ -95,6 +95,13 @@ Item {
         authErrorMsg = ""
         isLocked = false
         enableEffectsProc.running = true
+        unlockPlasmaProc.running = true
+    }
+
+    Process {
+        id: unlockPlasmaProc
+        command: ["bash", "-c", "loginctl unlock-session 2>/dev/null; pkill -9 -x kscreenlocker_greet 2>/dev/null || true"]
+        onExited: running = false
     }
 
     Process {

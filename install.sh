@@ -369,6 +369,11 @@ deploy_kde_colorschemes() {
         python3 "$KDE_GEN_SCRIPT" || warn "KDE color scheme generator finished with warnings."
         success "Generated 38 KDE Plasma color schemes in ${COLOR_SCHEMES_DIR}"
     fi
+
+    # Ensure KDE Plasma ScreenLocker autolock is enabled for QuickShell integration
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock true 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key LockOnResume true 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout 5 2>/dev/null || true
 }
 
 # 7. Bashrc Fastfetch Setup
