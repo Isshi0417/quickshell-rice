@@ -898,6 +898,16 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
         "list.hoverForeground": fg,
         "list.highlightForeground": accent,
 
+        "scrollbar.shadow": current_line,
+        "widget.shadow": current_line,
+        "editorWidget.background": surface,
+        "editorWidget.border": current_line,
+        "editorWidget.shadow": current_line,
+        "editorStickyScroll.background": surface,
+        "editorStickyScroll.border": current_line,
+        "editorStickyScroll.shadow": current_line,
+        "editorStickyScrollHover.background": current_line,
+
         "editorBracketHighlight.foreground1": keyword_color,
         "editorBracketHighlight.foreground2": function_color,
         "editorBracketHighlight.foreground3": type_color,

@@ -23,7 +23,16 @@
         "list.inactiveSelectionBackground": "{{color0}}",
         "list.inactiveSelectionForeground": "{{foreground}}",
         "list.hoverBackground": "{{color0}}",
-        "list.highlightForeground": "{{color4}}"
+        "list.highlightForeground": "{{color4}}",
+        "scrollbar.shadow": "{{color8}}",
+        "widget.shadow": "{{color8}}",
+        "editorWidget.background": "{{color0}}",
+        "editorWidget.border": "{{color8}}",
+        "editorWidget.shadow": "{{color8}}",
+        "editorStickyScroll.background": "{{color0}}",
+        "editorStickyScroll.border": "{{color8}}",
+        "editorStickyScroll.shadow": "{{color8}}",
+        "editorStickyScrollHover.background": "{{color8}}"
     },
     "editor.tokenColorCustomizations": {
         "comments": "{{color8}}",
