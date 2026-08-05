@@ -565,15 +565,7 @@ loginctl lock-session 2>/dev/null || true
 EOF
     chmod +x "${LOCAL_BIN}/quickshell-lock"
 
-    # 3. Bind KDE Plasma global shortcut Meta+L to quickshell-lock
-    if command -v kwriteconfig6 &>/dev/null; then
-        kwriteconfig6 --file kglobalshortcutsrc --group "ksmserver" --key "Lock Session" "Meta+L,Ctrl+Alt+L,Lock Session" 2>/dev/null || true
-        if command -v qdbus6 &>/dev/null; then
-            qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
-        fi
-    fi
-
-    # 4. Add quickshell-lock & lock-screen aliases to ~/.bashrc
+    # 3. Add quickshell-lock & lock-screen aliases to ~/.bashrc
     BASHRC="${HOME}/.bashrc"
     if [ -f "$BASHRC" ]; then
         if ! grep -q "quickshell-lock" "$BASHRC"; then
@@ -606,9 +598,21 @@ echo ""
 echo -e "${GREEN}${BOLD}=========================================================="
 echo "    QuickShell Ecosystem Successfully Installed!         "
 echo "=========================================================="${NC}
-echo -e "${CYAN}Key Commands & Shortcuts:${NC}"
+echo -e "${CYAN}Key Commands & Utilities:${NC}"
 echo " - Refresh Ecosystem Utility: refresh-quickshell (or ~/.local/bin/refresh-quickshell)"
+echo " - QuickShell Lock Trigger: ~/.local/bin/quickshell-lock (or alias: lock-screen)"
 echo " - App Launcher Toggle Script: ${TARGET_CONFIG_DIR}/quickshell/toggle_launcher.sh"
 echo " - Systemd Service Management: systemctl --user [start|stop|restart|status] quickshell.service"
 echo " - Manual Theme Sync: python3 ${TARGET_CONFIG_DIR}/quickshell/services/python/theme_sync.py"
+echo ""
+echo -e "${YELLOW}${BOLD}Manual Keyboard Shortcut Setup (KDE System Settings):${NC}"
+echo " 1. Open System Settings -> Shortcuts -> Add New -> Command"
+echo " 2. Lock Screen Shortcut:"
+echo "     - Name: QuickShell Lock Screen"
+echo "     - Command: ~/.local/bin/quickshell-lock"
+echo "     - Shortcut: Meta + L"
+echo " 3. App Launcher Shortcut:"
+echo "     - Name: Toggle QuickShell Launcher"
+echo "     - Command: ${TARGET_CONFIG_DIR}/quickshell/toggle_launcher.sh"
+echo "     - Shortcut: Meta (or Super)"
 echo ""
