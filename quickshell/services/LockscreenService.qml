@@ -7,6 +7,7 @@ Item {
     id: root
 
     property bool isLocked: false
+    property bool isUnlocking: false
     property string userPassword: ""
     property bool isAuthenticating: false
     property bool authFailed: false
@@ -27,6 +28,15 @@ Item {
         onTriggered: {
             root.authFailed = false
             root.authErrorMsg = ""
+        }
+    }
+
+    Timer {
+        id: unlockGraceTimer
+        interval: 2500
+        repeat: false
+        onTriggered: {
+            root.isUnlocking = false
         }
     }
 
@@ -60,7 +70,7 @@ Item {
         command: ["bash", "-c", "if [ -f /tmp/quickshell_lock_trigger ] || pgrep -f kscreenlocker_greet >/dev/null; then rm -f /tmp/quickshell_lock_trigger; echo 'LOCK'; fi"]
         stdout: SplitParser {
             onRead: data => {
-                if (data.trim() === "LOCK" && !root.isLocked) {
+                if (data.trim() === "LOCK" && !root.isLocked && !root.isUnlocking) {
                     root.lock()
                 }
             }
@@ -85,6 +95,7 @@ Item {
         authFailed = false
         authErrorMsg = ""
         isLocked = true
+        isUnlocking = false
         disableEffectsProc.running = true
     }
 
@@ -94,13 +105,15 @@ Item {
         authFailed = false
         authErrorMsg = ""
         isLocked = false
+        isUnlocking = true
+        unlockGraceTimer.restart()
         enableEffectsProc.running = true
         unlockPlasmaProc.running = true
     }
 
     Process {
         id: unlockPlasmaProc
-        command: ["bash", "-c", "loginctl unlock-session 2>/dev/null"]
+        command: ["bash", "-c", "loginctl unlock-session 2>/dev/null; sleep 0.2; pkill -9 -f kscreenlocker_greet 2>/dev/null || true"]
         onExited: running = false
     }
 
