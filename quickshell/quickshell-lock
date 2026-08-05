@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# QuickShell Lock Screen Trigger Utility
+touch /tmp/quickshell_lock_trigger 2>/dev/null || true
+loginctl lock-session 2>/dev/null || true

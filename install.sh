@@ -555,15 +555,23 @@ setup_quickshell_lockscreen() {
     kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout 5 2>/dev/null || true
     kwriteconfig6 --file kscreenlockerrc --group Theme --key Current org.quickshell.login 2>/dev/null || true
 
-    # 2. Deploy lock screen command helper script to ~/.local/bin/quickshell-lock
+    # 2. Deploy lock screen command helper script to multiple locations for absolute path reliability
     LOCAL_BIN="${HOME}/.local/bin"
-    mkdir -p "$LOCAL_BIN"
-    cat << 'EOF' > "${LOCAL_BIN}/quickshell-lock"
-#!/usr/bin/env bash
+    QS_CFG_DIR="${TARGET_CONFIG_DIR}/quickshell"
+    mkdir -p "$LOCAL_BIN" "$QS_CFG_DIR"
+
+    LOCK_SCRIPT_CONTENT="#!/usr/bin/env bash
 touch /tmp/quickshell_lock_trigger 2>/dev/null || true
-loginctl lock-session 2>/dev/null || true
-EOF
-    chmod +x "${LOCAL_BIN}/quickshell-lock"
+loginctl lock-session 2>/dev/null || true"
+
+    echo "$LOCK_SCRIPT_CONTENT" > "${LOCAL_BIN}/quickshell-lock"
+    echo "$LOCK_SCRIPT_CONTENT" > "${QS_CFG_DIR}/quickshell-lock"
+    chmod +x "${LOCAL_BIN}/quickshell-lock" "${QS_CFG_DIR}/quickshell-lock"
+
+    if command -v sudo &>/dev/null; then
+        sudo cp "${LOCAL_BIN}/quickshell-lock" /usr/local/bin/quickshell-lock 2>/dev/null || true
+        sudo chmod +x /usr/local/bin/quickshell-lock 2>/dev/null || true
+    fi
 
     # 3. Add quickshell-lock & lock-screen aliases to ~/.bashrc
     BASHRC="${HOME}/.bashrc"
@@ -571,8 +579,9 @@ EOF
         if ! grep -q "quickshell-lock" "$BASHRC"; then
             echo "" >> "$BASHRC"
             echo "# QuickShell lockscreen shortcuts & aliases" >> "$BASHRC"
-            echo "alias lock-screen=\"\$HOME/.local/bin/quickshell-lock\"" >> "$BASHRC"
-            echo "alias lockscreen=\"\$HOME/.local/bin/quickshell-lock\"" >> "$BASHRC"
+            echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$BASHRC"
+            echo "alias lock-screen=\"quickshell-lock\"" >> "$BASHRC"
+            echo "alias lockscreen=\"quickshell-lock\"" >> "$BASHRC"
         fi
     fi
 
@@ -600,7 +609,7 @@ echo "    QuickShell Ecosystem Successfully Installed!         "
 echo "=========================================================="${NC}
 echo -e "${CYAN}Key Commands & Utilities:${NC}"
 echo " - Refresh Ecosystem Utility: refresh-quickshell (or ~/.local/bin/refresh-quickshell)"
-echo " - QuickShell Lock Trigger: ~/.local/bin/quickshell-lock (or alias: lock-screen)"
+echo " - QuickShell Lock Trigger: ${HOME}/.local/bin/quickshell-lock (or alias: lock-screen)"
 echo " - App Launcher Toggle Script: ${TARGET_CONFIG_DIR}/quickshell/toggle_launcher.sh"
 echo " - Systemd Service Management: systemctl --user [start|stop|restart|status] quickshell.service"
 echo " - Manual Theme Sync: python3 ${TARGET_CONFIG_DIR}/quickshell/services/python/theme_sync.py"
@@ -609,7 +618,8 @@ echo -e "${YELLOW}${BOLD}Manual Keyboard Shortcut Setup (KDE System Settings):${
 echo " 1. Open System Settings -> Shortcuts -> Add New -> Command"
 echo " 2. Lock Screen Shortcut:"
 echo "     - Name: QuickShell Lock Screen"
-echo "     - Command: ~/.local/bin/quickshell-lock"
+echo "     - Command: ${HOME}/.local/bin/quickshell-lock"
+echo "     - (Alternative Command if tilde is not expanded: bash -c \"touch /tmp/quickshell_lock_trigger; loginctl lock-session\")"
 echo "     - Shortcut: Meta + L"
 echo " 3. App Launcher Shortcut:"
 echo "     - Name: Toggle QuickShell Launcher"
