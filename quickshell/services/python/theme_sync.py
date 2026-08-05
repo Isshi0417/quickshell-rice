@@ -2286,6 +2286,36 @@ Wallpaper=
     try:
         with open(os.path.join(konsole_dir, 'Quickshell.colorscheme'), 'w') as f:
             f.write(colorscheme)
+
+        # Deploy Quickshell.profile
+        profile_content = """[General]
+Name=Quickshell
+Parent=FALLBACK/
+ColorScheme=Quickshell
+
+[Appearance]
+ColorScheme=Quickshell
+Font=Monospace,10,-1,5,50,0,0,0,0,0
+"""
+        with open(os.path.join(konsole_dir, 'Quickshell.profile'), 'w') as f:
+            f.write(profile_content)
+
+        # Set Quickshell.profile as default in ~/.config/konsolerc
+        subprocess.run(["kwriteconfig6", "--file", "konsolerc", "--group", "Desktop Entry", "--key", "DefaultProfile", "Quickshell.profile"], capture_output=True)
+
+        # Signal live open Konsole sessions over D-Bus to switch to Quickshell profile immediately
+        res = subprocess.check_output(["qdbus6"], text=True, stderr=subprocess.DEVNULL)
+        for line in res.splitlines():
+            svc = line.strip()
+            if "org.kde.konsole" in svc:
+                try:
+                    sessions = subprocess.check_output(["qdbus6", svc], text=True, stderr=subprocess.DEVNULL)
+                    for s_line in sessions.splitlines():
+                        if "/Sessions/" in s_line:
+                            s_path = s_line.strip()
+                            subprocess.run(["qdbus6", svc, s_path, "org.kde.konsole.Session.setProfile", "Quickshell"], capture_output=True)
+                except Exception:
+                    pass
     except Exception:
         pass
 
