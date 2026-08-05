@@ -318,6 +318,7 @@ deploy_wallpaper_folders() {
     local VARIANTS=(
         "Zoey Pink" "Zoey Night" "Emo Zoey"
         "Pro" "Blade" "Buff" "Cyan" "Lincoln" "Morpheus" "Alucard"
+        "Everblush"
         "Gruvbox Dark" "Gruvbox Material" "Gruvbox Light"
         "Rosé Pine" "Rosé Pine Moon" "Rosé Pine Dawn"
         "Catppuccin Mocha" "Catppuccin Macchiato" "Catppuccin Latte"

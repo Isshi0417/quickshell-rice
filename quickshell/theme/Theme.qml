@@ -11,7 +11,7 @@ Item {
     property string wallpaperPath: "file://" + Quickshell.env("HOME") + "/Pictures/Wallpapers/Pro/lutgen_Pro_wallhaven.png"
 
     readonly property var themeCategories: [
-        "All", "Zoey Pink", "Dracula Pro", "Gruvbox", "Rosé Pine", "Catppuccin", "Everforest", "Tokyo Night", "Nord", "Solarized", "One Theme", "Monokai", "Cyberpunk"
+        "All", "Zoey Pink", "Dracula Pro", "Everblush", "Gruvbox", "Rosé Pine", "Catppuccin", "Everforest", "Tokyo Night", "Nord", "Solarized", "One Theme", "Monokai", "Cyberpunk"
     ]
 
     readonly property var variants: [
@@ -28,6 +28,9 @@ Item {
         { category: "Dracula Pro", name: "Lincoln",  isDark: true,  accent: "#ffff80", subAccent: "#8aff80", bg: "#2c2a21", surface: "#38352a", currentLine: "#585441", fg: "#f8f8f2", comment: "#a99f70", cyan: "#80ffea", green: "#8aff80", orange: "#ffca80", pink: "#ff80bf", purple: "#9580ff", red: "#ff9580", yellow: "#ffff80" },
         { category: "Dracula Pro", name: "Morpheus", isDark: true,  accent: "#ff9580", subAccent: "#ffca80", bg: "#2c2122", surface: "#382a2b", currentLine: "#584145", fg: "#f8f8f2", comment: "#a97079", cyan: "#80ffea", green: "#8aff80", orange: "#ffca80", pink: "#ff80bf", purple: "#9580ff", red: "#ff9580", yellow: "#ffff80" },
         { category: "Dracula Pro", name: "Alucard",  isDark: false, accent: "#644ac9", subAccent: "#a3144d", bg: "#f5f5f5", surface: "#cfcfde", currentLine: "#cfcfde", fg: "#1f1f1f", comment: "#635d97", cyan: "#036a96", green: "#14710a", orange: "#a34d14", pink: "#a3144d", purple: "#644ac9", red: "#cb3a2a", yellow: "#846e15" },
+
+        // Everblush
+        { category: "Everblush",   name: "Everblush",   isDark: true,  accent: "#8ccf7e", subAccent: "#67b0e8", bg: "#141b1e", surface: "#232a2d", currentLine: "#2d3437", fg: "#dadada", comment: "#676e7d", cyan: "#67cbe8", green: "#8ccf7e", orange: "#e59e67", pink: "#c47fd5", purple: "#c47fd5", red: "#e57474", yellow: "#e5c76b" },
 
         // Gruvbox
         { category: "Gruvbox",     name: "Gruvbox Dark",     isDark: true,  accent: "#fe8019", subAccent: "#fabd2f", bg: "#282828", surface: "#3c3836", currentLine: "#504945", fg: "#ebdbb2", cyan: "#8ec07c", green: "#b8bb26", orange: "#fe8019", pink: "#d3869b", purple: "#d3869b", red: "#fb4934", yellow: "#fabd2f" },
