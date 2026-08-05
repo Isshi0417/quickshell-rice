@@ -124,31 +124,38 @@ def recolor_and_replace(img_path, palette_hex_list, out_path):
         print(f"[Error recoloring] {img_path}: {e}", flush=True)
 
 def watch_folder():
-    base_dir = os.path.expanduser('~/Pictures/Wallpapers')
+    base_dirs = [
+        os.path.expanduser('~/Pictures/Wallpapers'),
+        os.path.expanduser('~/.config/quickshell/wallpapers'),
+        os.path.expanduser('~/Documents/themes/quickshell/wallpapers')
+    ]
     processed = set()
     
-    print(f"[*] Starting Lutgen Auto-Recolor Watcher Daemon on {base_dir}...", flush=True)
+    print(f"[*] Starting Lutgen Auto-Recolor Watcher Daemon...", flush=True)
     
     while True:
         try:
-            for root, dirs, files in os.walk(base_dir):
-                variant_name = os.path.basename(root)
-                if variant_name.lower() == 'custom' or root == base_dir:
+            for base_dir in base_dirs:
+                if not os.path.exists(base_dir):
                     continue
+                for root, dirs, files in os.walk(base_dir):
+                    variant_name = os.path.basename(root)
+                    if variant_name.lower() == 'custom' or root == base_dir:
+                        continue
 
-                palette = get_palette(variant_name)
-                if palette:
-                    for f in files:
-                        ext = os.path.splitext(f)[1].lower()
-                        # Process any new un-recolored image dropped into the folder
-                        if ext in ['.png', '.jpg', '.jpeg', '.webp'] and not f.startswith('lutgen_'):
-                            full_path = os.path.join(root, f)
-                            recolored_filename = f"lutgen_{os.path.splitext(f)[0]}.png"
-                            recolored_path = os.path.join(root, recolored_filename)
-                            
-                            if full_path not in processed and not os.path.exists(recolored_path):
-                                recolor_and_replace(full_path, palette, recolored_path)
-                                processed.add(full_path)
+                    palette = get_palette(variant_name)
+                    if palette:
+                        for f in files:
+                            ext = os.path.splitext(f)[1].lower()
+                            # Process any new un-recolored image dropped into the folder
+                            if ext in ['.png', '.jpg', '.jpeg', '.webp'] and not f.startswith('lutgen_'):
+                                full_path = os.path.join(root, f)
+                                recolored_filename = f"lutgen_{os.path.splitext(f)[0]}.png"
+                                recolored_path = os.path.join(root, recolored_filename)
+                                
+                                if full_path not in processed and not os.path.exists(recolored_path):
+                                    recolor_and_replace(full_path, palette, recolored_path)
+                                    processed.add(full_path)
         except Exception as e:
             print(f"[Watcher Exception] {e}", flush=True)
             
