@@ -5,6 +5,8 @@
 # ==============================================================================
 
 set -eo pipefail
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
 
 # Formatting & Colors
 BOLD='\033[1m'

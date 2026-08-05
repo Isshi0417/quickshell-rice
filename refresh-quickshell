@@ -17,12 +17,27 @@ echo -e "${CYAN}${BOLD}[refresh-quickshell]${NC} Stashing local changes and pull
 
 THEMES_DIR="${HOME}/Documents/themes"
 
+BEFORE_HASH=""
+if [ -f "$THEMES_DIR/install.sh" ]; then
+    BEFORE_HASH=$(sha256sum "$THEMES_DIR/install.sh" 2>/dev/null | awk '{print $1}')
+fi
+
 if [ -d "$THEMES_DIR/.git" ]; then
     git -C "$THEMES_DIR" stash || true
     git -C "$THEMES_DIR" pull origin main || echo -e "${YELLOW}${BOLD}[WARNING]${NC} Git pull finished with warnings."
     echo -e "${GREEN}${BOLD}[SUCCESS]${NC} Git repository pulled from main!"
 else
     echo -e "${YELLOW}${BOLD}[WARNING]${NC} Git repository not found at ${THEMES_DIR}"
+fi
+
+AFTER_HASH=""
+if [ -f "$THEMES_DIR/install.sh" ]; then
+    AFTER_HASH=$(sha256sum "$THEMES_DIR/install.sh" 2>/dev/null | awk '{print $1}')
+fi
+
+if [ -n "$BEFORE_HASH" ] && [ "$BEFORE_HASH" != "$AFTER_HASH" ]; then
+    echo -e "${CYAN}${BOLD}[refresh-quickshell]${NC} Detected changes in install.sh! Running installer..."
+    bash "$THEMES_DIR/install.sh"
 fi
 
 echo -e "${CYAN}${BOLD}[refresh-quickshell]${NC} Syncing configurations to ~/.config/quickshell..."
