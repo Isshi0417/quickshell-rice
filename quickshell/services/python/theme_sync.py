@@ -2287,52 +2287,84 @@ body, .theme-dark, .theme-light, :root, html {{
             os.utime(app_file, None)
         except Exception: pass
 
-def sync_papirus_folders(variant_name, accent="#ff79c6", sub_accent="#bd93f9"):
+def sync_papirus_folders(variant_name, accent="#ff79c6", sub_accent="#bd93f9", is_dark=True):
     """
     Colorizes Papirus icon theme folders to match the active color scheme.
-    Uses papirus-folders utility and user icon theme overlay if needed.
+    Uses papirus-folders utility and refreshes system icon cache.
     """
     import os, subprocess, shutil
 
     if not shutil.which("papirus-folders"):
         return
 
-    home = os.path.expanduser('~')
-    local_icons = os.path.join(home, '.local', 'share', 'icons')
-
-    # Ensure user-writable copies of Papirus themes exist so papirus-folders can run cleanly without root
-    for theme in ['Papirus', 'Papirus-Dark', 'Papirus-Light']:
-        sys_path = os.path.join('/usr/share/icons', theme)
-        usr_path = os.path.join(local_icons, theme)
-        if os.path.exists(sys_path) and not os.path.exists(usr_path):
-            try:
-                os.makedirs(local_icons, exist_ok=True)
-                subprocess.run(['cp', '-r', sys_path, usr_path], capture_output=True)
-            except Exception: pass
-
     name_lower = variant_name.lower().strip()
 
     color_map = {
-        "zoey": "pink",
-        "dracula": "violet",
-        "catppuccin": "magenta" if ("latte" in name_lower or "frappe" in name_lower) else "violet",
-        "gruvbox": "orange",
+        # Zoey Pink
+        "zoey pink": "pink",
+        "zoey night": "pink",
+        "emo zoey": "magenta",
+
+        # Dracula Pro
+        "pro": "violet",
+        "blade": "teal",
+        "buff": "pink",
+        "cyan": "cyan",
+        "lincoln": "yellow",
+        "morpheus": "orange",
+        "alucard": "violet",
+
+        # Gruvbox
+        "gruvbox dark": "orange",
+        "gruvbox material": "green",
+        "gruvbox light": "brown",
+
+        # Rosé Pine
+        "rosé pine moon": "pink",
+        "rosé pine dawn": "carmine",
         "rosé pine": "pink",
+        "rose pine moon": "pink",
+        "rose pine dawn": "carmine",
         "rose pine": "pink",
-        "everforest": "green",
+
+        # Catppuccin
+        "catppuccin mocha": "violet",
+        "catppuccin macchiato": "magenta",
+        "catppuccin latte": "blue",
+
+        # Everforest
+        "everforest dark": "green",
+        "everforest light": "green",
+
+        # Tokyo Night
+        "tokyo night storm": "indigo",
+        "tokyo night day": "blue",
         "tokyo night": "indigo",
-        "nord": "nordic",
-        "solarized": "cyan",
-        "one dark": "blue",
-        "monokai": "yellow",
-        "cyberpunk": "magenta",
+
+        # Nord
+        "nord dark": "nordic",
+        "nord light": "nordic",
+
+        # Solarized
+        "solarized dark": "cyan",
+        "solarized light": "cyan",
+
+        # One Theme
+        "one dark pro": "blue",
+        "one light": "blue",
+
+        # Monokai & Cyberpunk
+        "monokai pro": "yellow",
+        "cyberpunk neon": "magenta",
     }
 
-    chosen_color = None
-    for key, col in color_map.items():
-        if key in name_lower:
-            chosen_color = col
-            break
+    chosen_color = color_map.get(name_lower)
+
+    if not chosen_color:
+        for key, col in color_map.items():
+            if key in name_lower:
+                chosen_color = col
+                break
 
     if not chosen_color:
         hex_c = accent.lstrip('#')
@@ -2362,15 +2394,18 @@ def sync_papirus_folders(variant_name, accent="#ff79c6", sub_accent="#bd93f9"):
         else:
             chosen_color = "blue"
 
-    # Execute papirus-folders asynchronously in background thread to prevent blocking theme engine
-    def run_papirus():
-        for theme_name in ["Papirus", "Papirus-Dark", "Papirus-Light"]:
-            try:
-                subprocess.run(["papirus-folders", "-C", chosen_color, "-t", theme_name, "-u"], capture_output=True, timeout=5)
-            except Exception:
-                pass
-    import threading
-    threading.Thread(target=run_papirus, daemon=True).start()
+    target_theme = "Papirus-Dark" if is_dark else "Papirus-Light"
+    try:
+        subprocess.run(["papirus-folders", "-C", chosen_color, "-t", target_theme, "-u"], capture_output=True, timeout=15)
+    except Exception:
+        pass
+
+    # Signal GTK and KDE to reload icon theme
+    try:
+        subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "icon-theme", target_theme], capture_output=True)
+        subprocess.run(["kwriteconfig6", "--group", "Icons", "--key", "Theme", target_theme], capture_output=True)
+    except Exception:
+        pass
 
 def main():
     parser = argparse.ArgumentParser()
@@ -2401,7 +2436,7 @@ def main():
     sync_micro(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_konsole(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_xresources(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
-    sync_papirus_folders(args.variantName, args.accent, args.subAccent)
+    sync_papirus_folders(args.variantName, args.accent, args.subAccent, is_dark)
 
 if __name__ == '__main__':
     main()
