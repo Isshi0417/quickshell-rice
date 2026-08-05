@@ -6,7 +6,7 @@ variants = [
     {'name': 'Zoey Pink',        'isDark': False, 'accent': '#ec4899', 'subAccent': '#a855f7', 'bg': '#fff0f5', 'surface': '#fbcfe8', 'currentLine': '#f472b6', 'fg': '#4a044e'},
     {'name': 'Zoey Night',       'isDark': True,  'accent': '#f472b6', 'subAccent': '#c084fc', 'bg': '#251c2e', 'surface': '#33263e', 'currentLine': '#483659', 'fg': '#f5e6f8'},
     {'name': 'Emo Zoey',         'isDark': True,  'accent': '#ff2a85', 'subAccent': '#9333ea', 'bg': '#120914', 'surface': '#1c0d20', 'currentLine': '#32143a', 'fg': '#f4d7f7'},
-    {'name': 'Zoey Nostalgia',   'isDark': False, 'accent': '#d35b80', 'subAccent': '#427b58', 'bg': '#fbf1c7', 'surface': '#ebdbb2', 'currentLine': '#d5c4a1', 'fg': '#3c3836'},
+    {'name': 'Zoey Nostalgia',   'isDark': False, 'accent': '#d85078', 'subAccent': '#8f3f71', 'bg': '#faf0ec', 'surface': '#ebdcd3', 'currentLine': '#dfc4b4', 'fg': '#362828'},
 
     # Dracula Pro
     {'name': 'Pro',              'isDark': True,  'accent': '#9580ff', 'subAccent': '#ff80bf', 'bg': '#22212c', 'surface': '#2b2938', 'currentLine': '#454158', 'fg': '#f8f8f2'},
