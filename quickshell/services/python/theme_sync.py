@@ -399,7 +399,7 @@ def sync_gtk(bg, surface, current_line, fg, accent, is_dark):
         with open(css_file, 'w') as f:
             f.write(css_content)
 
-def sync_alacritty(bg, surface, current_line, fg, accent, sub_accent):
+def sync_alacritty(bg, surface, current_line, fg, accent, sub_accent, is_dark=True, variant_name=""):
     import glob, os, re
     alacritty_dirs = get_app_config_dirs(['alacritty', 'Alacritty'])
     for fb in [
@@ -409,6 +409,38 @@ def sync_alacritty(bg, surface, current_line, fg, accent, sub_accent):
     ]:
         if fb not in alacritty_dirs:
             alacritty_dirs.append(fb)
+
+    v_lower = (variant_name or "").lower()
+    if is_dark:
+        c_red = "#ff9580"
+        c_green = "#8aff80"
+        c_yellow = "#ffff80"
+        c_blue = accent
+        c_magenta = sub_accent
+        c_cyan = "#80ffea"
+        c_white = fg
+        c_black = bg
+        c_black_bright = current_line
+    elif "nostalgia" in v_lower:
+        c_red = "#af3a03"
+        c_green = "#79740e"
+        c_yellow = "#b57614"
+        c_blue = "#d35b80"
+        c_magenta = "#8f3f71"
+        c_cyan = "#427b58"
+        c_white = "#1c1917"
+        c_black = "#3c3836"
+        c_black_bright = "#d5c4a1"
+    else:
+        c_red = "#b91c1c"
+        c_green = "#15803d"
+        c_yellow = "#b45309"
+        c_blue = accent
+        c_magenta = sub_accent
+        c_cyan = "#0e7490"
+        c_white = "#0f172a"
+        c_black = fg
+        c_black_bright = current_line
 
     colors_block = f"""[colors.primary]
 background = "{bg}"
@@ -423,24 +455,24 @@ text = "{bg}"
 background = "{accent}"
 
 [colors.normal]
-black   = "{bg}"
-red     = "#ff9580"
-green   = "#8aff80"
-yellow  = "#ffff80"
-blue    = "{accent}"
-magenta = "{sub_accent}"
-cyan    = "#80ffea"
+black   = "{c_black}"
+red     = "{c_red}"
+green   = "{c_green}"
+yellow  = "{c_yellow}"
+blue    = "{c_blue}"
+magenta = "{c_magenta}"
+cyan    = "{c_cyan}"
 white   = "{fg}"
 
 [colors.bright]
-black   = "{current_line}"
-red     = "#ff9580"
-green   = "#8aff80"
-yellow  = "#ffff80"
-blue    = "{accent}"
-magenta = "{sub_accent}"
-cyan    = "#80ffea"
-white   = "{fg}"
+black   = "{c_black_bright}"
+red     = "{c_red}"
+green   = "{c_green}"
+yellow  = "{c_yellow}"
+blue    = "{c_blue}"
+magenta = "{c_magenta}"
+cyan    = "{c_cyan}"
+white   = "{c_white}"
 """
 
     for alacritty_dir in alacritty_dirs:
@@ -2117,10 +2149,45 @@ color-link divider "{current_line}"
         except Exception:
             pass
 
-def sync_konsole(bg, surface, current_line, fg, accent, sub_accent):
+def sync_konsole(bg, surface, current_line, fg, accent, sub_accent, is_dark=True, variant_name=""):
     konsole_dir = os.path.expanduser('~/.local/share/konsole')
     os.makedirs(konsole_dir, exist_ok=True)
-    
+
+    v_lower = (variant_name or "").lower()
+    if is_dark:
+        c_red = "#ff9580"
+        c_green = "#8aff80"
+        c_yellow = "#ffff80"
+        c_blue = accent
+        c_magenta = sub_accent
+        c_cyan = "#80ffea"
+        c_white = fg
+        c_white_intense = "#ffffff"
+        c_black = bg
+        c_black_intense = current_line
+    elif "nostalgia" in v_lower:
+        c_red = "#af3a03"
+        c_green = "#79740e"
+        c_yellow = "#b57614"
+        c_blue = "#d35b80"
+        c_magenta = "#8f3f71"
+        c_cyan = "#427b58"
+        c_white = "#1c1917"
+        c_white_intense = "#1c1917"
+        c_black = "#3c3836"
+        c_black_intense = "#d5c4a1"
+    else:
+        c_red = "#b91c1c"
+        c_green = "#15803d"
+        c_yellow = "#b45309"
+        c_blue = accent
+        c_magenta = sub_accent
+        c_cyan = "#0e7490"
+        c_white = "#0f172a"
+        c_white_intense = "#0f172a"
+        c_black = fg
+        c_black_intense = current_line
+
     colorscheme = f"""[Background]
 Color={bg}
 
@@ -2131,67 +2198,67 @@ Color={surface}
 Color={surface}
 
 [Color0]
-Color={bg}
+Color={c_black}
 
 [Color0Faint]
-Color={bg}
+Color={c_black}
 
 [Color0Intense]
-Color={current_line}
+Color={c_black_intense}
 
 [Color1]
-Color=#ff9580
+Color={c_red}
 
 [Color1Faint]
-Color=#ff9580
+Color={c_red}
 
 [Color1Intense]
-Color=#ff9580
+Color={c_red}
 
 [Color2]
-Color=#8aff80
+Color={c_green}
 
 [Color2Faint]
-Color=#8aff80
+Color={c_green}
 
 [Color2Intense]
-Color=#8aff80
+Color={c_green}
 
 [Color3]
-Color=#ffff80
+Color={c_yellow}
 
 [Color3Faint]
-Color=#ffff80
+Color={c_yellow}
 
 [Color3Intense]
-Color=#ffff80
+Color={c_yellow}
 
 [Color4]
-Color={accent}
+Color={c_blue}
 
 [Color4Faint]
-Color={accent}
+Color={c_blue}
 
 [Color4Intense]
-Color={accent}
+Color={c_blue}
 
 [Color5]
-Color={sub_accent}
+Color={c_magenta}
 
 [Color5Faint]
-Color={sub_accent}
+Color={c_magenta}
 
 [Color5Intense]
-Color={sub_accent}
+Color={c_magenta}
 
 [Color6]
-Color=#80ffea
+Color={c_cyan}
 
 [Color6Faint]
-Color=#80ffea
+Color={c_cyan}
 
 [Color6Intense]
-Color=#80ffea
+Color={c_cyan}
 
 [Color7]
 Color={fg}
@@ -2200,7 +2267,7 @@ Color={fg}
 Color={fg}
 
 [Color7Intense]
-Color=#ffffff
+Color={c_white_intense}
 
 [Foreground]
 Color={fg}
@@ -2209,7 +2276,7 @@ Color={fg}
 Color={fg}
 
 [ForegroundIntense]
-Color=#ffffff
+Color={c_white_intense}
 
 [General]
 Description=Quickshell Dynamic Theme
@@ -2551,7 +2618,7 @@ def main():
     is_dark = args.isDark.lower() == 'true'
     sync_gtk(args.bg, args.surface, args.currentLine, args.fg, args.accent, is_dark)
     sync_kde(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark, args.variantName)
-    sync_alacritty(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
+    sync_alacritty(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark, args.variantName)
     sync_discord(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
     sync_vscode(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark, args.variantName)
     sync_zen(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
@@ -2563,7 +2630,7 @@ def main():
     sync_fastfetch(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark)
     sync_ghostty(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_micro(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
-    sync_konsole(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
+    sync_konsole(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent, is_dark, args.variantName)
     sync_xresources(args.bg, args.surface, args.currentLine, args.fg, args.accent, args.subAccent)
     sync_papirus_folders(args.variantName, args.accent, args.subAccent, is_dark)
 
