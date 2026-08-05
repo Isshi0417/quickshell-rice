@@ -57,7 +57,7 @@ Item {
 
     Process {
         id: checkLockTriggerProc
-        command: ["bash", "-c", "if [ -f /tmp/quickshell_lock_trigger ] || pgrep -f kscreenlocker_greet >/dev/null; then rm -f /tmp/quickshell_lock_trigger; pkill -9 -f kscreenlocker_greet 2>/dev/null || true; echo 'LOCK'; fi"]
+        command: ["bash", "-c", "if [ -f /tmp/quickshell_lock_trigger ] || pgrep -f kscreenlocker_greet >/dev/null; then rm -f /tmp/quickshell_lock_trigger; echo 'LOCK'; fi"]
         stdout: SplitParser {
             onRead: data => {
                 if (data.trim() === "LOCK" && !root.isLocked) {
@@ -78,12 +78,6 @@ Item {
         }
     }
 
-    Process {
-        id: killKdeGreeterProc
-        command: ["bash", "-c", "pkill -9 -f kscreenlocker_greet 2>/dev/null || true"]
-        onExited: running = false
-    }
-
     function lock() {
         PopupService.closeAll()
         userPassword = ""
@@ -91,7 +85,6 @@ Item {
         authFailed = false
         authErrorMsg = ""
         isLocked = true
-        killKdeGreeterProc.running = true
         disableEffectsProc.running = true
     }
 
@@ -107,7 +100,7 @@ Item {
 
     Process {
         id: unlockPlasmaProc
-        command: ["bash", "-c", "loginctl unlock-session 2>/dev/null; pkill -9 -f kscreenlocker_greet 2>/dev/null || true"]
+        command: ["bash", "-c", "loginctl unlock-session 2>/dev/null"]
         onExited: running = false
     }
 
