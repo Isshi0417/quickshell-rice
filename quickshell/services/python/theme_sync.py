@@ -915,6 +915,9 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
                 "scope": [
                     "keyword",
                     "keyword.control",
+                    "keyword.control.import",
+                    "keyword.control.from",
+                    "keyword.control.flow",
                     "keyword.operator.new",
                     "keyword.operator.expression",
                     "keyword.operator.logical",
@@ -934,6 +937,7 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
                     "support.function",
                     "support.function.builtin",
                     "support.function.magic",
+                    "support.function.console",
                     "meta.function-call",
                     "meta.function-call.generic",
                     "meta.method-call"
@@ -951,6 +955,8 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
                     "entity.other.inherited-class",
                     "support.type",
                     "support.class",
+                    "support.class.builtin",
+                    "support.type.python",
                     "support.other.namespace"
                 ],
                 "settings": {"foreground": type_color}
@@ -988,15 +994,24 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
                     "constant.other.caps",
                     "constant.other.symbol",
                     "constant.other.property",
+                    "constant.other.placeholder",
                     "constant.character",
                     "constant.character.escape",
                     "support.constant",
+                    "support.constant.python",
                     "support.variable",
+                    "support.variable.python",
+                    "support.variable.property",
+                    "support.other.variable",
+                    "support.type.object.module",
                     "variable.other.constant",
+                    "variable.other.constant.python",
                     "variable.other.enummember",
                     "variable.readonly",
+                    "variable.readonly.defaultLibrary",
                     "entity.name.constant",
                     "entity.name.enummember",
+                    "meta.symbol",
                     "boolean"
                 ],
                 "settings": {"foreground": number_color}
@@ -1060,31 +1075,45 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
         ]
     }
 
+    semantic_rules = {
+        "variable.readonly": number_color,
+        "variable.readonly.defaultLibrary": number_color,
+        "variable.defaultLibrary": number_color,
+        "variable.constant": number_color,
+        "property.readonly": number_color,
+        "property.readonly.defaultLibrary": number_color,
+        "property.defaultLibrary": number_color,
+        "enumMember": number_color,
+        "macro": keyword_color,
+        "parameter": fg,
+        "property": fg,
+        "variable": fg,
+        "function": function_color,
+        "function.defaultLibrary": function_color,
+        "method": function_color,
+        "type": type_color,
+        "type.defaultLibrary": type_color,
+        "class": type_color,
+        "class.defaultLibrary": type_color,
+        "interface": type_color,
+        "enum": type_color,
+        "struct": type_color,
+        "namespace": type_color,
+        "keyword": keyword_color,
+        "comment": comment_color,
+        "string": string_color,
+        "number": number_color,
+        "operator": operator_color
+    }
+
+    theme_name_str = "Default Dark Modern" if is_dark else "Default Light Modern"
+
     semantic_token_colors = {
         "enabled": True,
-        "rules": {
-            "variable.readonly": number_color,
-            "variable.readonly.defaultLibrary": number_color,
-            "property.readonly": number_color,
-            "property.readonly.defaultLibrary": number_color,
-            "enumMember": number_color,
-            "macro": keyword_color,
-            "parameter": fg,
-            "property": fg,
-            "variable": fg,
-            "function": function_color,
-            "method": function_color,
-            "type": type_color,
-            "class": type_color,
-            "interface": type_color,
-            "enum": type_color,
-            "struct": type_color,
-            "namespace": type_color,
-            "keyword": keyword_color,
-            "comment": comment_color,
-            "string": string_color,
-            "number": number_color,
-            "operator": operator_color
+        "rules": semantic_rules,
+        f"[{theme_name_str}]": {
+            "enabled": True,
+            "rules": semantic_rules
         }
     }
 
@@ -1115,7 +1144,7 @@ def sync_vscode(bg, surface, current_line, fg, accent, sub_accent, is_dark, vari
             data["editor.semanticTokenColorCustomizations"] = semantic_token_colors
             data["editor.bracketPairColorization.enabled"] = True
             data["editor.guides.bracketPairs"] = "active"
-            data["workbench.colorTheme"] = "Default Dark Modern" if is_dark else "Default Light Modern"
+            data["workbench.colorTheme"] = theme_name_str
 
             with open(settings_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4)
