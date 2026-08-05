@@ -546,6 +546,47 @@ setup_kwin_overview_rules() {
     fi
 }
 
+setup_quickshell_lockscreen() {
+    info "Configuring QuickShell as default lockscreen..."
+    
+    # 1. Enable Plasma autolock (5 min timeout) and set theme in kscreenlockerrc
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock true 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key LockOnResume true 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout 5 2>/dev/null || true
+    kwriteconfig6 --file kscreenlockerrc --group Theme --key Current org.quickshell.login 2>/dev/null || true
+
+    # 2. Deploy lock screen command helper script to ~/.local/bin/quickshell-lock
+    LOCAL_BIN="${HOME}/.local/bin"
+    mkdir -p "$LOCAL_BIN"
+    cat << 'EOF' > "${LOCAL_BIN}/quickshell-lock"
+#!/usr/bin/env bash
+touch /tmp/quickshell_lock_trigger 2>/dev/null || true
+loginctl lock-session 2>/dev/null || true
+EOF
+    chmod +x "${LOCAL_BIN}/quickshell-lock"
+
+    # 3. Bind KDE Plasma global shortcut Meta+L to quickshell-lock
+    if command -v kwriteconfig6 &>/dev/null; then
+        kwriteconfig6 --file kglobalshortcutsrc --group "ksmserver" --key "Lock Session" "Meta+L,Ctrl+Alt+L,Lock Session" 2>/dev/null || true
+        if command -v qdbus6 &>/dev/null; then
+            qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
+        fi
+    fi
+
+    # 4. Add quickshell-lock & lock-screen aliases to ~/.bashrc
+    BASHRC="${HOME}/.bashrc"
+    if [ -f "$BASHRC" ]; then
+        if ! grep -q "quickshell-lock" "$BASHRC"; then
+            echo "" >> "$BASHRC"
+            echo "# QuickShell lockscreen shortcuts & aliases" >> "$BASHRC"
+            echo "alias lock-screen=\"\$HOME/.local/bin/quickshell-lock\"" >> "$BASHRC"
+            echo "alias lockscreen=\"\$HOME/.local/bin/quickshell-lock\"" >> "$BASHRC"
+        fi
+    fi
+
+    success "QuickShell lockscreen successfully configured as default!"
+}
+
 # Execution Flow
 install_dependencies
 install_quickshell
@@ -557,6 +598,7 @@ repair_feishin_flatpak
 setup_bashrc
 setup_refresh_script
 setup_kwin_overview_rules
+setup_quickshell_lockscreen
 setup_systemd_service
 run_initial_sync
 
