@@ -39,10 +39,7 @@ if ((targetId && targetId !== "") || (appName && appName !== "")) {
         }
     }
 
-    if (targetWin) {
-        if (targetWin.minimized) {
-            targetWin.minimized = false;
-        }
+    if (targetWin && !targetWin.minimized) {
         workspace.activeWindow = targetWin;
     }
 }
