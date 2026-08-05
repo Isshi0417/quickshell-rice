@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #!/usr/bin/env python3
 import os
 import time
@@ -115,9 +114,12 @@ def recolor_and_replace(img_path, palette_hex_list, out_path):
             res = subprocess.run(cmd, capture_output=True, text=True)
             if res.returncode == 0 and os.path.exists(out_path):
                 print(f"[Lutgen Success] {img_path} -> {out_path}", flush=True)
-                if os.path.exists(img_path):
-                    os.remove(img_path)
-                    print(f"[Cleaned Original] Removed dropped picture: {img_path}", flush=True)
+                if os.path.exists(img_path) and img_path != out_path:
+                    try:
+                        os.remove(img_path)
+                        print(f"[Cleaned Original] Removed dropped picture: {img_path}", flush=True)
+                    except Exception:
+                        pass
     except Exception as e:
         print(f"[Error recoloring] {img_path}: {e}", flush=True)
 
@@ -125,7 +127,7 @@ def watch_folder():
     base_dir = os.path.expanduser('~/Pictures/Wallpapers')
     processed = set()
     
-    print(f"[*] Starting Lutgen Auto-Recolor & Replace Watcher on {base_dir}...", flush=True)
+    print(f"[*] Starting Lutgen Auto-Recolor Watcher Daemon on {base_dir}...", flush=True)
     
     while True:
         try:
@@ -138,8 +140,8 @@ def watch_folder():
                 if palette:
                     for f in files:
                         ext = os.path.splitext(f)[1].lower()
-                        # Process dropped image if it is NOT already a lutgen output
-                        if ext in ['.png', '.jpg', '.jpeg', '.webp'] and not f.startswith('lutgen_') and not f.endswith('_wallhaven.png'):
+                        # Process any new un-recolored image dropped into the folder
+                        if ext in ['.png', '.jpg', '.jpeg', '.webp'] and not f.startswith('lutgen_'):
                             full_path = os.path.join(root, f)
                             recolored_filename = f"lutgen_{os.path.splitext(f)[0]}.png"
                             recolored_path = os.path.join(root, recolored_filename)

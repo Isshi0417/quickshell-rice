@@ -428,11 +428,28 @@ Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:%h
 WantedBy=graphical-session.target
 EOF
 
+    cat << EOF > "${SERVICE_DIR}/quickshell-recolor-watcher.service"
+[Unit]
+Description=QuickShell Lutgen Wallpaper Recolor Watcher Service
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.config/quickshell/services/python/recolor_watcher.py
+Restart=always
+RestartSec=3
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:%h/.local/bin:%h/.cargo/bin
+
+[Install]
+WantedBy=graphical-session.target
+EOF
+
     systemctl --user daemon-reload
-    systemctl --user enable quickshell.service 2>/dev/null || warn "Could not enable quickshell service automatically"
-    info "Starting QuickShell systemd service..."
-    systemctl --user restart quickshell.service 2>/dev/null || warn "Could not start quickshell service automatically (is a Wayland session running?)"
-    success "Systemd user service configured at ${SERVICE_DIR}/quickshell.service!"
+    systemctl --user enable quickshell.service quickshell-recolor-watcher.service 2>/dev/null || warn "Could not enable quickshell services automatically"
+    info "Starting QuickShell systemd services..."
+    systemctl --user restart quickshell.service quickshell-recolor-watcher.service 2>/dev/null || warn "Could not start quickshell services automatically"
+    success "Systemd user services configured at ${SERVICE_DIR}!"
 }
 
 # Helper to set Feishin theme to default and repair sandbox configurations
